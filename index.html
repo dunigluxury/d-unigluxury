@@ -46,18 +46,17 @@
     </header>
 
     <main id="pantalla-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/60 p-4 rounded-2xl border border-stone-900">
-            <div>
-                <h2 class="text-xs uppercase font-futurista font-black tracking-widest text-amber-400">Colecciones Activas</h2>
-                <p class="text-xs text-stone-400">Explora piezas exclusivas indexadas en tiempo real</p>
-            </div>
-            <div class="flex items-center gap-2 bg-stone-900/50 px-3 py-1.5 rounded-xl border border-stone-800">
-                <span class="text-xs text-stone-500">Canal:</span>
-                <input type="text" id="vitrina-owner-input" value="luxury_store" oninput="actualizarFiltroVitrina()" class="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-32">
-            </div>
+    <div class="flex justify-center items-center bg-stone-950/60 p-6 rounded-2xl border border-stone-900 w-full">
+        <div class="text-center">
+            <h2 class="text-xs uppercase font-futurista font-black tracking-widest text-amber-400">Colecciones Activas</h2>
+            <p class="text-sm font-bold text-white mt-1 tracking-[0.2em] font-futurista italic">
+                CANAL: <span class="text-amber-500">D'UNIG_LUXURY</span>
+            </p>
         </div>
-        <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </main>
+    </div>
+    
+    <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</main>
 
     <main id="pantalla-detalle" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
         <button onclick="irAPantallaVitrina()" class="mb-6 flex items-center gap-2 text-xs font-futurista uppercase tracking-widest text-stone-400 hover:text-amber-400 font-bold cursor-pointer transition-colors">
