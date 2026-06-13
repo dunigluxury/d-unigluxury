@@ -429,7 +429,7 @@
 
             if(indexSelector === "" || !cuentasDB[indexSelector]) { alert("Por favor seleccione un método de pago."); return; }
             if(!transaccionRef) { alert("Por favor inserte el código de referencia de su transacción."); return; }
-            if(!captureBase64Global) { alert("Por favor adjunte el capture de pantalla del pago efectuado."); return; }
+            
 
             const cuentaSel = cuentasDB[indexSelector];
             
