@@ -196,29 +196,39 @@
         </div>
     </main>
 
-    <main id="panel-seccion-ordenes" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
-        <div class="glass-panel p-6 rounded-3xl border border-stone-900 shadow-2xl">
-            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-4 mb-4">
-                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-                <h2 class="text-sm font-futurista font-black uppercase tracking-widest text-white">Registro de Órdenes Recibidas</h2>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead>
-                        <tr class="border-b border-stone-900 text-stone-500 uppercase tracking-widest text-[9px] font-futurista">
-                            <th class="p-3">ID Order</th>
-                            <th class="p-3">Fecha</th>
-                            <th class="p-3">Productos Solicitados</th>
-                            <th class="p-3">Total ($)</th>
-                            <th class="p-3">Referencia Registrada</th>
-                            <th class="p-3 text-right">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-ordenes-body"></tbody>
-                </table>
-            </div>
+    <main class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
+
+    <div class="flex justify-center items-center bg-stone-950/60 p-6 rounded-2xl border border-stone-900 w-full mb-6">
+        <div class="text-center">
+            <h2 class="text-xs uppercase font-futurista font-black tracking-widest text-amber-400">Panel de Gestión</h2>
+            <p class="text-sm font-bold text-white mt-1 tracking-[0.2em] font-futurista italic">
+                CANAL: <span class="text-amber-500">LUXURY_STORE</span>
+            </p>
         </div>
-    </main>
+    </div>
+
+    <div id="panel-seccion-ordenes" class="glass-panel p-6 rounded-3xl border border-stone-900 shadow-2xl">
+        <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-4 mb-4">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+            <h2 class="text-sm font-futurista font-black uppercase tracking-widest text-white">Registro de Órdenes Recibidas</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="border-b border-stone-900 text-stone-500 uppercase tracking-widest text-[9px] font-futurista">
+                        <th class="p-3">ID Order</th>
+                        <th class="p-3">Fecha</th>
+                        <th class="p-3">Productos Solicitados</th>
+                        <th class="p-3">Total ($)</th>
+                        <th class="p-3">Referencia Registrada</th>
+                        <th class="p-3 text-right">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-ordenes-body"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
 
     <main id="panel-seccion-extras" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
         <div class="max-w-md mx-auto glass-panel p-6 rounded-2xl shadow-2xl border border-stone-900/60 space-y-4">
