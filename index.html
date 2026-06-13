@@ -152,9 +152,22 @@
                     <input type="text" id="carrito-input-referencia" placeholder="Ej: REF-77001" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-400/40 font-mono tracking-wider">
                 </div>
 
-                 
+                <div class="space-y-1.5">
+                    
+
+                        <div id="preview-capture-box" class="hidden absolute inset-0 w-full h-full bg-stone-950 flex items-center justify-between px-3">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-10 h-10 rounded-lg border border-stone-800 overflow-hidden bg-stone-900 shrink-0">
+                                    <img id="img-preview-capture" class="w-full h-full object-cover">
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-[9px] text-stone-300 font-bold truncate">comprobante.jpg</p>
+                                    <p class="text-[8px] text-emerald-400 font-mono uppercase tracking-widest">Listo para verificar</p>
+                                </div>
                             </div>
-                            
+                            <button onclick="removerCapturePagoDelCarrito()" class="p-2 text-red-400 hover:bg-stone-900 rounded-lg cursor-pointer transition-colors">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
 
                     </div>
@@ -423,80 +436,73 @@
 
         // REDIRECCIÓN INTELIGENTE DE CHECKOUT CON WHATSAPP AUTOMÁTICO
         async function finalizarOrdenCompraVIP() {
-            if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
-            const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
-            const indexSelector = document.getElementById('carrito-selector-pago').value;
+    if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
+    
+    const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
+    const indexSelector = document.getElementById('carrito-selector-pago').value;
 
-            if(indexSelector === "" || !cuentasDB[indexSelector]) { alert("Por favor seleccione un método de pago."); return; }
-            if(!transaccionRef) { alert("Por favor inserte el código de referencia de su transacción."); return; }
-            
+    if(indexSelector === "" || !cuentasDB[indexSelector]) { alert("Por favor seleccione un método de pago."); return; }
+    if(!transaccionRef) { alert("Por favor inserte el código de referencia."); return; }
+    
+    const cuentaSel = cuentasDB[indexSelector];
+    
+    // Descargar número de WhatsApp
+    let numeroWhatsApp = "584120000000"; 
+    const { data: configData } = await supabaseClient
+        .from('ajustes_sistema')
+        .select('valor')
+        .eq('id', 'whatsapp_notificaciones')
+        .single();
+    
+    if(configData) {
+        numeroWhatsApp = configData.valor.replace(/[^0-9]/g, "");
+    }
 
-            const cuentaSel = cuentasDB[indexSelector];
-            
-            // Descargar el número de WhatsApp desde ajustes_sistema
-            let numeroWhatsApp = "584120000000"; // Fallback por si acaso
-            const { data: configData, error: configError } = await supabaseClient
-                .from('ajustes_sistema')
-                .select('valor')
-                .eq('id', 'whatsapp_notificaciones')
-                .single();
-            
-            if(!configError && configData) {
-                numeroWhatsApp = configData.valor.replace(/[^0-9]/g, ""); // Limpiar espacios o caracteres
-            }
+    // Resumen de productos
+    let listaProductosTexto = "";
+    let subtotalGlobal = 0;
+    carritoVIP.forEach((item) => {
+        listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
+        subtotalGlobal += parseFloat(item.precio);
+    });
 
-            // Construir resumen de productos
-            let listaProductosTexto = "";
-            let subtotalGlobal = 0;
-            carritoVIP.forEach((item, idx) => {
-                listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
-                subtotalGlobal += parseFloat(item.precio);
-            });
-
-            // Armar el mensaje estético para enviar por WhatsApp
-            const textoMensaje = 
-`💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎
+    const textoMensaje = `💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎
 --------------------------------------------
-🛍️ *PRODUCTOS SOLICITADOS:*
+🛍️ *PRODUCTOS:*
 ${listaProductosTexto}
-💵 *TOTAL A PAGAR:* $${subtotalGlobal.toFixed(2)}
+💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}
 --------------------------------------------
-🏦 *MÉTODO DE PAGO UTILIZADO:*
+🏦 *MÉTODO DE PAGO:*
 • *Plataforma:* ${cuentaSel.plataforma ? cuentaSel.plataforma.toUpperCase() : 'N/A'}
 • *Banco:* ${cuentaSel.banco || 'N/A'}
 • *Titular:* ${cuentaSel.titular || 'N/A'}
 
-🔢 *NÚMERO DE REFERENCIA:*
-👉 \`${transaccionRef}\`
-📸 _(Capture de referencia cargado e indexado correctamente en el sistema)_
+🔢 *REFERENCIA:* ${transaccionRef}
 --------------------------------------------
-_El pago está listo para ser validado en el Panel del Administrador._`;
+_Pedido listo para validar._`;
 
-            // Enviar los datos a la tabla ordenes_vip incluyendo el Base64 listo para tu visualización
-            const payloadOrden = {
-                fecha: new Date().toISOString(),
-                productos: carritoVIP.map(item => item.titulo).join(', '),
-                total: subtotalGlobal,
-                referencia: `${transaccionRef} (Enviado a WhatsApp)`,
-                estado: "Pendiente"
-            };
+    // Guardar en Supabase
+    await supabaseClient.from('ordenes_vip').insert([{
+        fecha: new Date().toISOString(),
+        productos: carritoVIP.map(item => item.titulo).join(', '),
+        total: subtotalGlobal,
+        referencia: transaccionRef,
+        estado: "Pendiente"
+    }]);
 
-            await supabaseClient.from('ordenes_vip').insert([payloadOrden]);
+    // Limpiar carrito e interfaz
+    carritoVIP = [];
+    document.getElementById('contador-carrito-global').innerText = "0";
+    document.getElementById('carrito-input-referencia').value = "";
+    
+    // IMPORTANTE: Eliminé las llamadas a 'removerCapturePagoDelCarrito' y 'caja-detalles-pago-extendida'
+    // porque si no existen en tu HTML, causan la pantalla negra.
+    
+    irAPantallaVitrina();
 
-            // Crear el enlace URL y abrir la API de WhatsApp
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
-            
-            // Limpiar carrito e interfaz antes de salir
-            carritoVIP = [];
-            document.getElementById('contador-carrito-global').innerText = "0";
-            document.getElementById('carrito-input-referencia').value = "";
-            removerCapturePagoDelCarrito();
-            document.getElementById('caja-detalles-pago-extendida').classList.add('hidden');
-            irAPantallaVitrina();
-
-            // Abrir WhatsApp en pestaña nueva
-            window.open(urlWhatsApp, '_blank');
-        }
+    // Abrir WhatsApp
+    window.open(`https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`, '_blank');
+}
 
         window.addEventListener('DOMContentLoaded', () => { 
             descargarCatalogoDeSupabase(); 
