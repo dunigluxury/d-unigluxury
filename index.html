@@ -108,76 +108,37 @@
         </div>
     </main>
 
-    <main id="pantalla-carrito" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        <section class="lg:col-span-3 glass-panel p-5 rounded-2xl shadow-2xl border border-stone-900/60">
-            <div class="border-b border-stone-800 pb-3 mb-4 flex justify-between items-end">
-                <h2 class="text-xl font-black font-futurista tracking-widest text-white uppercase flex items-center gap-2">
-                    <i data-lucide="shopping-basket" class="w-5 h-5 text-amber-400"></i> Carrito de Compras VIP
-                </h2>
-                <span class="text-xs font-futurista text-stone-500 tracking-wider hidden md:block">Precio</span>
-            </div>
-            <div id="carrito-lista-items" class="divide-y divide-stone-900"></div>
-            <div class="text-right text-sm md:text-base border-t border-stone-900 pt-4 mt-4 font-futurista">
-                Subtotal (<span id="cantidad-items-abajo" class="text-amber-400 font-bold font-mono">0</span> productos): 
-                <span class="text-white font-black font-mono ml-1" id="carrito-subtotal-monto-abajo">$0.00</span>
-            </div>
-        </section>
+    <main id="pantalla-carrito" class="hidden max-w-7xl w-full mx-auto px-4 py-8 relative z-10 grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+    <section class="lg:col-span-3 glass-panel p-5 rounded-2xl shadow-2xl border border-stone-900/60">
+        <h2 class="text-xl font-black text-white uppercase mb-4">Carrito VIP</h2>
+        <div id="carrito-lista-items" class="divide-y divide-stone-900"></div>
+        <div class="text-right mt-4 pt-4 border-t border-stone-900">
+            <span class="text-white font-black" id="carrito-subtotal-monto-abajo">Total: $0.00</span>
+        </div>
+    </section>
 
-        <section class="bg-stone-950/90 border border-stone-800 p-5 rounded-2xl shadow-2xl space-y-5">
-            <div class="flex items-start gap-2.5 text-xs text-stone-300 bg-amber-500/5 border border-amber-500/10 p-3 rounded-xl">
-                <span class="bg-emerald-600 text-black font-black rounded-full w-4 h-4 flex items-center justify-center shrink-0 text-[10px] mt-0.5">✓</span>
-                <div>
-                    <span class="text-emerald-400 font-bold">Tu suite califica para Envío Global VIP.</span> Elige entrega prioritaria protegida al finalizar.
-                </div>
-            </div>
-            <div class="text-base font-normal font-futurista text-stone-300">
-                Subtotal (<span id="cantidad-items-lateral" class="text-amber-400 font-mono">0</span> piezas): 
-                <span class="block text-2xl font-black font-mono text-white mt-1" id="carrito-total-monto">$0.00</span>
-            </div>
-            <div class="border-t border-stone-900 pt-4 space-y-3">
-                <div class="space-y-1.5">
-                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">1. Cuenta Destino Colectora</label>
-                    <select id="carrito-selector-pago" onchange="mostrarDetallesCuentaSeleccionada()" class="w-full bg-stone-900 border border-stone-800 text-xs text-stone-300 p-3 rounded-xl focus:outline-none focus:border-amber-500/40 font-medium"></select>
-                </div>
-                
-                <div id="caja-detalles-pago-extendida" class="hidden bg-stone-900/90 border border-amber-500/20 p-4 rounded-xl space-y-2">
-                    <div class="text-[9px] uppercase font-futurista font-black text-amber-400 tracking-wider flex items-center gap-1.5 border-b border-stone-800/60 pb-1.5">
-                        <i data-lucide="info" class="w-3 h-3"></i> Datos de Transferencia Confirmados
-                    </div>
-                    <div id="contenido-detalles-cuenta" class="text-xs space-y-1 text-stone-300 font-mono"></div>
-                </div>
+    <section class="bg-stone-950/90 border border-stone-800 p-5 rounded-2xl shadow-2xl space-y-5">
+        <div class="text-2xl font-black text-white" id="carrito-total-monto">$0.00</div>
+        
+        <div class="space-y-2">
+            <label class="text-[10px] uppercase text-stone-400 font-bold">1. Método de Pago</label>
+            <select id="carrito-selector-pago" onchange="mostrarDetallesCuentaSeleccionada()" class="w-full bg-stone-900 border border-stone-800 text-white p-3 rounded-xl"></select>
+        </div>
 
-                <div class="space-y-1.5">
-                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Referencia / Código de Depósito</label>
-                    <input type="text" id="carrito-input-referencia" placeholder="Ej: REF-77001" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-400/40 font-mono tracking-wider">
-                </div>
+        <div id="caja-detalles-pago-extendida" class="hidden bg-stone-900 p-4 rounded-xl border border-amber-500/20 text-xs text-stone-300">
+            <div id="contenido-detalles-cuenta"></div>
+        </div>
 
-                <div class="space-y-1.5">
-                    
+        <div class="space-y-2">
+            <label class="text-[10px] uppercase text-stone-400 font-bold">2. Referencia / Código</label>
+            <input type="text" id="carrito-input-referencia" placeholder="Ej: REF-77001" class="w-full bg-stone-900 border border-stone-800 text-white p-3 rounded-xl">
+        </div>
 
-                        <div id="preview-capture-box" class="hidden absolute inset-0 w-full h-full bg-stone-950 flex items-center justify-between px-3">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <div class="w-10 h-10 rounded-lg border border-stone-800 overflow-hidden bg-stone-900 shrink-0">
-                                    <img id="img-preview-capture" class="w-full h-full object-cover">
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="text-[9px] text-stone-300 font-bold truncate">comprobante.jpg</p>
-                                    <p class="text-[8px] text-emerald-400 font-mono uppercase tracking-widest">Listo para verificar</p>
-                                </div>
-                            </div>
-                            <button onclick="removerCapturePagoDelCarrito()" class="p-2 text-red-400 hover:bg-stone-900 rounded-lg cursor-pointer transition-colors">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            <button onclick="finalizarOrdenCompraVIP()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-3 px-4 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
-                <i data-lucide="shield-check" class="w-4 h-4"></i> PROCEED TO CHECKOUT
-            </button>
-        </section>
-    </main>
+        <button onclick="finalizarOrdenCompraVIP()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-black py-4 rounded-xl uppercase tracking-widest text-xs">
+            PROCEED TO CHECKOUT
+        </button>
+    </section>
+</main>
 
     <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out" onclick="cerrarAmplificacion()">
         <button class="absolute top-6 right-6 text-stone-400 hover:text-white transition-colors cursor-pointer">
