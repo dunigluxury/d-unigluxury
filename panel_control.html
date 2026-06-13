@@ -21,6 +21,20 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
 
+    <!-- Modal de Autenticación -->
+    <div id="auth-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-sm p-8 rounded-3xl border border-stone-800 shadow-2xl">
+            <h2 class="text-xl font-futurista font-black text-white mb-6 uppercase tracking-widest text-center">Acceso VIP</h2>
+            <div class="space-y-4">
+                <input type="email" id="auth-email" placeholder="Correo electrónico" class="w-full bg-stone-950 border border-stone-800 p-3 rounded-xl text-white text-xs">
+                <input type="password" id="auth-pass" placeholder="Contraseña" class="w-full bg-stone-950 border border-stone-800 p-3 rounded-xl text-white text-xs">
+                <button onclick="ejecutarLogin()" class="w-full bg-amber-500 text-black font-black p-3 rounded-xl text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors cursor-pointer">
+                    Ingresar al Panel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <header class="bg-black/40 backdrop-blur-xl border-b border-stone-900/80 sticky top-0 z-40 px-4">
         <div class="max-w-7xl mx-auto h-24 flex items-center justify-between relative z-10">
             <div class="flex items-center space-x-4">
@@ -35,6 +49,9 @@
                 <a href="index.html" class="p-3 rounded-xl border border-stone-800 text-stone-400 hover:text-white transition-all text-xs font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-2 cursor-pointer">
                     <i data-lucide="eye" class="w-4 h-4 text-amber-500"></i> Ver Vitrina
                 </a>
+                <button onclick="ejecutarLogout()" class="p-3 rounded-xl border border-red-900/30 text-red-400 hover:text-red-300 transition-all text-xs font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Salir
+                </button>
                 <div class="flex items-center gap-2 bg-stone-950/90 border border-stone-800 p-2 rounded-xl">
                     <span class="text-xs text-amber-400 font-bold ml-2">@</span>
                     <input type="text" id="owner-instagram-input" value="luxury_store" oninput="cambiarDuenoDeCanal()" class="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-40">
@@ -229,11 +246,60 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0and2bGxsZHhwYmxoaXNibGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU4OTAsImV4cCI6MjA5NTY1MTg5MH0.SqzQXSmh1nAnlKpD39khgSQSokFeY_1Hp37PWX2RVsw"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Lógica de seguridad integrada
+        async function verificarAcceso() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                // Si no hay sesión, redirigir a login
+                window.location.href = "login.html"; 
+                return null;
+            }
+            return session.user.email;
+        }
+
+
         let baseProductos = [];
         let categoriasDB = ["General", "Calzado Premium", "Alta Costura", "Joyas Cuánticas"];
         let filtroInstagram = "luxury_store";
         let fotosSliderArray = Array(5).fill("");
         let listaCuentas = [];
+
+        // VERIFICACIÓN DE SESIÓN AL CARGAR
+        window.addEventListener('DOMContentLoaded', async () => { 
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                document.getElementById('auth-modal').classList.add('hidden');
+            }
+            
+            descargarCatalogoDeSupabase(); 
+            alternarCamposPago(); 
+            descargarCuentasPago(); 
+            renderizarCategorias(); 
+            renderizerInputsMatrizFotos(); 
+            lucide.createIcons(); 
+        });
+
+        // AUTENTICACIÓN
+        async function ejecutarLogin() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-pass').value;
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                alert("Acceso denegado: " + error.message);
+            } else {
+                document.getElementById('auth-modal').classList.add('hidden');
+            }
+        }
+
+        async function ejecutarLogout() {
+            await supabaseClient.auth.signOut();
+            location.reload();
+        }
 
         // CONTROL NAV DEL PANEL
         function cambiarSeccionPanel(target) {
@@ -278,7 +344,7 @@
                     <td class="p-3 text-amber-400 font-mono font-bold">$${parseFloat(p.precio).toFixed(2)}</td>
                     <td class="p-3 text-center font-mono">${p.stock}</td>
                     <td class="p-3 text-right flex justify-end gap-2">
-                        <button onclick="prepararEdicionProducto(${p.id})" class="p-2 text-amber-400 bg-stone-900 border border-stone-800 rounded-lg cursor-pointer hover:bg-stone-850"✏️</button>
+                        <button onclick="prepararEdicionProducto(${p.id})" class="p-2 text-amber-400 bg-stone-900 border border-stone-800 rounded-lg cursor-pointer hover:bg-stone-850">✏️</button>
                         <button onclick="eliminarProductoDeSupabase(${p.id})" class="p-2 text-red-400 bg-stone-900 border border-stone-800 rounded-lg cursor-pointer hover:bg-stone-850">🗑️</button>
                     </td></tr>`;
             });
@@ -396,7 +462,6 @@
             document.getElementById('contador-fotos-cargadas').innerText = `${fotosSliderArray.filter(f=>f!=="").length} / 5`;
         }
 
-        // CONTROL FIJO CORREGIDO PARA INYECTAR Y ACTUALIZAR SELECTORES
         function renderizarCategorias() {
             const select = document.getElementById('prod-categoria'), lista = document.getElementById('lista-categorias');
             if(!select || !lista) return; select.innerHTML = ""; lista.innerHTML = "";
@@ -416,9 +481,6 @@
             } 
         }
 
-        // =========================================================================
-        // FORMULARIO DINÁMICO DE MÉTODOS DE PAGO
-        // =========================================================================
         function alternarCamposPago() {
             const plataforma = document.getElementById('pago-plataforma').value;
             const wrapper = document.getElementById('wrapper-campos-dinamicos');
@@ -589,9 +651,6 @@
             }
         }
 
-        // =========================================================================
-        // GESTIÓN DEL HISTORIAL DE ÓRDENES Y AJUSTES DE SISTEMA (EXTRAS)
-        // =========================================================================
         async function descargarHistorialDeOrdenes() {
             const { data, error } = await supabaseClient.from('ordenes_vip').select('*').order('fecha', { ascending: false });
             if (!error && data) {
@@ -632,15 +691,6 @@
 
             if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
         }
-
-        window.addEventListener('DOMContentLoaded', () => { 
-            descargarCatalogoDeSupabase(); 
-            alternarCamposPago(); 
-            descargarCuentasPago(); 
-            renderizarCategorias(); 
-            renderizerInputsMatrizFotos(); 
-            lucide.createIcons(); 
-        });
     </script>
 </body>
 </html>
