@@ -383,44 +383,46 @@
         }
 
         // REDIRECCIÓN INTELIGENTE DE CHECKOUT CON WHATSAPP AUTOMÁTICO
-        async function finalizarOrdenCompraVIP() {
-            if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
-            
-            const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
-            const indexSelector = document.getElementById('carrito-selector-pago').value;
+async function finalizarOrdenCompraVIP() {
+    if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
+    
+    const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
+    const indexSelector = document.getElementById('carrito-selector-pago').value;
 
-            // Validaciones necesarias
-            if(indexSelector === "" || !cuentasDB[indexSelector]) { 
-                alert("Por favor seleccione un método de pago."); 
-                return; 
-            }
-            if(!transaccionRef) { 
-                alert("Por favor inserte el código de referencia de su transacción."); 
-                return; 
-            }
-            
-            // Descargar el número de WhatsApp desde ajustes_sistema
-            let numeroWhatsApp = "584120000000"; // Fallback por si acaso
-            const { data: configData, error: configError } = await supabaseClient
-                .from('ajustes_sistema')
-                .select('valor')
-                .eq('id', 'whatsapp_notificaciones')
-                .single();
-            
-            if(!configError && configData) {
-                numeroWhatsApp = configData.valor.replace(/[^0-9]/g, ""); // Limpiar espacios o caracteres
-            }
+    // Validaciones necesarias
+    if(indexSelector === "" || !cuentasDB[indexSelector]) { 
+        alert("Por favor seleccione un método de pago."); 
+        return; 
+    }
+    if(!transaccionRef) { 
+        alert("Por favor inserte el código de referencia de su transacción."); 
+        return; 
+    }
+    
+    // Descargar el número de WhatsApp desde ajustes_sistema
+    let numeroWhatsApp = "584120000000"; 
+    const { data: configData, error: configError } = await supabaseClient
+        .from('ajustes_sistema')
+        .select('valor')
+        .eq('id', 'whatsapp_notificaciones')
+        .single();
+    
+    if(!configError && configData) {
+        numeroWhatsApp = configData.valor.replace(/[^0-9]/g, "");
+    }
 
-            // Construir resumen de productos
-            let listaProductosTexto = "";
-            let subtotalGlobal = 0;
-            carritoVIP.forEach((item, idx) => {
-                listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
-                subtotalGlobal += parseFloat(item.precio);
-            });
+    // Construir resumen de productos
+    let listaProductosTexto = "";
+    let subtotalGlobal = 0;
+    carritoVIP.forEach((item) => {
+        listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
+        subtotalGlobal += parseFloat(item.precio);
+    });
 
-            // Armar el mensaje estético para enviar por WhatsApp
-            const textoMensaje = 
+    const cuentaSel = cuentasDB[indexSelector];
+
+    // Armar el mensaje estético (SIN MENCIONAR CAPTURE)
+    const textoMensaje = 
 `💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎
 --------------------------------------------
 🛍️ *PRODUCTOS SOLICITADOS:*
@@ -434,35 +436,35 @@ ${listaProductosTexto}
 
 🔢 *NÚMERO DE REFERENCIA:*
 👉 \`${transaccionRef}\`
-📸 _(Capture de referencia cargado e indexado correctamente en el sistema)_
 --------------------------------------------
 _El pago está listo para ser validado en el Panel del Administrador._`;
 
-            // Enviar los datos a la tabla ordenes_vip incluyendo el Base64 listo para tu visualización
-            const payloadOrden = {
-                fecha: new Date().toISOString(),
-                productos: carritoVIP.map(item => item.titulo).join(', '),
-                total: subtotalGlobal,
-                referencia: `${transaccionRef} (Enviado a WhatsApp)`,
-                estado: "Pendiente"
-            };
+    // Enviar los datos a la tabla ordenes_vip
+    const payloadOrden = {
+        fecha: new Date().toISOString(),
+        productos: carritoVIP.map(item => item.titulo).join(', '),
+        total: subtotalGlobal,
+        referencia: `${transaccionRef}`,
+        estado: "Pendiente"
+    };
 
-            await supabaseClient.from('ordenes_vip').insert([payloadOrden]);
+    await supabaseClient.from('ordenes_vip').insert([payloadOrden]);
 
-            // Crear el enlace URL y abrir la API de WhatsApp
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
-            
-            // Limpiar carrito e interfaz antes de salir
-            carritoVIP = [];
-            document.getElementById('contador-carrito-global').innerText = "0";
-            document.getElementById('carrito-input-referencia').value = "";
-            removerCapturePagoDelCarrito();
-            document.getElementById('caja-detalles-pago-extendida').classList.add('hidden');
-            irAPantallaVitrina();
+    // Crear el enlace URL y abrir la API de WhatsApp
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
+    
+    // Limpiar carrito e interfaz
+    carritoVIP = [];
+    document.getElementById('contador-carrito-global').innerText = "0";
+    document.getElementById('carrito-input-referencia').value = "";
+    document.getElementById('caja-detalles-pago-extendida').classList.add('hidden');
+    document.getElementById('carrito-selector-pago').value = "";
+    
+    irAPantallaVitrina();
 
-            // Abrir WhatsApp en pestaña nueva
-            window.open(urlWhatsApp, '_blank');
-        }
+    // Abrir WhatsApp en pestaña nueva
+    window.open(urlWhatsApp, '_blank');
+}
 
         window.addEventListener('DOMContentLoaded', () => { 
             descargarCatalogoDeSupabase(); 
