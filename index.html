@@ -382,25 +382,23 @@
             renderizarContenidoCarrito();
         }
 
-        // REDIRECCIÓN INTELIGENTE DE CHECKOUT CON WHATSAPP AUTOMÁTICO
-async function finalizarOrdenCompraVIP() {
+        async function finalizarOrdenCompraVIP() {
     if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
     
     const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
     const indexSelector = document.getElementById('carrito-selector-pago').value;
 
-    // Validaciones necesarias
     if(indexSelector === "" || !cuentasDB[indexSelector]) { 
         alert("Por favor seleccione un método de pago."); 
         return; 
     }
     if(!transaccionRef) { 
-        alert("Por favor inserte el código de referencia de su transacción."); 
+        alert("Por favor inserte el código de referencia."); 
         return; 
     }
-    
-    // Descargar el número de WhatsApp desde ajustes_sistema
-    let numeroWhatsApp = "584120000000"; 
+
+    // 1. Obtener número de WhatsApp desde Supabase
+    let numeroWhatsApp = "584120000000"; // Número por defecto
     const { data: configData, error: configError } = await supabaseClient
         .from('ajustes_sistema')
         .select('valor')
@@ -411,49 +409,28 @@ async function finalizarOrdenCompraVIP() {
         numeroWhatsApp = configData.valor.replace(/[^0-9]/g, "");
     }
 
-    // Construir resumen de productos
+    // 2. Construir mensaje
     let listaProductosTexto = "";
     let subtotalGlobal = 0;
     carritoVIP.forEach((item) => {
         listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
-        subtotalGlobal += parseFloat(item.precio);
+        subtotalGlobal += parseFloat(item.precio) || 0;
     });
 
     const cuentaSel = cuentasDB[indexSelector];
+    const textoMensaje = `💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎\n\n🛍️ *PRODUCTOS:*\n${listaProductosTexto}\n💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}\n\n🏦 *PAGO:* ${cuentaSel.plataforma} - ${cuentaSel.banco}\n🔢 *REF:* ${transaccionRef}`;
 
-    // Armar el mensaje estético (SIN MENCIONAR CAPTURE)
-    const textoMensaje = 
-`💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎
---------------------------------------------
-🛍️ *PRODUCTOS SOLICITADOS:*
-${listaProductosTexto}
-💵 *TOTAL A PAGAR:* $${subtotalGlobal.toFixed(2)}
---------------------------------------------
-🏦 *MÉTODO DE PAGO UTILIZADO:*
-• *Plataforma:* ${cuentaSel.plataforma ? cuentaSel.plataforma.toUpperCase() : 'N/A'}
-• *Banco:* ${cuentaSel.banco || 'N/A'}
-• *Titular:* ${cuentaSel.titular || 'N/A'}
-
-🔢 *NÚMERO DE REFERENCIA:*
-👉 \`${transaccionRef}\`
---------------------------------------------
-_El pago está listo para ser validado en el Panel del Administrador._`;
-
-    // Enviar los datos a la tabla ordenes_vip
-    const payloadOrden = {
-        fecha: new Date().toISOString(),
+    // 3. Guardar en Supabase
+    await supabaseClient.from('ordenes_vip').insert([{
         productos: carritoVIP.map(item => item.titulo).join(', '),
         total: subtotalGlobal,
-        referencia: `${transaccionRef}`,
+        referencia: transaccionRef,
         estado: "Pendiente"
-    };
+    }]);
 
-    await supabaseClient.from('ordenes_vip').insert([payloadOrden]);
-
-    // Crear el enlace URL y abrir la API de WhatsApp
+    // 4. Abrir WhatsApp y limpiar
     const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
     
-    // Limpiar carrito e interfaz
     carritoVIP = [];
     document.getElementById('contador-carrito-global').innerText = "0";
     document.getElementById('carrito-input-referencia').value = "";
@@ -461,8 +438,6 @@ _El pago está listo para ser validado en el Panel del Administrador._`;
     document.getElementById('carrito-selector-pago').value = "";
     
     irAPantallaVitrina();
-
-    // Abrir WhatsApp en pestaña nueva
     window.open(urlWhatsApp, '_blank');
 }
 
