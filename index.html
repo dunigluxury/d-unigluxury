@@ -21,30 +21,30 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
 
-    <header class="bg-black/40 backdrop-blur-xl border-b border-stone-900/80 sticky top-0 z-40 px-2 sm:px-4">
-    <div class="max-w-7xl mx-auto h-20 sm:h-24 flex items-center justify-between w-full">
+    <header class="bg-black/40 backdrop-blur-xl border-b border-stone-900/80 sticky top-0 z-40 px-2">
+    <div class="max-w-7xl mx-auto h-20 flex items-center justify-center relative">
         
-        <div class="flex items-center space-x-2 sm:space-x-4 cursor-pointer shrink-0" onclick="irAPantallaVitrina()">
-            <div class="border border-amber-500/30 p-2 sm:p-3 rounded-xl bg-stone-950/80 glow-gold">
-                <i data-lucide="cpu" class="w-5 h-5 sm:w-7 sm:h-7 text-amber-400"></i>
+        <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="irAPantallaVitrina()">
+            <div class="border border-amber-500/30 p-2 rounded-xl bg-stone-950/80 glow-gold">
+                <i data-lucide="cpu" class="w-6 h-6 text-amber-400"></i>
             </div>
-            <div class="hidden sm:block">
-                <h1 class="text-lg sm:text-2xl font-black tracking-[0.2em] text-white font-futurista">D'UNIG <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">LUXURY</span></h1>
-                <p class="text-[8px] sm:text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">SISTEMA INTEGRADO v7000</p>
+            
+            <div class="text-center">
+                <h1 class="text-lg sm:text-xl font-black tracking-[0.15em] text-white font-futurista">
+                    D'UNIG <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">LUXURY</span>
+                </h1>
+                <p class="hidden sm:block text-[8px] text-amber-500/70 uppercase tracking-[0.25em] font-bold font-futurista">
+                    SISTEMA INTEGRADO v7000
+                </p>
             </div>
-        </div>
-        
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-            <button onclick="irAPantallaCarrito()" class="relative bg-stone-900 hover:bg-stone-800 border border-amber-500/20 p-2 sm:p-3 rounded-xl flex items-center gap-1 sm:gap-2 transition-all">
-                <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
-                <span class="hidden sm:inline text-xs font-futurista font-bold text-white">CARRITO</span>
-                <span id="contador-carrito-global" class="bg-amber-500 text-black font-mono text-[10px] font-black px-1.5 py-0.5 rounded-md">0</span>
-            </button>
-            <button onclick="irAPantallaVitrina()" class="p-2 sm:p-3 rounded-xl border border-stone-800 text-stone-400 hover:text-white transition-all text-xs font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1 sm:gap-2">
-                <i data-lucide="terminal" class="w-4 h-4 text-amber-500"></i> <span class="hidden sm:inline">Vitrina</span>
-            </button>
         </div>
 
+        <div class="absolute right-2 flex items-center gap-2">
+            <button onclick="irAPantallaCarrito()" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1">
+                <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
+                <span id="contador-carrito-global" class="bg-amber-500 text-black font-mono text-[10px] font-black px-1.5 rounded">0</span>
+            </button>
+        </div>
     </div>
 </header>
 
