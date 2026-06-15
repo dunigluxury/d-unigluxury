@@ -49,18 +49,26 @@
 </header>
 
     <main id="pantalla-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/60 p-4 rounded-2xl border border-stone-900">
-            <div>
-                <h2 class="text-xs uppercase font-futurista font-black tracking-widest text-amber-400">Colecciones Activas</h2>
-                <p class="text-xs text-stone-400">Explora piezas exclusivas indexadas en tiempo real</p>
-            </div>
-            <div class="flex items-center gap-2 bg-stone-900/50 px-3 py-1.5 rounded-xl border border-stone-800">
-                <span class="text-xs text-stone-500">Canal:</span>
-                <input type="text" id="vitrina-owner-input" value="luxury_store" oninput="actualizarFiltroVitrina()" class="bg-transparent border-none text-xs font-bold text-white focus:outline-none w-32">
-            </div>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/60 p-6 rounded-2xl border border-stone-900">
+        
+        <div>
+            <h2 class="text-xl sm:text-2xl font-black text-white font-futurista tracking-widest uppercase">
+                MENÚ DIGITAL
+            </h2>
+            <p class="text-[10px] sm:text-xs text-amber-500/70 font-bold uppercase tracking-[0.2em] mt-1">
+                
+            </p>
         </div>
-        <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </main>
+
+        <div class="bg-stone-900/50 px-4 py-2 rounded-xl border border-stone-800 flex items-center gap-2">
+            <span class="text-[10px] text-stone-500 font-bold uppercase tracking-widest">Canal:</span>
+            <span class="text-xs font-black text-amber-400 tracking-wider font-futurista uppercase">LUXURY_STORE</span>
+        </div>
+        
+    </div>
+
+    <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</main>
 
     <main id="pantalla-detalle" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
         <button onclick="irAPantallaVitrina()" class="mb-6 flex items-center gap-2 text-xs font-futurista uppercase tracking-widest text-stone-400 hover:text-amber-400 font-bold cursor-pointer transition-colors">
