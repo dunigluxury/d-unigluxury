@@ -201,53 +201,64 @@ const listaAdicionales = [
 ];
     
         /**
-         * Renderiza los adicionales como un menú desplegable (Acordeón)
-         */
-        function renderizarAdicionales() {
-            const contenedor = document.getElementById('contenedor-adicionales');
-            if (!contenedor) return;
+ * Renderiza los adicionales como un menú desplegable (Acordeón)
+ */
+function renderizarAdicionales() {
+    const contenedor = document.getElementById('contenedor-adicionales');
+    if (!contenedor) return;
 
-            // Estructura de acordeón usando <details>
-            contenedor.innerHTML = `
-                <details class="group bg-stone-950 border border-stone-800 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all">
-                    <summary class="list-none p-4 text-[10px] font-bold text-stone-400 cursor-pointer flex justify-between items-center hover:text-amber-400 select-none">
-                        <span>SELECCIONAR ADICIONALES</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform duration-300"></i>
-                    </summary>
-                    <div class="p-3 border-t border-stone-800 space-y-2">
-                        ${listaAdicionales.map(ad => `
-                            <label class="flex items-center gap-3 cursor-pointer hover:bg-stone-900 p-2 rounded-lg transition-colors">
-                                <input type="checkbox" class="check-adicional w-4 h-4 accent-amber-500" data-nombre="${ad.nombre}" data-precio="${ad.precio}">
-                                <div class="flex justify-between w-full">
-                                    <span class="text-[11px] text-stone-300">${ad.nombre}</span>
-                                    <span class="text-[11px] text-amber-500/80 font-mono">+$${ad.precio.toFixed(2)}</span>
-                                </div>
-                            </label>
-                        `).join('')}
-                    </div>
-                </details>
-            `;
-            
-            // Actualizamos iconos (necesario para el chevron)
-            lucide.createIcons();
-        }
+    // Usamos window.listaAdicionales y nos aseguramos de que sea un array
+    const lista = window.listaAdicionales || [];
 
-        /**
-         * Recolecta los adicionales marcados por el usuario
-         */
-        function obtenerAdicionalesSeleccionados() {
-            const seleccionados = [];
-            const checkboxes = document.querySelectorAll('.check-adicional:checked');
-            
-            checkboxes.forEach(cb => {
-                seleccionados.push({
-                    nombre: cb.getAttribute('data-nombre'),
-                    precio: parseFloat(cb.getAttribute('data-precio'))
-                });
-            });
-            
-            return seleccionados;
-        }
+    // Si no hay adicionales, limpiamos el contenedor
+    if (lista.length === 0) {
+        contenedor.innerHTML = ''; 
+        return;
+    }
+
+    // Estructura de acordeón usando <details>
+    contenedor.innerHTML = `
+        <details class="group bg-stone-950 border border-stone-800 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all">
+            <summary class="list-none p-4 text-[10px] font-bold text-stone-400 cursor-pointer flex justify-between items-center hover:text-amber-400 select-none">
+                <span>SELECCIONAR ADICIONALES</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform duration-300"></i>
+            </summary>
+            <div class="p-3 border-t border-stone-800 space-y-2">
+                ${lista.map(ad => `
+                    <label class="flex items-center gap-3 cursor-pointer hover:bg-stone-900 p-2 rounded-lg transition-colors">
+                        <input type="checkbox" class="check-adicional w-4 h-4 accent-amber-500" data-nombre="${ad.nombre}" data-precio="${ad.precio}">
+                        <div class="flex justify-between w-full">
+                            <span class="text-[11px] text-stone-300">${ad.nombre}</span>
+                            <span class="text-[11px] text-amber-500/80 font-mono">+$${Number(ad.precio).toFixed(2)}</span>
+                        </div>
+                    </label>
+                `).join('')}
+            </div>
+        </details>
+    `;
+    
+    // Refrescar iconos para que el chevron cargue correctamente
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+/**
+ * Recolecta los adicionales marcados por el usuario
+ */
+function obtenerAdicionalesSeleccionados() {
+    const seleccionados = [];
+    const checkboxes = document.querySelectorAll('.check-adicional:checked');
+    
+    checkboxes.forEach(cb => {
+        seleccionados.push({
+            nombre: cb.getAttribute('data-nombre'),
+            precio: parseFloat(cb.getAttribute('data-precio'))
+        });
+    });
+    
+    return seleccionados;
+}
 
 
         function irAPantallaVitrina() {
@@ -571,11 +582,18 @@ const listaAdicionales = [
         }
 
         async function descargarAdicionalesParaMenu() {
-            const { data } = await supabaseClient.from('adicionales').select('*');
-            if (data) {
-                window.listaAdicionales = data;
-            }
+    try {
+        const { data, error } = await supabaseClient.from('adicionales').select('*');
+        if (error) {
+            console.error("Error cargando adicionales:", error);
+            return;
         }
+        window.listaAdicionales = data || [];
+        console.log("Adicionales cargados:", window.listaAdicionales);
+    } catch (e) {
+        console.error("Fallo crítico en descarga:", e);
+    }
+}
     </script>
 </body>
 </html>
