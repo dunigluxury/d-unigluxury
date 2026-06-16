@@ -441,72 +441,69 @@
     const cuentaSel = cuentasDB[indexSelector];
     const textoMensaje = `💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎\n\n🛍️ *PRODUCTOS:*\n${listaProductosTexto}\n💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}\n\n🏦 *PAGO:* ${cuentaSel.plataforma} - ${cuentaSel.banco}\n🔢 *REF:* ${transaccionRef}`;
 
-    // 3. Guardar en Supabase
-    await supabaseClient.from('ordenes_vip').insert([{
-        productos: carritoVIP.map(item => item.titulo).join(', '),
-        total: subtotalGlobal,
-        referencia: transaccionRef,
-        estado: "Pendiente"
-    }]);
+    // ... (todo tu código anterior hasta finalizarOrdenCompraVIP) ...
+        await supabaseClient.from('ordenes_vip').insert([{
+            productos: carritoVIP.map(item => item.titulo).join(', '),
+            total: subtotalGlobal,
+            referencia: transaccionRef,
+            estado: "Pendiente"
+        }]);
 
-    // 4. Abrir WhatsApp y limpiar
-    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
-    
-    carritoVIP = [];
-    document.getElementById('contador-carrito-global').innerText = "0";
-    document.getElementById('carrito-input-referencia').value = "";
-    document.getElementById('caja-detalles-pago-extendida').classList.add('hidden');
-    document.getElementById('carrito-selector-pago').value = "";
-    
-    irAPantallaVitrina();
-    window.open(urlWhatsApp, '_blank');
-}
-        // ... tu función finalizarOrdenCompraVIP sigue igual ...
+        const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(textoMensaje)}`;
+        
+        carritoVIP = [];
+        document.getElementById('contador-carrito-global').innerText = "0";
+        document.getElementById('carrito-input-referencia').value = "";
+        document.getElementById('caja-detalles-pago-extendida').classList.add('hidden');
+        document.getElementById('carrito-selector-pago').value = "";
+        
+        irAPantallaVitrina();
+        window.open(urlWhatsApp, '_blank');
+    } // <-- Esta es la llave que cierra finalizarOrdenCompraVIP
+
+    // --- CARGA Y RENDERIZADO ---
+    window.addEventListener('DOMContentLoaded', () => { 
+        descargarCatalogoDeSupabase(); 
+        descargarAdicionalesDeSupabase(); 
+        lucide.createIcons(); 
+    });
+
+    async function descargarAdicionalesDeSupabase() {
+        const { data, error } = await supabaseClient.from('adicionales').select('*');
+        if (!error && data) {
+            window.listaAdicionales = data;
+            console.log("Adicionales cargados:", window.listaAdicionales);
+        } else {
+            console.error("Error al cargar adicionales:", error);
         }
+    }
 
-        window.addEventListener('DOMContentLoaded', () => { 
-            descargarCatalogoDeSupabase(); 
-            descargarAdicionalesDeSupabase(); // <--- AGREGALO AQUÍ
-            lucide.createIcons(); 
-        });
+    function renderizarAdicionales() {
+        const contenedor = document.getElementById('contenedor-adicionales');
+        if (!contenedor || !window.listaAdicionales || window.listaAdicionales.length === 0) return;
 
-        // Función para descargar los adicionales
-        async function descargarAdicionalesDeSupabase() {
-            const { data, error } = await supabaseClient.from('adicionales').select('*');
-            if (!error && data) {
-                window.listaAdicionales = data;
-                console.log("Adicionales cargados correctamente:", window.listaAdicionales);
-            } else {
-                console.error("Error al cargar adicionales:", error);
-            }
-        }
-
-        // Función para renderizar el acordeón
-        function renderizarAdicionales() {
-            const contenedor = document.getElementById('contenedor-adicionales');
-            if (!contenedor || !window.listaAdicionales || window.listaAdicionales.length === 0) return;
-
-            contenedor.innerHTML = `
-                <details class="group bg-stone-900 border border-stone-800 rounded-xl overflow-hidden my-4">
-                    <summary class="list-none p-4 text-[10px] font-bold text-stone-400 cursor-pointer flex justify-between items-center hover:text-amber-400">
-                        <span>SELECCIONAR ADICIONALES</span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div class="p-3 border-t border-stone-800 space-y-2">
-                        ${window.listaAdicionales.map(ad => `
-                            <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-stone-800 rounded-lg">
-                                <input type="checkbox" class="check-adicional w-4 h-4 accent-amber-500" data-nombre="${ad.nombre}" data-precio="${ad.precio}">
-                                <div class="flex justify-between w-full">
-                                    <span class="text-xs text-stone-300">${ad.nombre}</span>
-                                    <span class="text-xs text-amber-400 font-mono">+$${parseFloat(ad.precio).toFixed(2)}</span>
-                                </div>
-                            </label>
-                        `).join('')}
-                    </div>
-                </details>
-            `;
-            lucide.createIcons();
-        }
+        contenedor.innerHTML = `
+            <details class="group bg-stone-900 border border-stone-800 rounded-xl overflow-hidden my-4">
+                <summary class="list-none p-4 text-[10px] font-bold text-stone-400 cursor-pointer flex justify-between items-center hover:text-amber-400">
+                    <span>SELECCIONAR ADICIONALES</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-3 border-t border-stone-800 space-y-2">
+                    ${window.listaAdicionales.map(ad => `
+                        <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-stone-800 rounded-lg">
+                            <input type="checkbox" class="check-adicional w-4 h-4 accent-amber-500" data-nombre="${ad.nombre}" data-precio="${ad.precio}">
+                            <div class="flex justify-between w-full">
+                                <span class="text-xs text-stone-300">${ad.nombre}</span>
+                                <span class="text-xs text-amber-400 font-mono">+$${parseFloat(ad.precio).toFixed(2)}</span>
+                            </div>
+                        </label>
+                    `).join('')}
+                </div>
+            </details>
+        `;
+        lucide.createIcons();
+    }
+    // Fin del script
     </script>
 </body>
 </html>
