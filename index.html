@@ -298,12 +298,34 @@
         }
 
         function agregarAlCarritoYVolver() {
-            if (!productoSeleccionado) return;
-            carritoVIP.push(productoSeleccionado);
-            document.getElementById('contador-carrito-global').innerText = carritoVIP.length;
-            alert(`¡"${productoSeleccionado.titulo}" agregado al carrito VIP!`);
-            irAPantallaVitrina();
-        }
+    if (!productoSeleccionado) return;
+
+    // 1. Buscar todos los checkboxes seleccionados
+    const checkboxes = document.querySelectorAll('.check-adicional:checked');
+    let adicionalesSeleccionados = [];
+    let extraTotal = 0;
+
+    checkboxes.forEach(cb => {
+        const nombre = cb.getAttribute('data-nombre');
+        const precio = parseFloat(cb.getAttribute('data-precio'));
+        adicionalesSeleccionados.push(nombre);
+        extraTotal += precio;
+    });
+
+    // 2. Crear un objeto de producto "híbrido" (Producto base + precio extra)
+    const productoParaCarrito = {
+        ...productoSeleccionado,
+        titulo: `${productoSeleccionado.titulo} ${adicionalesSeleccionados.length > 0 ? '(+ ' + adicionalesSeleccionados.join(', ') + ')' : ''}`,
+        precio: parseFloat(productoSeleccionado.precio) + extraTotal
+    };
+
+    // 3. Añadir al carrito
+    carritoVIP.push(productoParaCarrito);
+    document.getElementById('contador-carrito-global').innerText = carritoVIP.length;
+    
+    alert(`¡"${productoParaCarrito.titulo}" agregado al carrito!`);
+    irAPantallaVitrina();
+}
 
         function renderizarContenidoCarrito() {
             const container = document.getElementById('carrito-lista-items'); if(!container) return;
