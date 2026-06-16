@@ -88,6 +88,19 @@
                 </div>
                 <div id="lista-categorias" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
             </div>
+<div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
+    <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Adicionales VIP</h3>
+    </div>
+    <div class="space-y-2">
+        <input type="text" id="add-nombre" placeholder="Nombre (ej: Salsa)..." class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+        <input type="number" id="add-precio" placeholder="Precio ($)..." step="0.01" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+        <button onclick="guardarAdicional()" class="w-full bg-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-amber-600 transition-colors">Sincronizar Adicional</button>
+    </div>
+    <div id="lista-adicionales-panel" class="space-y-1.5 max-h-40 overflow-y-auto">
+        </div>
+</div>
 
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -391,6 +404,71 @@
                 descargarCatalogoDeSupabase();
             }
         }
+
+async function guardarAdicional() {
+    const nombre = document.getElementById('add-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('add-precio').value);
+
+    // Validación para proteger la integridad de los datos
+    if (!nombre || isNaN(precio) || precio < 0) {
+        alert("Por favor, ingresa datos válidos y precisos.");
+        return;
+    }
+
+    // Guardar en Supabase
+    const { error } = await supabaseClient
+        .from('adicionales')
+        .insert([{ nombre, precio }]);
+
+    if (error) {
+        alert("Error al guardar: " + error.message);
+    } else {
+        alert("Adicional registrado con éxito");
+        // Limpiar campos
+        document.getElementById('add-nombre').value = '';
+        document.getElementById('add-precio').value = '';
+        // Recargar la lista para mostrar el nuevo adicional
+        cargarAdicionalesPanel(); 
+    }
+
+}
+async function cargarAdicionalesPanel() {
+    const { data, error } = await supabaseClient.from('adicionales').select('*');
+    const container = document.getElementById('lista-adicionales-panel');
+    if (!container || error) return;
+    
+    container.innerHTML = data.map(item => `
+        <div class="flex justify-between items-center bg-stone-900/50 p-2 rounded-lg text-xs border border-stone-800">
+            <span class="text-stone-300">${item.nombre}</span>
+            <span class="text-amber-400 font-mono">$${item.precio.toFixed(2)}</span>
+            <button onclick="eliminarAdicional(${item.id})" class="text-red-500 hover:text-red-400">X</button>
+        </div>
+    `).join('');
+}
+
+async function eliminarAdicional(id) {
+    if (!confirm("¿Estás seguro de eliminar este adicional?")) return;
+
+    // 1. Eliminar de la base de datos
+    const { error } = await supabaseClient
+        .from('adicionales')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert("Error al eliminar: " + error.message);
+    } else {
+        alert("Adicional eliminado correctamente.");
+        // 2. Recargar la lista para reflejar el cambio
+        cargarAdicionalesPanel();
+    }
+}
+
+// ... al final de tu script ...
+descargarCatalogoDeSupabase();
+descargarCuentasPago();
+cargarAdicionalesPanel(); // <--- ESTA LÍNEA ES CLAVE
+
 
         function prepararEdicionProducto(idProducto) {
             const prod = baseProductos.find(p => p.id === idProducto); if(!prod) return;
