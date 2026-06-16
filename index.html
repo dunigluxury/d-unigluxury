@@ -111,6 +111,10 @@
                     </div>
                 </div>
                 <div class="pt-2">
+    <div class="mb-6 pt-4 border-t border-stone-900">
+        <h4 class="text-[9px] uppercase tracking-widest text-stone-500 font-bold font-futurista mb-3">Adicionales disponibles:</h4>
+        <div id="contenedor-adicionales" class="grid grid-cols-2 gap-2"></div>
+    </div>
                     <button onclick="agregarAlCarritoYVolver()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
                         <i data-lucide="shopping-bag" class="w-4 h-4"></i> AÑADIR A LA BOLSA VIP
                     </button>
@@ -183,10 +187,68 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0and2bGxsZHhwYmxoaXNibGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU4OTAsImV4cCI6MjA5NTY1MTg5MH0.SqzQXSmh1nAnlKpD39khgSQSokFeY_1Hp37PWX2RVsw"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let baseProductos = [], cuentasDB = [], carritoVIP = [];
-        let productoSeleccionado = null, filtroInstagram = "luxury_store";
-        let fotoSeleccionadaParaLightbox = ""
+        // ... tus otras variables globales ...
+let baseProductos = [], cuentasDB = [], carritoVIP = [];
+let productoSeleccionado = null, filtroInstagram = "luxury_store";
+let fotoSeleccionadaParaLightbox = "";
+
+// AGREGA ESTO:
+const listaAdicionales = [
+    { nombre: "Salsa Rosada", precio: 0.50 },
+    { nombre: "Salsa Mayonesa", precio: 0.30 },
+    { nombre: "Papas", precio: 1.00 },
+    { nombre: "Queso", precio: 0.80 }
+];
     
+        /**
+         * Renderiza los adicionales como un menú desplegable (Acordeón)
+         */
+        function renderizarAdicionales() {
+            const contenedor = document.getElementById('contenedor-adicionales');
+            if (!contenedor) return;
+
+            // Estructura de acordeón usando <details>
+            contenedor.innerHTML = `
+                <details class="group bg-stone-950 border border-stone-800 rounded-xl overflow-hidden hover:border-amber-500/30 transition-all">
+                    <summary class="list-none p-4 text-[10px] font-bold text-stone-400 cursor-pointer flex justify-between items-center hover:text-amber-400 select-none">
+                        <span>SELECCIONAR ADICIONALES</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition-transform duration-300"></i>
+                    </summary>
+                    <div class="p-3 border-t border-stone-800 space-y-2">
+                        ${listaAdicionales.map(ad => `
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-stone-900 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" class="check-adicional w-4 h-4 accent-amber-500" data-nombre="${ad.nombre}" data-precio="${ad.precio}">
+                                <div class="flex justify-between w-full">
+                                    <span class="text-[11px] text-stone-300">${ad.nombre}</span>
+                                    <span class="text-[11px] text-amber-500/80 font-mono">+$${ad.precio.toFixed(2)}</span>
+                                </div>
+                            </label>
+                        `).join('')}
+                    </div>
+                </details>
+            `;
+            
+            // Actualizamos iconos (necesario para el chevron)
+            lucide.createIcons();
+        }
+
+        /**
+         * Recolecta los adicionales marcados por el usuario
+         */
+        function obtenerAdicionalesSeleccionados() {
+            const seleccionados = [];
+            const checkboxes = document.querySelectorAll('.check-adicional:checked');
+            
+            checkboxes.forEach(cb => {
+                seleccionados.push({
+                    nombre: cb.getAttribute('data-nombre'),
+                    precio: parseFloat(cb.getAttribute('data-precio'))
+                });
+            });
+            
+            return seleccionados;
+        }
+
 
         function irAPantallaVitrina() {
             document.getElementById('pantalla-detalle').classList.add('hidden');
@@ -255,15 +317,25 @@
             try { if(productoSeleccionado.imagenes_slider) fotosSlider = JSON.parse(productoSeleccionado.imagenes_slider) || []; } catch(e){}
             if (fotosSlider.length === 0 && productoSeleccionado.imagen_url) { fotosSlider.push(productoSeleccionado.imagen_url); }
 
-            const containerMiniaturas = document.getElementById('detalle-contenedor-miniaturas'); containerMiniaturas.innerHTML = "";
-            fotosSlider.forEach((img) => {
-                if(img) {
-                    containerMiniaturas.innerHTML += `<div onclick="actualizarVisorFoto('${img}')" class="aspect-square rounded-xl bg-stone-950 border border-stone-800 overflow-hidden cursor-pointer hover:border-amber-500/40 transition-all"><img src="${img}" class="w-full h-full object-cover"></div>`;
-                }
-            });
+            const containerMiniaturas = document.getElementById('detalle-contenedor-miniaturas');
+            
+            // Construimos todo el HTML en una cadena primero (mejor rendimiento)
+            containerMiniaturas.innerHTML = fotosSlider
+                .filter(img => img)
+                .map(img => `
+                    <div onclick="actualizarVisorFoto('${img}')" class="aspect-square rounded-xl bg-stone-950 border border-stone-800 overflow-hidden cursor-pointer hover:border-amber-500/40 transition-all">
+                        <img src="${img}" class="w-full h-full object-cover">
+                    </div>
+                `).join('');
 
+            // Preparar UI antes de mostrar
+            renderizarAdicionales();
+
+            // Mostrar pantalla
             document.getElementById('pantalla-vitrina').classList.add('hidden');
             document.getElementById('pantalla-detalle').classList.remove('hidden');
+
+            // Una sola llamada para procesar todos los iconos (miniaturas y adicionales)
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -288,12 +360,31 @@
         }
 
         function agregarAlCarritoYVolver() {
-            if (!productoSeleccionado) return;
-            carritoVIP.push(productoSeleccionado);
-            document.getElementById('contador-carrito-global').innerText = carritoVIP.length;
-            alert(`¡"${productoSeleccionado.titulo}" agregado al carrito VIP!`);
-            irAPantallaVitrina();
-        }
+    if (!productoSeleccionado) return;
+
+    // 1. Obtenemos los adicionales marcados
+    const adicionalesSeleccionados = obtenerAdicionalesSeleccionados();
+    
+    // 2. Calculamos el costo extra total
+    const costoExtra = adicionalesSeleccionados.reduce((acc, curr) => acc + curr.precio, 0);
+
+    // 3. Creamos una copia del producto con los datos nuevos
+    // Usamos parseFloat para asegurar que el precio sea un número
+    const itemConAdicionales = {
+        ...productoSeleccionado,
+        precio: parseFloat(productoSeleccionado.precio) + costoExtra,
+        listaAdicionales: adicionalesSeleccionados
+    };
+
+    // 4. Guardamos en el carrito
+    carritoVIP.push(itemConAdicionales);
+
+    // 5. Actualizamos UI y feedback
+    document.getElementById('contador-carrito-global').innerText = carritoVIP.length;
+    alert(`¡"${itemConAdicionales.titulo}" agregado con ${adicionalesSeleccionados.length} adicional(es)!`);
+    
+    irAPantallaVitrina();
+}
 
         function renderizarContenidoCarrito() {
             const container = document.getElementById('carrito-lista-items'); if(!container) return;
@@ -409,7 +500,7 @@
     }
 
     // 1. Obtener número de WhatsApp desde Supabase
-    let numeroWhatsApp = "584120000000"; // Número por defecto
+    let numeroWhatsApp = "584120000000";
     const { data: configData, error: configError } = await supabaseClient
         .from('ajustes_sistema')
         .select('valor')
@@ -420,20 +511,33 @@
         numeroWhatsApp = configData.valor.replace(/[^0-9]/g, "");
     }
 
-    // 2. Construir mensaje
+    // 2. Construir mensaje con adicionales
     let listaProductosTexto = "";
     let subtotalGlobal = 0;
+    
     carritoVIP.forEach((item) => {
-        listaProductosTexto += `• ${item.titulo} ($${parseFloat(item.precio).toFixed(2)})\n`;
+        // Si tiene adicionales, los agregamos al texto
+        let extrasStr = (item.listaAdicionales && item.listaAdicionales.length > 0) 
+            ? `\n   + ${item.listaAdicionales.map(a => a.nombre).join(', ')}` 
+            : "";
+            
+        listaProductosTexto += `• ${item.titulo}${extrasStr} ($${parseFloat(item.precio).toFixed(2)})\n`;
         subtotalGlobal += parseFloat(item.precio) || 0;
     });
 
     const cuentaSel = cuentasDB[indexSelector];
     const textoMensaje = `💎 *NUEVO PEDIDO - D'UNIG LUXURY* 💎\n\n🛍️ *PRODUCTOS:*\n${listaProductosTexto}\n💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}\n\n🏦 *PAGO:* ${cuentaSel.plataforma} - ${cuentaSel.banco}\n🔢 *REF:* ${transaccionRef}`;
 
-    // 3. Guardar en Supabase
+    // 3. Guardar en Supabase (con detalle de adicionales)
+    const detalleProductosString = carritoVIP.map(item => {
+        const extras = (item.listaAdicionales && item.listaAdicionales.length > 0) 
+            ? ` (${item.listaAdicionales.map(a => a.nombre).join(', ')})` 
+            : "";
+        return `${item.titulo}${extras}`;
+    }).join(', ');
+
     await supabaseClient.from('ordenes_vip').insert([{
-        productos: carritoVIP.map(item => item.titulo).join(', '),
+        productos: detalleProductosString,
         total: subtotalGlobal,
         referencia: transaccionRef,
         estado: "Pendiente"
@@ -452,10 +556,27 @@
     window.open(urlWhatsApp, '_blank');
 }
 
-        window.addEventListener('DOMContentLoaded', () => { 
-            descargarCatalogoDeSupabase(); 
+        window.addEventListener('DOMContentLoaded', async () => { 
+            await iniciarEcosistema(); // Ahora podemos usar await aquí
             lucide.createIcons(); 
         });
+
+        // Esta es la función maestra que organiza el orden de carga
+        async function iniciarEcosistema() {
+            // Asegúrate de que todas estas funciones existan en tu script
+            await descargarCatalogoDeSupabase(); 
+            await descargarCuentasPago();        
+            await descargarAdicionalesParaMenu(); // Aquí llamamos a la que trae los adicionales
+            console.log("Ecosistema D'UNIG LUXURY cargado.");
+        }
+
+        async function descargarAdicionalesParaMenu() {
+            const { data } = await supabaseClient.from('adicionales').select('*');
+            if (data) {
+                window.listaAdicionales = data;
+            }
+        }
     </script>
 </body>
 </html>
+
