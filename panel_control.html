@@ -311,48 +311,48 @@
 
         // VERIFICACIÓN DE SESIÓN AL CARGAR
         window.addEventListener('DOMContentLoaded', async () => { 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                document.getElementById('auth-modal').classList.add('hidden');
-            }
-            
-            descargarCatalogoDeSupabase(); 
-            alternarCamposPago(); 
-            descargarCuentasPago(); 
-            renderizarCategorias(); 
-            renderizerInputsMatrizFotos(); 
-            lucide.createIcons(); 
-        });
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        document.getElementById('auth-modal').classList.add('hidden');
+    }
+    
+    // Agrega esta línea para que los usuarios carguen al entrar
+    cargarUsuariosSuscritos(); 
+    
+    descargarCatalogoDeSupabase(); 
+    alternarCamposPago(); 
+    descargarCuentasPago(); 
+    renderizarCategorias(); 
+    renderizerInputsMatrizFotos(); 
+    lucide.createIcons(); 
+});
 
 async function cargarUsuariosSuscritos() {
-    // Solo pedimos las columnas que sabemos que existen
-    const { data, error } = await supabaseClient
-        .from('suscripciones')
-        .select('user_id, plan_nombre, estado');
+    try {
+        const { data, error } = await supabaseClient
+            .from('suscripciones')
+            .select('user_id, plan_nombre, estado');
 
-    if (error) {
-        console.error("Error al cargar:", error.message);
-        alert("Error al cargar usuarios: " + error.message);
-        return;
-    }
+        if (error) throw error; // Lanza el error al bloque catch
 
-    console.log("Datos recibidos:", data); // Mira esto en la consola F12
-
-    const contenedor = document.getElementById('lista-usuarios-panel');
-    if (contenedor && data) {
-        contenedor.innerHTML = data.map(u => `
-            <tr class="border-b border-stone-800">
-                <td class="p-3 text-white">${u.user_id}</td>
-                <td class="p-3 text-white">${u.plan_nombre}</td>
-                <td class="p-3 text-white">${u.estado}</td>
-            </tr>
-        `).join('');
+        const contenedor = document.getElementById('lista-usuarios-panel');
+        if (contenedor && data) {
+            contenedor.innerHTML = data.map(u => `
+                <tr class="border-b border-stone-800">
+                    <td class="p-3 text-white">${u.user_id}</td>
+                    <td class="p-3 text-white">${u.plan_nombre}</td>
+                    <td class="p-3 text-white">${u.estado || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error("No se pudieron cargar los usuarios:", err.message);
+        // No usamos alert aquí para no molestar al usuario si es un error menor
     }
 }
 
-        // AUTENTICACIÓN
-        async function ejecutarLogin() {
-    console.log("Intentando ingresar..."); // Veremos si esto sale en la consola
+       // AUTENTICACIÓN
+async function ejecutarLogin() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-pass').value;
 
@@ -368,15 +368,19 @@ async function cargarUsuariosSuscritos() {
         });
 
         if (error) {
-            console.error("Error de Supabase:", error);
-            alert("Acceso denegado: " + error.message);
-        } else {
-            console.log("Login exitoso", data);
-            document.getElementById('auth-modal').classList.add('hidden');
+            alert("Error de acceso: " + error.message);
+            return;
         }
-    } catch (e) {
-        console.error("Error crítico:", e);
-        alert("Ocurrió un error inesperado.");
+
+        // Si entramos, ocultamos el modal
+        document.getElementById('auth-modal').classList.add('hidden');
+        
+        // Cargamos los datos necesarios
+        descargarCatalogoDeSupabase();
+        // cargarUsuariosSuscritos(); // Descomenta solo si ya tienes esta función definida
+        
+    } catch (err) {
+        console.error("Error crítico:", err);
     }
 }
 
