@@ -259,6 +259,31 @@
         </div>
     </main>
 
+</main>
+
+    <main id="panel-seccion-usuarios" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
+        <div class="glass-panel p-6 rounded-3xl border border-stone-900 shadow-2xl">
+            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-4 mb-4">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <h2 class="text-sm font-futurista font-black uppercase tracking-widest text-white">Gestión de Usuarios</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-stone-900 text-stone-500 uppercase tracking-widest text-[9px] font-futurista">
+                            <th class="p-3">ID Usuario</th>
+                            <th class="p-3">Plan</th>
+                            <th class="p-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-usuarios-panel">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+
     <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
@@ -298,6 +323,32 @@
             renderizerInputsMatrizFotos(); 
             lucide.createIcons(); 
         });
+
+async function cargarUsuariosSuscritos() {
+    // Solo pedimos las columnas que sabemos que existen
+    const { data, error } = await supabaseClient
+        .from('suscripciones')
+        .select('user_id, plan_nombre, estado');
+
+    if (error) {
+        console.error("Error al cargar:", error.message);
+        alert("Error al cargar usuarios: " + error.message);
+        return;
+    }
+
+    console.log("Datos recibidos:", data); // Mira esto en la consola F12
+
+    const contenedor = document.getElementById('lista-usuarios-panel');
+    if (contenedor && data) {
+        contenedor.innerHTML = data.map(u => `
+            <tr class="border-b border-stone-800">
+                <td class="p-3 text-white">${u.user_id}</td>
+                <td class="p-3 text-white">${u.plan_nombre}</td>
+                <td class="p-3 text-white">${u.estado}</td>
+            </tr>
+        `).join('');
+    }
+}
 
         // AUTENTICACIÓN
         async function ejecutarLogin() {
@@ -371,39 +422,68 @@
         }
 
         async function inyectarProductoASupabase() {
-            const idEdicion = document.getElementById('prod-id-edicion').value;
-            const t = document.getElementById('prod-titulo').value.trim();
-            const c = document.getElementById('prod-categoria').value;
-            const p = parseFloat(document.getElementById('prod-precio').value);
-            const s = parseInt(document.getElementById('prod-stock').value);
-            const d = document.getElementById('prod-descripcion').value.trim();
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { alert("Debes iniciar sesión."); return; }
 
-            if (!t || isNaN(p) || isNaN(s)) { alert("Complete todos los campos requeridos."); return; }
-            const sliderValidos = fotosSliderArray.filter(f => f !== "");
+    // 1. Obtener directamente el 'limite_productos' que configuramos en la tabla
+    const { data: sub } = await supabaseClient
+        .from('suscripciones')
+        .select('limite_productos')
+        .eq('user_id', user.id)
+        .single();
 
-            const payload = {
-                titulo: t, categoria: c || "General", descripcion: d, precio: p, stock: s,
-                instagram_dueno: filtroInstagram, imagen_url: sliderValidos[0] || "",
-                imagenes_slider: JSON.stringify(sliderValidos)
-            };
+    // Si no encuentra el registro, asignamos 0 o un valor seguro por defecto
+    const limiteActual = sub?.limite_productos || 0;
 
-            let error;
-            if (idEdicion) { 
-                const res = await supabaseClient.from('productos').update(payload).eq('id', idEdicion); 
-                error = res.error;
-            } else { 
-                const res = await supabaseClient.from('productos').insert([payload]); 
-                error = res.error;
-            }
+    // 2. Contar cuántos productos tiene ya el usuario
+    const { count } = await supabaseClient
+        .from('productos')
+        .select('*', { count: 'exact', head: true })
+        .eq('instagram_dueno', filtroInstagram);
 
-            if (error) {
-                alert("Error de sincronización: " + error.message);
-            } else {
-                alert("Sincronizado con éxito."); 
-                limpiarFormularioCompleto(); 
-                descargarCatalogoDeSupabase();
-            }
-        }
+    // 3. Validar límite
+    const idEdicion = document.getElementById('prod-id-edicion').value;
+    if (!idEdicion && count >= limiteActual) {
+        alert("⚠️ Has alcanzado el límite de productos de tu plan actual (" + limiteActual + ").");
+        return; // Detiene la carga del producto
+    }
+    
+    // ... AQUÍ CONTINÚA TU CÓDIGO DE INSERCIÓN ORIGINAL
+}
+
+    // --- EL RESTO DE TU LÓGICA ORIGINAL ---
+    const t = document.getElementById('prod-titulo').value.trim();
+    const c = document.getElementById('prod-categoria').value;
+    const p = parseFloat(document.getElementById('prod-precio').value);
+    const s = parseInt(document.getElementById('prod-stock').value);
+    const d = document.getElementById('prod-descripcion').value.trim();
+
+    if (!t || isNaN(p) || isNaN(s)) { alert("Complete todos los campos requeridos."); return; }
+    const sliderValidos = fotosSliderArray.filter(f => f !== "");
+
+    const payload = {
+        titulo: t, categoria: c || "General", descripcion: d, precio: p, stock: s,
+        instagram_dueno: filtroInstagram, imagen_url: sliderValidos[0] || "",
+        imagenes_slider: JSON.stringify(sliderValidos)
+    };
+
+    let error;
+    if (idEdicion) { 
+        const res = await supabaseClient.from('productos').update(payload).eq('id', idEdicion); 
+        error = res.error;
+    } else { 
+        const res = await supabaseClient.from('productos').insert([payload]); 
+        error = res.error;
+    }
+
+    if (error) {
+        alert("Error de sincronización: " + error.message);
+    } else {
+        alert("Sincronizado con éxito."); 
+        limpiarFormularioCompleto(); 
+        descargarCatalogoDeSupabase();
+    }
+}
 
 async function guardarAdicional() {
     const nombre = document.getElementById('add-nombre').value.trim();
