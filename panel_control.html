@@ -352,25 +352,33 @@ async function cargarUsuariosSuscritos() {
 
         // AUTENTICACIÓN
         async function ejecutarLogin() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-pass').value;
+    console.log("Intentando ingresar..."); // Veremos si esto sale en la consola
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-pass').value;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+    if (!email || !password) {
+        alert("Por favor rellena ambos campos");
+        return;
+    }
 
-            if (error) {
-                alert("Acceso denegado: " + error.message);
-            } else {
-                document.getElementById('auth-modal').classList.add('hidden');
-            }
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            console.error("Error de Supabase:", error);
+            alert("Acceso denegado: " + error.message);
+        } else {
+            console.log("Login exitoso", data);
+            document.getElementById('auth-modal').classList.add('hidden');
         }
-
-        async function ejecutarLogout() {
-            await supabaseClient.auth.signOut();
-            location.reload();
-        }
+    } catch (e) {
+        console.error("Error crítico:", e);
+        alert("Ocurrió un error inesperado.");
+    }
+}
 
         // CONTROL NAV DEL PANEL
         function cambiarSeccionPanel(target) {
