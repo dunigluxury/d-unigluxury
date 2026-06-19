@@ -259,25 +259,28 @@
 
 
         let baseProductos = [];
-        let categoriasDB = ["General", "Calzado Premium", "Alta Costura", "Joyas Cuánticas"];
-        let filtroInstagram = "luxury_store";
-        let fotosSliderArray = Array(5).fill("");
-        let listaCuentas = [];
+let categoriasDB = []; // Empezamos vacío, Supabase lo llenará
+let filtroInstagram = "luxury_store";
+let fotosSliderArray = Array(5).fill("");
+let listaCuentas = [];
 
         // VERIFICACIÓN DE SESIÓN AL CARGAR
         window.addEventListener('DOMContentLoaded', async () => { 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                document.getElementById('auth-modal').classList.add('hidden');
-            }
-            
-            descargarCatalogoDeSupabase(); 
-            alternarCamposPago(); 
-            descargarCuentasPago(); 
-            renderizarCategorias(); 
-            renderizerInputsMatrizFotos(); 
-            lucide.createIcons(); 
-        });
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        document.getElementById('auth-modal').classList.add('hidden');
+    }
+    
+    // Nueva función que crearemos abajo
+    await descargarCategoriasDesdeSupabase(); 
+    
+    descargarCatalogoDeSupabase(); 
+    alternarCamposPago(); 
+    descargarCuentasPago(); 
+    // renderizarCategorias(); // Ya no la llamas aquí, la llamaremos al descargar los datos
+    renderizerInputsMatrizFotos(); 
+    lucide.createIcons(); 
+});
 
         // AUTENTICACIÓN
         async function ejecutarLogin() {
@@ -461,25 +464,58 @@
         function actualizarContadoresMedia() {
             document.getElementById('contador-fotos-cargadas').innerText = `${fotosSliderArray.filter(f=>f!=="").length} / 5`;
         }
+ // 1. Renderizar con botón de eliminar
+function renderizarCategorias() {
+    const select = document.getElementById('prod-categoria'), 
+          lista = document.getElementById('lista-categorias');
+    if(!select || !lista) return; 
+    
+    select.innerHTML = ""; 
+    lista.innerHTML = "";
+    
+    categoriasDB.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+        lista.innerHTML += `
+            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                <span>${c}</span>
+                <button onclick="eliminarCategoria('${c}')" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
+            </div>`;
+    });
+}
 
-        function renderizarCategorias() {
-            const select = document.getElementById('prod-categoria'), lista = document.getElementById('lista-categorias');
-            if(!select || !lista) return; select.innerHTML = ""; lista.innerHTML = "";
-            categoriasDB.forEach(c => {
-                select.innerHTML += `<option value="${c}">${c}</option>`;
-                lista.innerHTML += `<div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center"><span>${c}</span></div>`;
-            });
+// 2. Agregar nueva categoría persistente
+async function agregarCategoria() { 
+    const inp = document.getElementById('cat-nombre'); 
+    const nom = inp.value.trim(); 
+    
+    if(nom && !categoriasDB.includes(nom)) { 
+        const { error } = await supabaseClient
+            .from('categorias')
+            .insert([{ nombre: nom, instagram_dueno: filtroInstagram }]);
+            
+        if (!error) {
+            inp.value = ""; 
+            await descargarCategoriasDesdeSupabase(); // Recarga y renderiza
+        } else {
+            alert("Error al guardar: " + error.message);
         }
+    }
+}
 
-        function agregarCategoria() { 
-            const inp = document.getElementById('cat-nombre'); 
-            const nom = inp.value.trim(); 
-            if(nom && !categoriasDB.includes(nom)) { 
-                categoriasDB.push(nom); 
-                inp.value = ""; 
-                renderizarCategorias(); 
-            } 
-        }
+// 3. Nueva función para eliminar
+async function eliminarCategoria(nombre) {
+    const { error } = await supabaseClient
+        .from('categorias')
+        .delete()
+        .eq('nombre', nombre)
+        .eq('instagram_dueno', filtroInstagram);
+
+    if (!error) {
+        await descargarCategoriasDesdeSupabase(); // Recarga y renderiza
+    } else {
+        alert("Error al eliminar: " + error.message);
+    }
+}
 
         function alternarCamposPago() {
             const plataforma = document.getElementById('pago-plataforma').value;
@@ -651,35 +687,74 @@
             }
         }
 
-        async function descargarHistorialDeOrdenes() {
-            const { data, error } = await supabaseClient.from('ordenes_vip').select('*').order('fecha', { ascending: false });
-            if (!error && data) {
-                const tbody = document.getElementById('tabla-ordenes-body'); if (!tbody) return;
-                tbody.innerHTML = "";
-                data.forEach(o => {
-                    tbody.innerHTML += `<tr class="border-b border-stone-900/40 hover:bg-stone-900/10 transition-colors">
-                        <td class="p-3 font-mono text-amber-400 font-bold">#${o.id}</td>
-                        <td class="p-3 text-stone-400">${new Date(o.fecha).toLocaleDateString()}</td>
-                        <td class="p-3 text-white truncate max-w-xs">${o.productos}</td>
-                        <td class="p-3 font-mono font-bold text-stone-200">$${parseFloat(o.total || 0).toFixed(2)}</td>
-                        <td class="p-3 font-mono text-stone-500">${o.referencia || 'N/A'}</td>
-                        <td class="p-3 text-right"><span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">${o.estado}</span></td>
-                    </tr>`;
-                });
-            }
-        }
+        // A. CORRECCIÓN: Función completa y bien cerrada
+async function descargarHistorialDeOrdenes() {
+    const { data, error } = await supabaseClient
+        .from('ordenes_vip')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        async function descargarAjusteWhatsApp() {
-            const { data, error } = await supabaseClient
-                .from('ajustes_sistema')
-                .select('valor')
-                .eq('id', 'whatsapp_notificaciones')
-                .single();
+    if (!error && data) {
+        const tbody = document.getElementById('tabla-ordenes-body'); 
+        if (!tbody) return;
+        
+        tbody.innerHTML = "";
+        data.forEach(o => {
+            const fechaFormateada = new Date(o.created_at).toLocaleDateString();
             
-            if(!error && data) {
-                document.getElementById('config-whatsapp-num').value = data.valor;
-            }
-        }
+            tbody.innerHTML += `<tr class="border-b border-stone-900/40 hover:bg-stone-900/10 transition-colors">
+                <td class="p-3 font-mono text-amber-400 font-bold">#${o.id}</td>
+                <td class="p-3 text-stone-400">${fechaFormateada}</td>
+                <td class="p-3 text-white truncate max-w-xs">${o.productos}</td>
+                <td class="p-3 font-mono font-bold text-stone-200">$${parseFloat(o.total || 0).toFixed(2)}</td>
+                <td class="p-3 font-mono text-stone-500">${o.referencia || 'N/A'}</td>
+                // ... dentro del forEach de descargarHistorialDeOrdenes ...
+<td class="p-3 text-right">
+    <select 
+        onchange="actualizarEstadoOrden(${o.id}, this.value)" 
+        class="bg-stone-950 border border-stone-700 text-[10px] px-2 py-1 rounded-md font-bold uppercase cursor-pointer outline-none transition-colors 
+        ${o.estado === 'verificado' ? 'text-green-500 border-green-900/50' : 
+          o.estado === 'cancelado' ? 'text-red-500 border-red-900/50' : 
+          'text-amber-400 border-stone-700'}"
+    >
+        <option value="pendiente" ${o.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+        <option value="verificado" ${o.estado === 'verificado' ? 'selected' : ''}>Verificado</option>
+        <option value="cancelado" ${o.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+    </select>
+</td>
+            </tr>`;
+        });
+    } else if (error) {
+        console.error("Error al descargar órdenes:", error.message);
+    }
+}
+
+// B. Función para actualizar (Esta es la que hace el cambio en la BD)
+async function actualizarEstadoOrden(idOrden, nuevoEstado) {
+    const { error } = await supabaseClient
+        .from('ordenes_vip')
+        .update({ estado: nuevoEstado })
+        .eq('id', idOrden);
+
+    if (!error) {
+        await descargarHistorialDeOrdenes();
+    } else {
+        alert("Error al actualizar estado: " + error.message);
+    }
+}
+
+// C. Función para el WhatsApp (Esta ya la tenías bien)
+async function descargarAjusteWhatsApp() {
+    const { data, error } = await supabaseClient
+        .from('ajustes_sistema')
+        .select('valor')
+        .eq('id', 'whatsapp_notificaciones')
+        .single();
+    
+    if(!error && data) {
+        document.getElementById('config-whatsapp-num').value = data.valor;
+    }
+}
 
         async function guardarAjusteWhatsAppEnSupabase() {
             const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
@@ -691,6 +766,32 @@
 
             if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
         }
+// Cargar categorías reales desde Supabase
+async function descargarCategoriasDesdeSupabase() {
+    const { data, error } = await supabaseClient
+        .from('categorias')
+        .select('nombre')
+        .eq('instagram_dueno', filtroInstagram);
+
+    if (data) {
+        categoriasDB = data.map(c => c.nombre);
+        renderizarCategorias(); // Ahora renderiza lo que viene de la BD
+    }
+}
+
+// Guardar nueva categoría en Supabase
+async function guardarCategoriaEnSupabase(nombreCategoria) {
+    const { error } = await supabaseClient
+        .from('categorias')
+        .insert([{ nombre: nombreCategoria, instagram_dueno: filtroInstagram }]);
+
+    if (!error) {
+        await descargarCategoriasDesdeSupabase(); // Recarga todo al terminar
+    } else {
+        alert("Error al guardar: " + error.message);
+    }
+}
+
     </script>
 </body>
 </html>
