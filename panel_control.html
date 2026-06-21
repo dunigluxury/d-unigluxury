@@ -264,122 +264,45 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Lógica de seguridad integrada
-async function verificarAcceso() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (!session) {
-        window.location.href = "login.html"; 
-        return null;
-    }
-
-    // BUSCAR EL TENANT_ID DEL USUARIO
-    const { data: profile, error } = await supabaseClient
-        .from('profiles')
-        .select('tenant_id')
-        .eq('id', session.user.id)
-        .single();
-
-    if (error || !profile || !profile.tenant_id) {
-        console.error("Error al obtener tenant_id:", error);
-        alert("Acceso denegado: No tienes una tienda configurada.");
-        return null;
-    }
-
-    // SI TODO ESTÁ BIEN, GUARDAMOS EL TENANT_ID
-    currentTenantId = profile.tenant_id;
-    console.log("Tienda cargada con éxito:", currentTenantId);
-    
-    return session.user.email;
-}
-
-// VERIFICACIÓN DE SESIÓN Y CARGA DINÁMICA DE TENANT
-window.addEventListener('DOMContentLoaded', async () => { 
-    // 0. Obtener sesión
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    
-    if (session) {
-        // Ocultar modal si el usuario ya está logueado
-        const authModal = document.getElementById('auth-modal');
-        if (authModal) authModal.classList.add('hidden');
-        
-        console.log("Sesión activa para:", session.user.email);
-        
-        // 1. Obtener el tenant_id del usuario desde la tabla profiles
-        const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .select('tenant_id')
-            .eq('id', session.user.id)
-            .single();
-            
-        if (profile && profile.tenant_id) {
-            currentTenantId = profile.tenant_id;
-            console.log("Tenant ID cargado con éxito:", currentTenantId);
-            
-            // 2. Cargar datos específicos de este tenant en orden
-            try {
-                await descargarCategoriasDesdeSupabase(); 
-                await descargarAdicionales();
-                await descargarCatalogoDeSupabase(); 
-                await descargarCuentasPago();
-                
-                // Funciones de UI
-                alternarCamposPago(); 
-                renderizerInputsMatrizFotos(); 
-                lucide.createIcons();
-                
-                console.log("Carga de datos de tienda finalizada.");
-            } catch (err) {
-                console.error("Error al cargar los datos de la tienda:", err);
-                alert("Ocurrió un error al cargar la información de tu tienda.");
+        async function verificarAcceso() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                // Si no hay sesión, redirigir a login
+                window.location.href = "login.html"; 
+                return null;
             }
-        } else {
-            console.error("Usuario sin tenant asignado o error de perfil:", profileError);
-            alert("Tu cuenta no tiene una empresa asignada. Contacta al soporte.");
+            return session.user.email;
         }
-    } else {
-        console.warn("No hay sesión activa. Redirigiendo a login...");
-        // Opcional: window.location.href = "login.html";
+
+
+        let baseProductos = [];
+let categoriasDB = []; // Empezamos vacío, Supabase lo llenará
+let filtroInstagram = "luxury_store";
+let fotosSliderArray = Array(5).fill("");
+let listaCuentas = [];
+
+        // VERIFICACIÓN DE SESIÓN AL CARGAR
+window.addEventListener('DOMContentLoaded', async () => { 
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        document.getElementById('auth-modal').classList.add('hidden');
     }
+    
+    // Carga de datos inicial
+    await descargarCategoriasDesdeSupabase(); 
+    await descargarAdicionales(); // Integrado
+    descargarCatalogoDeSupabase(); 
+    alternarCamposPago(); 
+    descargarCuentasPago(); 
+    renderizerInputsMatrizFotos(); 
+    lucide.createIcons(); 
 });
 
-// Ejemplo de cómo deben actualizarse tus funciones de carga (Aplica este patrón a todas)
-async function descargarCategoriasDesdeSupabase() {
-    if (!currentTenantId) return;
-
-    const { data, error } = await supabaseClient
-        .from('categorias')
-        .select('nombre')
-        .eq('tenant_id', currentTenantId); // Filtro Multi-tenant
-
-    if (data) {
-        categoriasDB = data.map(c => c.nombre);
-        renderizarCategorias(); 
-    }
-}
-
-// Ejemplo de cómo deben actualizarse tus funciones de inserción
-async function guardarCategoriaEnSupabase(nombreCategoria) {
-    if (!currentTenantId) return;
-
-    const { error } = await supabaseClient
-        .from('categorias')
-        .insert([{ 
-            nombre: nombreCategoria, 
-            tenant_id: currentTenantId // Guardamos el ID del tenant
-        }]);
-
-    if (!error) {
-        await descargarCategoriasDesdeSupabase();
-    } else {
-        alert("Error al guardar: " + error.message);
-    }
-}
-
+// AUTENTICACIÓN
 async function ejecutarLogin() {
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-pass').value;
 
-    // 1. Intentar hacer login
     const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password,
@@ -387,30 +310,41 @@ async function ejecutarLogin() {
 
     if (error) {
         alert("Acceso denegado: " + error.message);
+    } else {
+        document.getElementById('auth-modal').classList.add('hidden');
+    }
+}
+
+async function ejecutarLogout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+}
+
+// GESTIÓN DE ADICIONALES
+async function guardarAdicional() {
+    const nombre = document.getElementById('add-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('add-precio').value);
+
+    if (!nombre || isNaN(precio)) {
+        alert("Por favor, ingresa un nombre y un precio válido.");
         return;
     }
 
-    // 2. Si el login es exitoso, buscamos su tenant_id
-    const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('tenant_id')
-        .eq('id', data.user.id)
-        .single();
+    const { error } = await supabaseClient
+        .from('adicionales')
+        .insert([{ 
+            nombre: nombre, 
+            precio: precio, 
+            instagram_dueno: filtroInstagram 
+        }]);
 
-    if (profile) {
-        currentTenantId = profile.tenant_id;
-        document.getElementById('auth-modal').classList.add('hidden');
-        
-        // 3. Cargamos los datos del tenant apenas entra
-        await descargarCategoriasDesdeSupabase();
-        descargarCatalogoDeSupabase();
-        await descargarAdicionales();
-        descargarCuentasPago();
-        
-        console.log("Tenant cargado:", currentTenantId);
+    if (error) {
+        alert("Error al guardar adicional: " + error.message);
     } else {
-        alert("Tu usuario no tiene una empresa (tenant) asignada. Contacta a soporte.");
-        await supabaseClient.auth.signOut(); // Por seguridad, si no tiene perfil, lo sacamos
+        alert("Adicional registrado con éxito.");
+        document.getElementById('add-nombre').value = "";
+        document.getElementById('add-precio').value = "";
+        descargarAdicionales(); // Recarga la tabla
     }
 }
 
@@ -418,7 +352,7 @@ async function descargarAdicionales() {
     const { data, error } = await supabaseClient
         .from('adicionales')
         .select('*')
-        .eq('tenant_id', currentTenantId);
+        .eq('instagram_dueno', filtroInstagram);
 
     if (!error && data) {
         const lista = document.getElementById('lista-adicionales');
@@ -462,7 +396,7 @@ async function eliminarAdicional(id) {
         }
 
         async function descargarCatalogoDeSupabase() {
-            const { data, error } = await supabaseClient.from('productos').select('*').eq('tenant_id', currentTenantId)
+            const { data, error } = await supabaseClient.from('productos').select('*').eq('instagram_dueno', filtroInstagram);
             if (!error && data) { 
                 baseProductos = data; 
                 renderizarTablaProductosBackend(); 
@@ -472,7 +406,7 @@ async function eliminarAdicional(id) {
 
         function cambiarDuenoDeCanal() {
             const val = document.getElementById('owner-instagram-input').value.trim().toLowerCase();
-            if(val) { currentTenantId = val; descargarCatalogoDeSupabase(); }
+            if(val) { filtroInstagram = val; descargarCatalogoDeSupabase(); }
         }
 
         function renderizarTablaProductosBackend() {
@@ -505,15 +439,10 @@ async function eliminarAdicional(id) {
             const sliderValidos = fotosSliderArray.filter(f => f !== "");
 
             const payload = {
-    titulo: t, 
-    categoria: c || "General", 
-    descripcion: d, 
-    precio: p, 
-    stock: s,
-    tenant_id: currentTenantId, // <-- CORRECCIÓN: Usamos la nueva clave de tu tabla
-    imagen_url: sliderValidos[0] || "",
-    imagenes_slider: JSON.stringify(sliderValidos)
-};
+                titulo: t, categoria: c || "General", descripcion: d, precio: p, stock: s,
+                instagram_dueno: filtroInstagram, imagen_url: sliderValidos[0] || "",
+                imagenes_slider: JSON.stringify(sliderValidos)
+            };
 
             let error;
             if (idEdicion) { 
@@ -633,14 +562,10 @@ async function agregarCategoria() {
     const inp = document.getElementById('cat-nombre'); 
     const nom = inp.value.trim(); 
     
-    // Aseguramos que currentTenantId esté presente antes de intentar insertar
-    if(nom && !categoriasDB.includes(nom) && currentTenantId) { 
+    if(nom && !categoriasDB.includes(nom)) { 
         const { error } = await supabaseClient
             .from('categorias')
-            .insert([{ 
-                nombre: nom, 
-                tenant_id: currentTenantId // <-- CORRECCIÓN: Usamos la clave correcta
-            }]);
+            .insert([{ nombre: nom, instagram_dueno: filtroInstagram }]);
             
         if (!error) {
             inp.value = ""; 
@@ -648,17 +573,16 @@ async function agregarCategoria() {
         } else {
             alert("Error al guardar: " + error.message);
         }
-    } else if (!currentTenantId) {
-        alert("Error de sesión: No se pudo identificar la empresa.");
     }
 }
-// 3. Función corregida para eliminar
+
+// 3. Nueva función para eliminar
 async function eliminarCategoria(nombre) {
     const { error } = await supabaseClient
         .from('categorias')
         .delete()
         .eq('nombre', nombre)
-        .eq('tenant_id', currentTenantId); // <--- CAMBIO AQUÍ: de instagram_dueno a tenant_id
+        .eq('instagram_dueno', filtroInstagram);
 
     if (!error) {
         await descargarCategoriasDesdeSupabase(); // Recarga y renderiza
@@ -839,11 +763,9 @@ async function eliminarCategoria(nombre) {
 
         // A. CORRECCIÓN: Función completa y bien cerrada
 async function descargarHistorialDeOrdenes() {
-    // FILTRADO POR TENANT (Para que cada tienda vea solo sus órdenes)
     const { data, error } = await supabaseClient
         .from('ordenes_vip')
         .select('*')
-        .eq('tenant_id', currentTenantId) 
         .order('created_at', { ascending: false });
 
     if (!error && data) {
@@ -860,19 +782,20 @@ async function descargarHistorialDeOrdenes() {
                 <td class="p-3 text-white truncate max-w-xs">${o.productos}</td>
                 <td class="p-3 font-mono font-bold text-stone-200">$${parseFloat(o.total || 0).toFixed(2)}</td>
                 <td class="p-3 font-mono text-stone-500">${o.referencia || 'N/A'}</td>
-                <td class="p-3 text-right">
-                    <select 
-                        onchange="actualizarEstadoOrden(${o.id}, this.value)" 
-                        class="bg-stone-950 border border-stone-700 text-[10px] px-2 py-1 rounded-md font-bold uppercase cursor-pointer outline-none transition-colors 
-                        ${o.estado === 'verificado' ? 'text-green-500 border-green-900/50' : 
-                          o.estado === 'cancelado' ? 'text-red-500 border-red-900/50' : 
-                          'text-amber-400 border-stone-700'}"
-                    >
-                        <option value="pendiente" ${o.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                        <option value="verificado" ${o.estado === 'verificado' ? 'selected' : ''}>Verificado</option>
-                        <option value="cancelado" ${o.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
-                    </select>
-                </td>
+                // ... dentro del forEach de descargarHistorialDeOrdenes ...
+<td class="p-3 text-right">
+    <select 
+        onchange="actualizarEstadoOrden(${o.id}, this.value)" 
+        class="bg-stone-950 border border-stone-700 text-[10px] px-2 py-1 rounded-md font-bold uppercase cursor-pointer outline-none transition-colors 
+        ${o.estado === 'verificado' ? 'text-green-500 border-green-900/50' : 
+          o.estado === 'cancelado' ? 'text-red-500 border-red-900/50' : 
+          'text-amber-400 border-stone-700'}"
+    >
+        <option value="pendiente" ${o.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+        <option value="verificado" ${o.estado === 'verificado' ? 'selected' : ''}>Verificado</option>
+        <option value="cancelado" ${o.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+    </select>
+</td>
             </tr>`;
         });
     } else if (error) {
@@ -880,12 +803,12 @@ async function descargarHistorialDeOrdenes() {
     }
 }
 
+// B. Función para actualizar (Esta es la que hace el cambio en la BD)
 async function actualizarEstadoOrden(idOrden, nuevoEstado) {
     const { error } = await supabaseClient
         .from('ordenes_vip')
         .update({ estado: nuevoEstado })
-        .eq('id', idOrden)
-        .eq('tenant_id', currentTenantId); // <--- ESTO ES LO QUE FALTA
+        .eq('id', idOrden);
 
     if (!error) {
         await descargarHistorialDeOrdenes();
@@ -908,54 +831,42 @@ async function descargarAjusteWhatsApp() {
 }
 
         async function guardarAjusteWhatsAppEnSupabase() {
-    const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
-    if(!num || num.length < 10) { alert("Ingrese un número válido."); return; }
+            const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
+            if(!num || num.length < 10) { alert("Ingrese un número válido con código de país."); return; }
 
-    const { error } = await supabaseClient
-        .from('ajustes_sistema')
-        .upsert({ 
-            id: 'whatsapp_notificaciones', 
-            valor: num, 
-            tenant_id: currentTenantId, // VINCULADO AL TENANT
-            updated_at: new Date().toISOString() 
-        });
+            const { error } = await supabaseClient
+                .from('ajustes_sistema')
+                .upsert({ id: 'whatsapp_notificaciones', valor: num, updated_at: new Date().toISOString() });
 
-    if(!error) { alert("¡Guardado con éxito!"); } else { alert("Error: " + error.message); }
-}
+            if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
+        }
 // Cargar categorías reales desde Supabase
 async function descargarCategoriasDesdeSupabase() {
-    if (!currentTenantId) return;
-
     const { data, error } = await supabaseClient
         .from('categorias')
         .select('nombre')
-        .eq('tenant_id', currentTenantId);
+        .eq('instagram_dueno', filtroInstagram);
 
     if (data) {
         categoriasDB = data.map(c => c.nombre);
-        renderizarCategorias(); 
+        renderizarCategorias(); // Ahora renderiza lo que viene de la BD
     }
 }
 
 // Guardar nueva categoría en Supabase
 async function guardarCategoriaEnSupabase(nombreCategoria) {
-    if (!currentTenantId) return;
-
     const { error } = await supabaseClient
         .from('categorias')
-        .insert([{ 
-            nombre: nombreCategoria, 
-            tenant_id: currentTenantId 
-        }]);
+        .insert([{ nombre: nombreCategoria, instagram_dueno: filtroInstagram }]);
 
     if (!error) {
-        await descargarCategoriasDesdeSupabase();
+        await descargarCategoriasDesdeSupabase(); // Recarga todo al terminar
     } else {
         alert("Error al guardar: " + error.message);
     }
 }
 
-// CORRECCIÓN: Elimina los puntos suspensivos que causan el error
+// Función para guardar adicionales
 async function guardarAdicional() {
     const nombre = document.getElementById('add-nombre').value.trim();
     const precio = parseFloat(document.getElementById('add-precio').value);
@@ -970,7 +881,7 @@ async function guardarAdicional() {
         .insert([{ 
             nombre: nombre, 
             precio: precio, 
-            tenant_id: currentTenantId 
+            instagram_dueno: filtroInstagram 
         }]);
 
     if (error) {
@@ -979,16 +890,14 @@ async function guardarAdicional() {
         alert("Adicional registrado con éxito.");
         document.getElementById('add-nombre').value = "";
         document.getElementById('add-precio').value = "";
-        descargarAdicionales();
     }
 }
-
 // Descargar y mostrar adicionales
 async function descargarAdicionales() {
     const { data, error } = await supabaseClient
         .from('adicionales')
         .select('*')
-        .eq('tenant_id', currentTenantId); // <--- CORRECCIÓN AQUÍ
+        .eq('instagram_dueno', filtroInstagram);
 
     if (!error && data) {
         const lista = document.getElementById('lista-adicionales');
@@ -1003,13 +912,9 @@ async function descargarAdicionales() {
     }
 }
 
+// Eliminar adicional
 async function eliminarAdicional(id) {
-    const { error } = await supabaseClient
-        .from('adicionales')
-        .delete()
-        .eq('id', id)
-        .eq('tenant_id', currentTenantId); // <--- CORRECCIÓN AQUÍ
-
+    const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
     if (!error) {
         descargarAdicionales();
     } else {
