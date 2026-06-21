@@ -81,6 +81,23 @@
                 </div>
                 <div id="lista-categorias" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
             </div>
+<!-- Formulario de Adicionales -->
+<div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
+    <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
+        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+        <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Adicionales</h3>
+    </div>
+    <div class="space-y-2">
+        <input type="text" id="add-nombre" placeholder="Nombre (Ej: Extra Salsa)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+        <input type="number" id="add-precio" placeholder="Precio ($)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+        <button onclick="guardarAdicional()" class="w-full bg-stone-900 border border-stone-800 text-amber-400 font-futurista font-bold p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-800">Inyectar Adicional</button>
+    </div>
+
+</div>
+<div class="border-t border-stone-900 pt-4 mt-4">
+    <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Adicionales Registrados</h4>
+    <div id="lista-adicionales" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+</div>
 
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -242,67 +259,190 @@
     <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
-        const SUPABASE_URL = "https://dtjwvllldxpblhisblhq.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0and2bGxsZHhwYmxoaXNibGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU4OTAsImV4cCI6MjA5NTY1MTg5MH0.SqzQXSmh1nAnlKpD39khgSQSokFeY_1Hp37PWX2RVsw"; 
+        const SUPABASE_URL = "https://yogxxziysjtxbexljxqb.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvZ3h4eml5c2p0eGJleGxqeHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjA3NDYsImV4cCI6MjA5NzEzNjc0Nn0.ULjhf1bkvGr7O19QPIwjzHINDy1FKUoWVbQss1Goeoc"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Lógica de seguridad integrada
-        async function verificarAcceso() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                // Si no hay sesión, redirigir a login
-                window.location.href = "login.html"; 
-                return null;
-            }
-            return session.user.email;
-        }
-
-
-        let baseProductos = [];
-let categoriasDB = []; // Empezamos vacío, Supabase lo llenará
-let filtroInstagram = "luxury_store";
-let fotosSliderArray = Array(5).fill("");
-let listaCuentas = [];
-
-        // VERIFICACIÓN DE SESIÓN AL CARGAR
-        window.addEventListener('DOMContentLoaded', async () => { 
+async function verificarAcceso() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        document.getElementById('auth-modal').classList.add('hidden');
+    
+    if (!session) {
+        window.location.href = "login.html"; 
+        return null;
     }
+
+    // BUSCAR EL TENANT_ID DEL USUARIO
+    const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', session.user.id)
+        .single();
+
+    if (error || !profile || !profile.tenant_id) {
+        console.error("Error al obtener tenant_id:", error);
+        alert("Acceso denegado: No tienes una tienda configurada.");
+        return null;
+    }
+
+    // SI TODO ESTÁ BIEN, GUARDAMOS EL TENANT_ID
+    currentTenantId = profile.tenant_id;
+    console.log("Tienda cargada con éxito:", currentTenantId);
     
-    // Nueva función que crearemos abajo
-    await descargarCategoriasDesdeSupabase(); 
+    return session.user.email;
+}
+
+// VERIFICACIÓN DE SESIÓN Y CARGA DINÁMICA DE TENANT
+window.addEventListener('DOMContentLoaded', async () => { 
+    // 0. Obtener sesión
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
-    descargarCatalogoDeSupabase(); 
-    alternarCamposPago(); 
-    descargarCuentasPago(); 
-    // renderizarCategorias(); // Ya no la llamas aquí, la llamaremos al descargar los datos
-    renderizerInputsMatrizFotos(); 
-    lucide.createIcons(); 
+    if (session) {
+        // Ocultar modal si el usuario ya está logueado
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) authModal.classList.add('hidden');
+        
+        console.log("Sesión activa para:", session.user.email);
+        
+        // 1. Obtener el tenant_id del usuario desde la tabla profiles
+        const { data: profile, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('tenant_id')
+            .eq('id', session.user.id)
+            .single();
+            
+        if (profile && profile.tenant_id) {
+            currentTenantId = profile.tenant_id;
+            console.log("Tenant ID cargado con éxito:", currentTenantId);
+            
+            // 2. Cargar datos específicos de este tenant en orden
+            try {
+                await descargarCategoriasDesdeSupabase(); 
+                await descargarAdicionales();
+                await descargarCatalogoDeSupabase(); 
+                await descargarCuentasPago();
+                
+                // Funciones de UI
+                alternarCamposPago(); 
+                renderizerInputsMatrizFotos(); 
+                lucide.createIcons();
+                
+                console.log("Carga de datos de tienda finalizada.");
+            } catch (err) {
+                console.error("Error al cargar los datos de la tienda:", err);
+                alert("Ocurrió un error al cargar la información de tu tienda.");
+            }
+        } else {
+            console.error("Usuario sin tenant asignado o error de perfil:", profileError);
+            alert("Tu cuenta no tiene una empresa asignada. Contacta al soporte.");
+        }
+    } else {
+        console.warn("No hay sesión activa. Redirigiendo a login...");
+        // Opcional: window.location.href = "login.html";
+    }
 });
 
-        // AUTENTICACIÓN
-        async function ejecutarLogin() {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-pass').value;
+// Ejemplo de cómo deben actualizarse tus funciones de carga (Aplica este patrón a todas)
+async function descargarCategoriasDesdeSupabase() {
+    if (!currentTenantId) return;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
+    const { data, error } = await supabaseClient
+        .from('categorias')
+        .select('nombre')
+        .eq('tenant_id', currentTenantId); // Filtro Multi-tenant
+
+    if (data) {
+        categoriasDB = data.map(c => c.nombre);
+        renderizarCategorias(); 
+    }
+}
+
+// Ejemplo de cómo deben actualizarse tus funciones de inserción
+async function guardarCategoriaEnSupabase(nombreCategoria) {
+    if (!currentTenantId) return;
+
+    const { error } = await supabaseClient
+        .from('categorias')
+        .insert([{ 
+            nombre: nombreCategoria, 
+            tenant_id: currentTenantId // Guardamos el ID del tenant
+        }]);
+
+    if (!error) {
+        await descargarCategoriasDesdeSupabase();
+    } else {
+        alert("Error al guardar: " + error.message);
+    }
+}
+
+async function ejecutarLogin() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-pass').value;
+
+    // 1. Intentar hacer login
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Acceso denegado: " + error.message);
+        return;
+    }
+
+    // 2. Si el login es exitoso, buscamos su tenant_id
+    const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', data.user.id)
+        .single();
+
+    if (profile) {
+        currentTenantId = profile.tenant_id;
+        document.getElementById('auth-modal').classList.add('hidden');
+        
+        // 3. Cargamos los datos del tenant apenas entra
+        await descargarCategoriasDesdeSupabase();
+        descargarCatalogoDeSupabase();
+        await descargarAdicionales();
+        descargarCuentasPago();
+        
+        console.log("Tenant cargado:", currentTenantId);
+    } else {
+        alert("Tu usuario no tiene una empresa (tenant) asignada. Contacta a soporte.");
+        await supabaseClient.auth.signOut(); // Por seguridad, si no tiene perfil, lo sacamos
+    }
+}
+
+async function descargarAdicionales() {
+    const { data, error } = await supabaseClient
+        .from('adicionales')
+        .select('*')
+        .eq('tenant_id', currentTenantId);
+
+    if (!error && data) {
+        const lista = document.getElementById('lista-adicionales');
+        if (lista) {
+            lista.innerHTML = "";
+            data.forEach(a => {
+                lista.innerHTML += `
+                    <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                        <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
+                        <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
+                    </div>`;
             });
-
-            if (error) {
-                alert("Acceso denegado: " + error.message);
-            } else {
-                document.getElementById('auth-modal').classList.add('hidden');
-            }
         }
+    }
+}
 
-        async function ejecutarLogout() {
-            await supabaseClient.auth.signOut();
-            location.reload();
-        }
+async function eliminarAdicional(id) {
+    const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
+    if (!error) {
+        descargarAdicionales();
+    } else {
+        alert("Error al eliminar: " + error.message);
+    }
+}
 
         // CONTROL NAV DEL PANEL
         function cambiarSeccionPanel(target) {
@@ -322,7 +462,7 @@ let listaCuentas = [];
         }
 
         async function descargarCatalogoDeSupabase() {
-            const { data, error } = await supabaseClient.from('productos').select('*').eq('instagram_dueno', filtroInstagram);
+            const { data, error } = await supabaseClient.from('productos').select('*').eq('tenant_id', currentTenantId)
             if (!error && data) { 
                 baseProductos = data; 
                 renderizarTablaProductosBackend(); 
@@ -332,7 +472,7 @@ let listaCuentas = [];
 
         function cambiarDuenoDeCanal() {
             const val = document.getElementById('owner-instagram-input').value.trim().toLowerCase();
-            if(val) { filtroInstagram = val; descargarCatalogoDeSupabase(); }
+            if(val) { currentTenantId = val; descargarCatalogoDeSupabase(); }
         }
 
         function renderizarTablaProductosBackend() {
@@ -365,10 +505,15 @@ let listaCuentas = [];
             const sliderValidos = fotosSliderArray.filter(f => f !== "");
 
             const payload = {
-                titulo: t, categoria: c || "General", descripcion: d, precio: p, stock: s,
-                instagram_dueno: filtroInstagram, imagen_url: sliderValidos[0] || "",
-                imagenes_slider: JSON.stringify(sliderValidos)
-            };
+    titulo: t, 
+    categoria: c || "General", 
+    descripcion: d, 
+    precio: p, 
+    stock: s,
+    tenant_id: currentTenantId, // <-- CORRECCIÓN: Usamos la nueva clave de tu tabla
+    imagen_url: sliderValidos[0] || "",
+    imagenes_slider: JSON.stringify(sliderValidos)
+};
 
             let error;
             if (idEdicion) { 
@@ -488,10 +633,14 @@ async function agregarCategoria() {
     const inp = document.getElementById('cat-nombre'); 
     const nom = inp.value.trim(); 
     
-    if(nom && !categoriasDB.includes(nom)) { 
+    // Aseguramos que currentTenantId esté presente antes de intentar insertar
+    if(nom && !categoriasDB.includes(nom) && currentTenantId) { 
         const { error } = await supabaseClient
             .from('categorias')
-            .insert([{ nombre: nom, instagram_dueno: filtroInstagram }]);
+            .insert([{ 
+                nombre: nom, 
+                tenant_id: currentTenantId // <-- CORRECCIÓN: Usamos la clave correcta
+            }]);
             
         if (!error) {
             inp.value = ""; 
@@ -499,16 +648,17 @@ async function agregarCategoria() {
         } else {
             alert("Error al guardar: " + error.message);
         }
+    } else if (!currentTenantId) {
+        alert("Error de sesión: No se pudo identificar la empresa.");
     }
 }
-
-// 3. Nueva función para eliminar
+// 3. Función corregida para eliminar
 async function eliminarCategoria(nombre) {
     const { error } = await supabaseClient
         .from('categorias')
         .delete()
         .eq('nombre', nombre)
-        .eq('instagram_dueno', filtroInstagram);
+        .eq('tenant_id', currentTenantId); // <--- CAMBIO AQUÍ: de instagram_dueno a tenant_id
 
     if (!error) {
         await descargarCategoriasDesdeSupabase(); // Recarga y renderiza
@@ -757,38 +907,112 @@ async function descargarAjusteWhatsApp() {
 }
 
         async function guardarAjusteWhatsAppEnSupabase() {
-            const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
-            if(!num || num.length < 10) { alert("Ingrese un número válido con código de país."); return; }
+    const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
+    if(!num || num.length < 10) { alert("Ingrese un número válido."); return; }
 
-            const { error } = await supabaseClient
-                .from('ajustes_sistema')
-                .upsert({ id: 'whatsapp_notificaciones', valor: num, updated_at: new Date().toISOString() });
+    const { error } = await supabaseClient
+        .from('ajustes_sistema')
+        .upsert({ 
+            id: 'whatsapp_notificaciones', 
+            valor: num, 
+            tenant_id: currentTenantId, // VINCULADO AL TENANT
+            updated_at: new Date().toISOString() 
+        });
 
-            if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
-        }
+    if(!error) { alert("¡Guardado con éxito!"); } else { alert("Error: " + error.message); }
+}
 // Cargar categorías reales desde Supabase
 async function descargarCategoriasDesdeSupabase() {
+    if (!currentTenantId) return;
+
     const { data, error } = await supabaseClient
         .from('categorias')
         .select('nombre')
-        .eq('instagram_dueno', filtroInstagram);
+        .eq('tenant_id', currentTenantId);
 
     if (data) {
         categoriasDB = data.map(c => c.nombre);
-        renderizarCategorias(); // Ahora renderiza lo que viene de la BD
+        renderizarCategorias(); 
     }
 }
 
 // Guardar nueva categoría en Supabase
 async function guardarCategoriaEnSupabase(nombreCategoria) {
+    if (!currentTenantId) return;
+
     const { error } = await supabaseClient
         .from('categorias')
-        .insert([{ nombre: nombreCategoria, instagram_dueno: filtroInstagram }]);
+        .insert([{ 
+            nombre: nombreCategoria, 
+            tenant_id: currentTenantId 
+        }]);
 
     if (!error) {
-        await descargarCategoriasDesdeSupabase(); // Recarga todo al terminar
+        await descargarCategoriasDesdeSupabase();
     } else {
         alert("Error al guardar: " + error.message);
+    }
+}
+
+// CORRECCIÓN: Elimina los puntos suspensivos que causan el error
+async function guardarAdicional() {
+    const nombre = document.getElementById('add-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('add-precio').value);
+
+    if (!nombre || isNaN(precio)) {
+        alert("Por favor, ingresa un nombre y un precio válido.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from('adicionales')
+        .insert([{ 
+            nombre: nombre, 
+            precio: precio, 
+            tenant_id: currentTenantId 
+        }]);
+
+    if (error) {
+        alert("Error al guardar adicional: " + error.message);
+    } else {
+        alert("Adicional registrado con éxito.");
+        document.getElementById('add-nombre').value = "";
+        document.getElementById('add-precio').value = "";
+        descargarAdicionales();
+    }
+}
+
+// Descargar y mostrar adicionales
+async function descargarAdicionales() {
+    const { data, error } = await supabaseClient
+        .from('adicionales')
+        .select('*')
+        .eq('tenant_id', currentTenantId); // <--- CORRECCIÓN AQUÍ
+
+    if (!error && data) {
+        const lista = document.getElementById('lista-adicionales');
+        lista.innerHTML = "";
+        data.forEach(a => {
+            lista.innerHTML += `
+                <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                    <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
+                    <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
+                </div>`;
+        });
+    }
+}
+
+async function eliminarAdicional(id) {
+    const { error } = await supabaseClient
+        .from('adicionales')
+        .delete()
+        .eq('id', id)
+        .eq('tenant_id', currentTenantId); // <--- CORRECCIÓN AQUÍ
+
+    if (!error) {
+        descargarAdicionales();
+    } else {
+        alert("Error al eliminar: " + error.message);
     }
 }
 
