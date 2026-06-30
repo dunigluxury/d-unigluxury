@@ -167,9 +167,7 @@
     <input type="text" 
            id="carrito-input-referencia" 
            inputmode="numeric" 
-           pattern="[0-9]{12}" 
-           maxlength="12" 
-           placeholder="Ingresa los 12 dígitos" 
+           placeholder="Ingresa la referencia o número" 
            class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-400/40 font-mono tracking-wider">
 </div>
 
@@ -434,7 +432,7 @@
         async function finalizarOrdenCompraVIP() {
     if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
     
-   const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
+    const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
     const indexSelector = document.getElementById('carrito-selector-pago').value;
 
     if(indexSelector === "" || !cuentasDB[indexSelector]) { 
@@ -442,11 +440,26 @@
         return; 
     }
 
-    // --- AQUÍ ESTÁ LA VALIDACIÓN DE LOS 12 NÚMEROS ---
-    if (!/^\d{12}$/.test(transaccionRef)) { 
-        alert("Por favor, inserte un código de referencia válido de exactamente 12 números."); 
-        return; 
+    // Identificar el tipo de pago (puedes ajustar el nombre según tu lógica)
+    const metodoElegido = cuentasDB[indexSelector].plataforma.toLowerCase(); 
+
+    // Validación dinámica
+    if (metodoElegido.includes('nequi')) {
+        // Validación para Colombia: números de 10 dígitos
+        if (!/^\d{10}$/.test(transaccionRef)) {
+            alert("Para Nequi, por favor inserte un número de teléfono válido de 10 dígitos.");
+            return;
+        }
+    } else {
+        // Validación para Pago Móvil (u otros): 12 dígitos
+        if (!/^\d{12}$/.test(transaccionRef)) {
+            alert("Para este método de pago, la referencia debe tener exactamente 12 números.");
+            return;
+        }
     }
+
+    // ... continúa con tu código de inserción a Supabase
+}
 
     // 1. Obtener número de WhatsApp desde Supabase
     let numeroWhatsApp = "584120000000"; // Número por defecto
