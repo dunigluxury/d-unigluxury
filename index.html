@@ -189,8 +189,8 @@
     <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
-        const SUPABASE_URL = "https://dtjwvllldxpblhisblhq.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0and2bGxsZHhwYmxoaXNibGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzU4OTAsImV4cCI6MjA5NTY1MTg5MH0.SqzQXSmh1nAnlKpD39khgSQSokFeY_1Hp37PWX2RVsw"; 
+        const SUPABASE_URL = "https://yoibmpulvokhvvhkryzv.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvaWJtcHVsdm9raHZ2aGtyeXp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MDgwODQsImV4cCI6MjA5ODA4NDA4NH0.cNq3eZzXyB7kqdsyqf3ctKsYO5x1ABo20hgFeJdyzBE"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let baseProductos = [], cuentasDB = [], carritoVIP = [];
@@ -432,6 +432,21 @@
         }
 
         async function finalizarOrdenCompraVIP() {
+    if (carritoVIP.length === 0) { alert("Tu bolsa de compras está vacía."); return; }
+    
+    const transaccionRef = document.getElementById('carrito-input-referencia').value.trim();
+    const indexSelector = document.getElementById('carrito-selector-pago').value;
+
+    if(indexSelector === "" || !cuentasDB[indexSelector]) { 
+        alert("Por favor seleccione un método de pago."); 
+        return; 
+    }
+
+    // --- AQUÍ ESTÁ LA VALIDACIÓN DE LOS 12 NÚMEROS ---
+    if (!/^\d{12}$/.test(transaccionRef)) { 
+        alert("Por favor, inserte un código de referencia válido de exactamente 12 números."); 
+        return; 
+    }
 
     // 1. Obtener número de WhatsApp desde Supabase
     let numeroWhatsApp = "584120000000"; // Número por defecto
