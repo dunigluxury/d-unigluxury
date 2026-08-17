@@ -112,7 +112,6 @@
                         <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Banco o Plataforma</label>
                         <select id="pago-plataforma" onchange="alternarCamposPago()" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-500/30">
                             <option value="pago_movil">Pago Móvil</option>
-                            
                         </select>
                     </div>
 
@@ -653,6 +652,13 @@ async function eliminarCategoria(nombre) {
                     let infoRender = "";
                     if (c.plataforma === "pago_movil") {
                         infoRender = `<span class="text-stone-300 font-mono">${c.banco || ''} | CI: ${c.ci || ''} | Tlf: ${c.telefono || ''}</span>`;
+                    } else if (c.plataforma === "zelle") {
+                        infoRender = `<span class="text-stone-300 font-mono">${c.email || ''} | ${c.titular || ''}</span>`;
+                    } else if (c.plataforma === "nequi") {
+                        infoRender = `<span class="text-stone-300 font-mono">Nequi: ${c.telefono || ''} | ${c.titular || ''}</span>`;
+                    } else {
+                        infoRender = `<span class="text-stone-300">${c.detalles || 'Pago en efectivo contra entrega'}</span>`;
+                    }
 
                     const nombrePlataforma = c.plataforma.replace('_', ' ').toUpperCase();
 
