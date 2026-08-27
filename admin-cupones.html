@@ -21,7 +21,6 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg p-4 sm:p-8">
 
-    <!-- ENCABEZADO -->
     <header class="max-w-4xl mx-auto w-full flex items-center justify-between border-b border-stone-900 pb-6 mb-8">
         <div class="flex items-center space-x-3">
             <div class="border border-amber-500/30 p-2.5 rounded-xl bg-stone-950/80 glow-gold text-amber-400">
@@ -37,12 +36,12 @@
         </a>
     </header>
 
-    <!-- FORMULARIO DE GESTIÓN -->
     <main class="max-w-4xl mx-auto w-full flex-grow space-y-8">
         <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-stone-800 glow-gold space-y-6">
             <div>
                 <h2 class="text-lg font-black font-futurista text-white tracking-wide">Registrar / Actualizar Cupón</h2>
-                <p class="text-xs text-stone-400 font-mono mt-1">Completa los campos para configurar o rellenar una casilla de la suerte.</p>
+                <p class="text-xs text-stone-400 font-mono mt-1">Configura o rellenar una casilla de la suerte.</p>
+                <p id="status-conexion" class="text-red-400 text-[10px] font-mono mt-2 font-bold"></p>
             </div>
 
             <form id="form-cupone-admin" onsubmit="guardarCupon(event)" class="space-y-4">
@@ -85,64 +84,76 @@
                 </div>
 
                 <button type="submit" id="btn-guardar" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg hover:scale-[1.01] transition-all">
-                    Guardar / Actualizar Cupón en Casilla
+                    Guardar / Actualizar Cupón
                 </button>
             </form>
         </div>
 
-        <!-- LISTADO RÁPIDO DE CUPONES EXISTENTES -->
         <div class="space-y-4">
-            <h3 class="text-sm font-futurista font-bold uppercase tracking-wider text-white">Casillas Registradas en Base de Datos</h3>
+            <h3 class="text-sm font-futurista font-bold uppercase tracking-wider text-white">Casillas Registradas</h3>
             <div id="lista-admin-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <!-- Se cargan dinámicamente -->
+                <p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">Cargando... (Si no carga, revisa tus credenciales en el código)</p>
             </div>
         </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="max-w-4xl mx-auto w-full border-t border-stone-900/80 mt-16 pt-6 text-center text-xs text-stone-500 font-mono tracking-widest">
         <p>© 2026 D'UNIG LUXURY ECOSISTEMA. GESTIÓN MÓVIL.</p>
     </footer>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE (Asegúrate de colocar tus credenciales reales)
-        const SUPABASE_URL = 'https://vcymfspywjabnbddbruh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA';
+        // -- CONFIGURACIÓN CRÍTICA: COLOCA TUS DATOS REALES AQUÍ --
+        const SUPABASE_URL = 'https://TU-URL-REAL.supabase.co'; // <--- COPIAR DE SUPABASE API
+        const SUPABASE_KEY = 'TU-ANON-KEY-REAL';       // <--- COPIAR DE SUPABASE API
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Verificar si las llaves son dummy
+            if (SUPABASE_URL.includes('TU-URL-REAL')) {
+                document.getElementById('status-conexion').innerText = "ERROR CRÍTICO: No has configurado la URL de Supabase en el código de admin-cupones.html. El fetch fallará.";
+                return;
+            }
+            
             cargarCuponesAdmin();
             lucide.createIcons();
         });
 
         async function cargarCuponesAdmin() {
-            const { data, error } = await supabaseClient
-                .from('cupones')
-                .select('*')
-                .order('numero_casilla', { ascending: true });
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cupones')
+                    .select('*')
+                    .order('numero_casilla', { ascending: true });
 
-            const contenedor = document.getElementById('lista-admin-grid');
-            if (error || !data) {
-                contenedor.innerHTML = `<p class="text-xs text-red-400 font-mono">Error al cargar registros.</p>`;
-                return;
-            }
+                const contenedor = document.getElementById('lista-admin-grid');
+                if (error) throw error;
 
-            contenedor.innerHTML = data.map(c => `
-                <div class="glass-panel p-4 rounded-2xl border border-stone-800 flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        ${c.imagen_url ? `<img src="${c.imagen_url}" class="w-12 h-12 object-cover rounded-xl border border-stone-700">` : `<div class="w-12 h-12 rounded-xl bg-stone-950 border border-stone-800 flex items-center justify-center text-amber-400 font-futurista font-bold text-xs">#${c.numero_casilla}</div>`}
-                        <div>
-                            <span class="text-[9px] font-mono text-amber-400 uppercase tracking-widest">Casilla #${c.numero_casilla} - ${c.categoria}</span>
-                            <h4 class="text-xs font-bold text-white font-futurista">${c.titulo}</h4>
-                            <span class="text-[10px] text-stone-500 font-mono">${c.codigo}</span>
+                if (!data || data.length === 0) {
+                    contenedor.innerHTML = `<p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">No hay cupones registrados aún.</p>`;
+                    return;
+                }
+
+                contenedor.innerHTML = data.map(c => `
+                    <div class="glass-panel p-4 rounded-2xl border border-stone-800 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            ${c.imagen_url ? `<img src="${c.imagen_url}" class="w-12 h-12 object-cover rounded-xl border border-stone-700">` : `<div class="w-12 h-12 rounded-xl bg-stone-950 border border-stone-800 flex items-center justify-center text-amber-400 font-futurista font-bold text-xs">#${c.numero_casilla}</div>`}
+                            <div>
+                                <span class="text-[9px] font-mono text-amber-400 uppercase tracking-widest">Casilla #${c.numero_casilla} - ${c.categoria}</span>
+                                <h4 class="text-xs font-bold text-white font-futurista">${c.titulo}</h4>
+                                <span class="text-[10px] text-stone-500 font-mono">${c.codigo}</span>
+                            </div>
                         </div>
+                        <button onclick="eliminarCupon(${c.id})" class="text-stone-500 hover:text-red-400 p-2 transition-colors cursor-pointer">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
                     </div>
-                    <button onclick="eliminarCupon(${c.id})" class="text-stone-500 hover:text-red-400 p-2 transition-colors cursor-pointer">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            `).join('');
-            lucide.createIcons();
+                `).join('');
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Error al cargar:", err);
+                document.getElementById('lista-admin-grid').innerHTML = `<p class="text-xs text-red-400 font-mono col-span-full text-center py-4">Error al conectar: ${err.message}. Revisa la consola de tu navegador (F12).</p>`;
+            }
         }
 
         async function guardarCupon(e) {
@@ -158,63 +169,10 @@
             const descripcion = document.getElementById('desc-cupone').value;
             const fileInput = document.getElementById('imagen-cupone');
 
-            let imagenUrl = null;
+            try {
+                let imagenUrl = null;
 
-            // Subir imagen al storage si el usuario seleccionó una archivo desde el teléfono
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const fileName = `cupon_${numCasilla}_${Date.now()}.${file.name.split('.').pop()}`;
-                
-                const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('cupones-img')
-                    .upload(fileName, file);
-
-                if (!uploadError) {
-                    const { data: publicUrlData } = supabaseClient.storage
-                        .from('cupones-img')
-                        .getPublicUrl(fileName);
-                    imagenUrl = publicUrlData.publicUrl;
-                } else {
-                    alert("Aviso: No se pudo subir la imagen, pero se guardarán los datos de texto.");
-                }
-            }
-
-            // Verificar si la casilla ya existe para actualizarla o crearla (upsert basado en numero_casilla)
-            const { error } = await supabaseClient
-                .from('cupones')
-                .upsert([
-                    { 
-                        numero_casilla: numCasilla, 
-                        categoria, 
-                        titulo, 
-                        codigo, 
-                        descripcion, 
-                        imagen_url: imagenUrl, 
-                        activo: true 
-                    }
-                ], { onConflict: 'numero_casilla' });
-
-            btn.innerText = "Guardar / Actualizar Cupón en Casilla";
-            btn.disabled = false;
-
-            if (error) {
-                alert("Error al guardar en Supabase: " + error.message);
-            } else {
-                alert("¡Cupón guardado con éxito!");
-                document.getElementById('form-cupone-admin').reset();
-                cargarCuponesAdmin();
-            }
-        }
-
-        async function eliminarCupon(id) {
-            if(!confirm("¿Estás seguro de eliminar este cupón?")) return;
-            const { error } = await supabaseClient.from('cupones').delete().eq('id', id);
-            if(!error) {
-                cargarCuponesAdmin();
-            } else {
-                alert("Error al eliminar.");
-            }
-        }
-    </script>
-</body>
-</html>
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const timestamp = Date.now();
+                    const fileExt = file.name.split('.').pop
