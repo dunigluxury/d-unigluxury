@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Cupones D'UNIG LUXURY</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;700&display=swap');
@@ -14,9 +17,6 @@
         .glow-gold { box-shadow: 0 0 30px rgba(229, 193, 88, 0.15); }
         .glass-panel { background: linear-gradient(135deg, rgba(28, 20, 24, 0.45) 0%, rgba(12, 8, 10, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.02); }
         .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
-        ::-webkit-scrollbar { width: 4px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
     </style>
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg p-4 sm:p-8">
@@ -37,14 +37,17 @@
     </header>
 
     <main class="max-w-4xl mx-auto w-full flex-grow space-y-8">
+        
+        <!-- Alerta de estado -->
+        <div id="alerta-sistema" class="hidden p-4 rounded-xl text-xs font-mono"></div>
+
         <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-stone-800 glow-gold space-y-6">
             <div>
                 <h2 class="text-lg font-black font-futurista text-white tracking-wide">Registrar / Actualizar Cupón</h2>
-                <p class="text-xs text-stone-400 font-mono mt-1">Configura o rellenar una casilla de la suerte.</p>
-                <p id="status-conexion" class="text-red-400 text-[10px] font-mono mt-2 font-bold"></p>
+                <p class="text-xs text-stone-400 font-mono mt-1">Llena los datos para configurar la casilla seleccionada.</p>
             </div>
 
-            <form id="form-cupone-admin" onsubmit="guardarCupon(event)" class="space-y-4">
+            <form id="form-cupone-admin" onsubmit="guardarCuponeSeguro(event)" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="text-[10px] font-futurista font-bold uppercase text-stone-400">Número de Casilla (1 al 20)</label>
@@ -79,12 +82,12 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-[10px] font-futurista font-bold uppercase text-stone-400">Imagen Ilustrativa del Cupón (Opcional)</label>
+                    <label class="text-[10px] font-futurista font-bold uppercase text-stone-400">Imagen Ilustrativa (Opcional)</label>
                     <input type="file" id="imagen-cupone" accept="image/*" class="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-xs text-stone-400 font-mono file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer">
                 </div>
 
                 <button type="submit" id="btn-guardar" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg hover:scale-[1.01] transition-all">
-                    Guardar / Actualizar Cupón
+                    Guardar Cupón en Base de Datos
                 </button>
             </form>
         </div>
@@ -92,7 +95,7 @@
         <div class="space-y-4">
             <h3 class="text-sm font-futurista font-bold uppercase tracking-wider text-white">Casillas Registradas</h3>
             <div id="lista-admin-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">Cargando... (Si no carga, revisa tus credenciales en el código)</p>
+                <p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">Sincronizando con Supabase...</p>
             </div>
         </div>
     </main>
@@ -102,24 +105,34 @@
     </footer>
 
     <script>
-        // -- CONFIGURACIÓN CRÍTICA: COLOCA TUS DATOS REALES AQUÍ --
-        const SUPABASE_URL = 'https://TU-URL-REAL.supabase.co'; // <--- COPIAR DE SUPABASE API
-        const SUPABASE_KEY = 'TU-ANON-KEY-REAL';       // <--- COPIAR DE SUPABASE API
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ⚠️ REEMPLAZA ESTOS DOS DATOS CON LOS REALES DE TU PROYECTO SUPABASE ⚠️
+        const SUPABASE_URL = 'https://vcymfspywjabnbddbruh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA';
+
+        let supabaseClient;
+
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (err) {
+            mostrarAlerta("Error al iniciar Supabase. Revisa las credenciales en el código.", "error");
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Verificar si las llaves son dummy
-            if (SUPABASE_URL.includes('TU-URL-REAL')) {
-                document.getElementById('status-conexion').innerText = "ERROR CRÍTICO: No has configurado la URL de Supabase en el código de admin-cupones.html. El fetch fallará.";
+            if (SUPABASE_URL.includes('tu-proyecto')) {
+                mostrarAlerta("⚠️ Faltan tus credenciales reales de Supabase en el archivo admin-cupones.html", "error");
                 return;
             }
-            
-            cargarCuponesAdmin();
-            lucide.createIcons();
+            cargarCupones();
         });
 
-        async function cargarCuponesAdmin() {
+        function mostrarAlerta(texto, tipo) {
+            const alerta = document.getElementById('alerta-sistema');
+            alerta.classList.remove('hidden');
+            alerta.className = `p-4 rounded-xl text-xs font-mono ${tipo === 'error' ? 'bg-red-950/80 border border-red-800 text-red-300' : 'bg-emerald-950/80 border border-emerald-800 text-emerald-300'}`;
+            alerta.innerText = texto;
+        }
+
+        async function cargarCupones() {
             try {
                 const { data, error } = await supabaseClient
                     .from('cupones')
@@ -130,7 +143,7 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    contenedor.innerHTML = `<p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">No hay cupones registrados aún.</p>`;
+                    contenedor.innerHTML = `<p class="text-xs text-stone-400 font-mono col-span-full text-center py-4">No hay cupones creados todavía.</p>`;
                     return;
                 }
 
@@ -144,22 +157,22 @@
                                 <span class="text-[10px] text-stone-500 font-mono">${c.codigo}</span>
                             </div>
                         </div>
-                        <button onclick="eliminarCupon(${c.id})" class="text-stone-500 hover:text-red-400 p-2 transition-colors cursor-pointer">
+                        <button onclick="eliminarCupone(${c.id})" class="text-stone-500 hover:text-red-400 p-2 transition-colors cursor-pointer">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 `).join('');
                 lucide.createIcons();
             } catch (err) {
-                console.error("Error al cargar:", err);
-                document.getElementById('lista-admin-grid').innerHTML = `<p class="text-xs text-red-400 font-mono col-span-full text-center py-4">Error al conectar: ${err.message}. Revisa la consola de tu navegador (F12).</p>`;
+                console.error(err);
+                document.getElementById('lista-admin-grid').innerHTML = `<p class="text-xs text-red-400 font-mono col-span-full text-center py-4">Error al conectar con la base de datos.</p>`;
             }
         }
 
-        async function guardarCupon(e) {
+        async function guardarCuponeSeguro(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-guardar');
-            btn.innerText = "Procesando...";
+            btn.innerText = "Guardando en Supabase...";
             btn.disabled = true;
 
             const numCasilla = parseInt(document.getElementById('num-casilla').value);
@@ -169,10 +182,67 @@
             const descripcion = document.getElementById('desc-cupone').value;
             const fileInput = document.getElementById('imagen-cupone');
 
-            try {
-                let imagenUrl = null;
+            let imagenUrl = null;
 
-                if (fileInput.files.length > 0) {
+            try {
+                // Intento de subida de imagen si seleccionaron una
+                if (fileInput.files && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
-                    const timestamp = Date.now();
-                    const fileExt = file.name.split('.').pop
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `casilla_${numCasilla}_${Date.now()}.${fileExt}`;
+                    
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('cupones-img')
+                        .upload(fileName, file);
+
+                    if (!uploadError) {
+                        const { data: urlData } = supabaseClient.storage
+                            .from('cupones-img')
+                            .getPublicUrl(fileName);
+                        imagenUrl = urlData.publicUrl;
+                    } else {
+                        console.warn("Aviso de imagen:", uploadError.message);
+                    }
+                }
+
+                // Guardado de datos en la tabla
+                const { error: dbError } = await supabaseClient
+                    .from('cupones')
+                    .upsert([
+                        {
+                            numero_casilla: numCasilla,
+                            categoria: categoria,
+                            titulo: titulo,
+                            codigo: codigo,
+                            descripcion: descripcion,
+                            imagen_url: imagenUrl,
+                            activo: true
+                        }
+                    ], { onConflict: 'numero_casilla' });
+
+                if (dbError) throw dbError;
+
+                mostrarAlerta("¡Cupón guardado y sincronizado con éxito!", "exito");
+                document.getElementById('form-cupone-admin').reset();
+                cargarCupones();
+
+            } catch (err) {
+                alert("Error al guardar: " + err.message);
+            } finally {
+                btn.innerText = "Guardar Cupón en Base de Datos";
+                btn.disabled = false;
+            }
+        }
+
+        async function eliminarCupone(id) {
+            if(!confirm("¿Eliminar este cupón de la bóveda?")) return;
+            const { error } = await supabaseClient.from('cupones').delete().eq('id', id);
+            if(!error) {
+                cargarCupones();
+            } else {
+                alert("No se pudo eliminar.");
+            }
+        }
+    </script>
+</body>
+</html>
