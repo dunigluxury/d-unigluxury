@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuponera Exclusiva - D'UNIG LUXURY</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #1a1216 0%, #0a0507 100%); background-color: #050204; }
+        .font-futurista { font-family: 'Orbitron', sans-serif; }
+        .glow-gold { box-shadow: 0 0 30px rgba(229, 193, 88, 0.15); }
+        .glass-panel { background: linear-gradient(135deg, rgba(28, 20, 24, 0.45) 0%, rgba(12, 8, 10, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.02); }
+        .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
+        ::-webkit-scrollbar { width: 4px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg p-4 sm:p-8">
+
+    <!-- ENCABEZADO -->
+    <header class="max-w-5xl mx-auto w-full flex items-center justify-between border-b border-stone-900 pb-6 mb-8">
+        <div class="flex items-center space-x-4">
+            <div class="border border-amber-500/30 p-2.5 rounded-xl bg-stone-950/80 glow-gold text-amber-400">
+                <i data-lucide="crown" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-xl font-black tracking-[0.2em] text-white font-futurista">D'UNIG <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">LUXURY</span></h1>
+                <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">BÓVEDA DE CUPONES VIP</p>
+            </div>
+        </div>
+        <a href="index.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-4 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Volver a la Vitrina
+        </a>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL: 20 CASILLAS -->
+    <main class="max-w-5xl mx-auto w-full flex-grow space-y-8">
+        <div class="text-center space-y-2">
+            <h2 class="text-2xl sm:text-3xl font-black font-futurista text-white tracking-wide">Selecciona tu Casilla de la Suerte</h2>
+            <p class="text-xs text-stone-400 font-mono">Haz clic en una casilla para revelar tu beneficio exclusivo, ofertas especiales y tendencias.</p>
+        </div>
+
+        <!-- GRID DE 20 CASILLAS -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4" id="grid-cupones">
+            <!-- Las 20 casillas se generan por JavaScript o HTML estático optimizado -->
+        </div>
+    </main>
+
+    <!-- MODAL DE PREMIO REVELADO -->
+    <div id="modal-premio" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel max-w-md w-full p-6 sm:p-8 rounded-3xl border border-stone-800 space-y-6 relative glow-gold text-center">
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl mx-auto flex items-center justify-center text-amber-400 glow-gold">
+                <i data-lucide="gift" class="w-8 h-8"></i>
+            </div>
+            <div class="space-y-2">
+                <span id="premio-categoria" class="text-[10px] uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-xl font-futurista font-bold"></span>
+                <h3 id="premio-titulo" class="text-lg sm:text-xl font-black font-futurista text-white tracking-wide mt-2"></h3>
+                <p id="premio-descripcion" class="text-xs text-stone-300 font-mono leading-relaxed"></p>
+            </div>
+            <div class="bg-stone-950 border border-stone-800 p-4 rounded-xl space-y-1">
+                <span class="text-[9px] uppercase text-stone-500 font-bold font-futurista block">Código de Canje Único</span>
+                <span id="premio-codigo" class="text-sm font-mono font-bold text-amber-400 tracking-widest"></span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="cerrarModalPremio()" class="w-full bg-stone-900 border border-stone-800 text-stone-300 hover:text-white font-futurista font-bold p-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer">
+                    Cerrar
+                </button>
+                <button onclick="reclamarPorWhatsApp()" class="w-full bg-amber-500 text-black font-futurista font-black p-3.5 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i> Reclamar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="max-w-5xl mx-auto w-full border-t border-stone-900/80 mt-16 pt-6 text-center text-xs text-stone-500 font-mono tracking-widest">
+        <p>© 2026 D'UNIG LUXURY ECOSISTEMA. CUPONERA DIGITAL OFICIAL.</p>
+    </footer>
+
+    <script>
+        // Definición de las 20 casillas con bienvenida, 2x1, 3x2, bebidas gratis y tendencias
+        const cuponesData = [
+            { id: 1, cat: "Bienvenida", titulo: "Servicio Gratis de Bienvenida", desc: "¡Felicidades! Tienes un servicio o producto base completamente gratis en tu primera visita.", codigo: "DUNIG-WELCOME" },
+            { id: 2, cat: "Oferta 2x1", titulo: "2x1 en Experiencias VIP", desc: "Compra una entrada o servicio VIP y lleva el segundo completamente gratis.", codigo: "DUNIG-2X1VIP" },
+            { id: 3, cat: "Oferta 3x2", titulo: "Lleva 3 y Paga 2", desc: "Aplica en cualquiera de nuestros productos seleccionados del catálogo general.", codigo: "DUNIG-3X2GEN" },
+            { id: 4, cat: "Bebidas Gratis", titulo: "Cocktail o Bebida de Cortesía", desc: "Disfruta de una bebida exclusiva de cortesía al procesar tu reserva.", codigo: "DUNIG-DRINK" },
+            { id: 5, cat: "Tendencia", titulo: "Pase Express sin Esperas", desc: "Acceso prioritario a nuestras instalaciones o atención preferencial inmediata.", codigo: "DUNIG-TREND1" },
+            { id: 6, cat: "Oferta 2x1", titulo: "2x1 en Ediciones Especiales", desc: "Duplica tu compra en nuestra línea de mayor exclusividad.", codigo: "DUNIG-2X1SPEC" },
+            { id: 7, cat: "Tendencia", titulo: "Cashback 15% en Próxima Cita", desc: "Obtén un 15% de saldo a favor para tu siguiente servicio agendado.", codigo: "DUNIG-TREND2" },
+            { id: 8, cat: "Bebidas Gratis", titulo: "Bar Abierto Mini VIP", desc: "Acceso ilimitado a barra de bebidas durante tu experiencia presencial.", codigo: "DUNIG-DRINK2" },
+            { id: 9, cat: "Oferta 3x2", titulo: "Pack Trilogía de Lujo", desc: "Lleva 3 servicios del catálogo y paga solo 2 con este código exclusivo.", codigo: "DUNIG-3X2LUX" },
+            { id: 10, cat: "Tendencia", titulo: "Asesoría Digital Gratuita", desc: "Sesión personalizada de consultoría o diseño express incluido.", codigo: "DUNIG-TREND3" },
+            { id: 11, cat: "Oferta 2x1", titulo: "2x1 en Horario Nocturno", desc: "Válido para reservas en bloques especiales de la tarde/noche.", codigo: "DUNIG-2X1NIGHT" },
+            { id: 12, cat: "Bebidas Gratis", titulo: "Botella Bienvenida Signature", desc: "Obtén una botella de cortesía en servicios seleccionados.", codigo: "DUNIG-DRINK3" },
+            { id: 13, cat: "Tendencia", titulo: "Upgrade de Categoría Gratuito", desc: "Mejoramos tu reserva al siguiente nivel o gama superior sin costo extra.", codigo: "DUNIG-TREND4" },
+            { id: 14, cat: "Oferta 3x2", titulo: "Tríptico Promocional 3x2", desc: "Aprovecha la promoción en accesorios o complementos digitales.", codigo: "DUNIG-3X2ACC" },
+            { id: 15, cat: "Tendencia", titulo: "Sorteo Mensual Golden Ticket", desc: "Participación directa automática en el sorteo de la membresía dorada anual.", codigo: "DUNIG-TREND5" },
+            { id: 16, cat: "Oferta 2x1", titulo: "2x1 Dúo Dinámico", desc: "Ven con un acompañante y paga una sola tarifa general.", codigo: "DUNIG-TREND6" },
+            { id: 17, cat: "Bebidas Gratis",titulo: "Refill Ilimitado de Bebidas", desc: "Mantente hidratado y fresco con bebidas ilimitadas durante tu estancia.", codigo: "DUNIG-DRINK4" },
+            { id: 18, cat: "Tendencia", titulo: "Regalo Sorpresa de Temporada", desc: "Un obsequio físico o digital sorpresa entregado al validar tu código.", codigo: "DUNIG-TREND7" },
+            { id: 19, cat: "Oferta 3x2", titulo: "Pack 3x2 Experiencia Total", desc: "Combina tus servicios favoritos pagando únicamente dos unidades.", codigo: "DUNIG-3X2TOT" },
+            { id: 20, cat: "Tendencia", titulo: "Membresía VIP por 30 Días", desc: "Acceso total a tarifas preferenciales y preventas exclusivas durante un mes.", codigo: "DUNIG-VIP30" }
+        ];
+
+        let cuponSeleccionado = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderizarCasillas();
+            lucide.createIcons();
+        });
+
+        function renderizarCasillas() {
+            const grid = document.getElementById('grid-cupones');
+            grid.innerHTML = cuponesData.map((c, index) => `
+                <div onclick="abrirCasilla(${index})" class="glass-panel h-36 rounded-2xl border border-stone-900 hover:border-amber-500/50 p-4 flex flex-col justify-between items-center text-center cursor-pointer group transition-all duration-300 hover:scale-105">
+                    <span class="text-[10px] font-mono text-stone-500 group-hover:text-amber-400">Casilla #${c.id}</span>
+                    <div class="w-12 h-12 rounded-xl bg-stone-950 border border-stone-800 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                        <i data-lucide="lock" class="w-5 h-5 group-hover:hidden"></i>
+                        <i data-lucide="unlock" class="w-5 h-5 hidden group-hover:block"></i>
+                    </div>
+                    <span class="text-[10px] font-futurista uppercase font-bold text-stone-300 tracking-wider">Destapable</span>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function abrirCasilla(index) {
+            cuponSeleccionado = cuponesData[index];
+            document.getElementById('premio-categoria').innerText = cuponSeleccionado.cat;
+            document.getElementById('premio-titulo').innerText = cuponSeleccionado.titulo;
+            document.getElementById('premio-descripcion').innerText = cuponSeleccionado.desc;
+            document.getElementById('premio-codigo').innerText = cuponSeleccionado.codigo;
+            document.getElementById('modal-premio').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cerrarModalPremio() {
+            document.getElementById('modal-premio').classList.add('hidden');
+        }
+
+        function reclamarPorWhatsApp() {
+            if(!cuponSeleccionado) return;
+            const mensaje = `Hola D'UNIG LUXURY, he abierto una casilla en la cuponera digital y quiero reclamar mi beneficio: *${cuponSeleccionado.titulo}* con el código de canje: *${cuponSeleccionado.codigo}*.`;
+            const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+            window.open(urlWhatsApp, '_blank');
+        }
+    </script>
+</body>
+</html>
