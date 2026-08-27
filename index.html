@@ -511,6 +511,22 @@
                 </details>`;
             lucide.createIcons();
         }
+
+        function abrirCuponera() {
+            // Abre el archivo independiente de cupones en una nueva pestaña
+            window.open('cuponera.html', '_blank');
+        }
     </script>
+
+    <!-- BOTÓN FLOTANTE DE CUPONES (Ubicado correctamente dentro del Body) -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="abrirCuponera()" class="relative group bg-gradient-to-r from-amber-500 to-amber-600 text-black p-4 rounded-full shadow-2xl glow-gold flex items-center justify-center hover:scale-110 transition-all duration-300 cursor-pointer border border-amber-300/40">
+            <i data-lucide="ticket" class="w-6 h-6 animate-pulse"></i>
+            <span class="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-black/90 text-amber-400 border border-amber-500/30 text-[10px] font-futurista font-bold uppercase px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+                ¡Cupones & Promos!
+            </span>
+        </button>
+    </div>
+
 </body>
 </html>
