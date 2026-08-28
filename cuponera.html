@@ -14,9 +14,6 @@
         .glow-gold { box-shadow: 0 0 30px rgba(229, 193, 88, 0.15); }
         .glass-panel { background: linear-gradient(135deg, rgba(28, 20, 24, 0.45) 0%, rgba(12, 8, 10, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.02); }
         .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
-        ::-webkit-scrollbar { width: 4px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
     </style>
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg p-4 sm:p-8">
@@ -28,18 +25,18 @@
             </div>
             <div>
                 <h1 class="text-lg sm:text-xl font-black tracking-[0.2em] text-white font-futurista">D'UNIG <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">LUXURY</span></h1>
-                <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">BÓVEDA DE CUPONES VIP (SUPABASE)</p>
+                <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">BÓVEDA DE CUPONES VIP</p>
             </div>
         </div>
         <a href="index.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-4 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer">
-            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Volver a la Vitrina
+            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Ir a la Vitrina / Carrito
         </a>
     </header>
 
     <main class="max-w-5xl mx-auto w-full flex-grow space-y-8">
         <div class="text-center space-y-2">
             <h2 class="text-2xl sm:text-3xl font-black font-futurista text-white tracking-wide">Selecciona tu Casilla de la Suerte</h2>
-            <p class="text-xs text-stone-400 font-mono">Toca una casilla para destapar tu beneficio exclusivo.</p>
+            <p class="text-xs text-stone-400 font-mono">Toca una casilla para destapar tu beneficio y cargarlo al carrito.</p>
         </div>
 
         <div id="loading-cupones" class="text-center py-20">
@@ -50,30 +47,35 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 hidden" id="grid-cupones"></div>
     </main>
 
-    <!-- MODAL DE PREMIO REVELADO -->
+    <!-- MODAL DE PREMIO -->
     <div id="modal-premio" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel max-w-md w-full p-6 sm:p-8 rounded-3xl border border-stone-800 space-y-6 relative glow-gold text-center">
-            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl mx-auto flex items-center justify-center text-amber-400 glow-gold">
-                <i data-lucide="gift" class="w-8 h-8"></i>
+        <div class="glass-panel max-w-md w-full p-6 sm:p-8 rounded-3xl border border-stone-800 space-y-5 relative glow-gold text-center">
+            <div class="w-14 h-14 bg-amber-500/10 border border-amber-500/30 rounded-2xl mx-auto flex items-center justify-center text-amber-400 glow-gold">
+                <i data-lucide="gift" class="w-7 h-7"></i>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-1.5">
                 <span id="premio-categoria" class="text-[10px] uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-xl font-futurista font-bold"></span>
-                <h3 id="premio-titulo" class="text-lg sm:text-xl font-black font-futurista text-white tracking-wide mt-2"></h3>
+                <h3 id="premio-titulo" class="text-lg sm:text-xl font-black font-futurista text-white tracking-wide mt-1"></h3>
                 <p id="premio-descripcion" class="text-xs text-stone-300 font-mono leading-relaxed"></p>
             </div>
-            <div id="contenedor-imagen-premio" class="hidden rounded-xl overflow-hidden border border-stone-800 max-h-40">
-                <img id="premio-imagen" src="" class="w-full h-full object-cover">
+            
+            <div class="bg-stone-950 border border-stone-800 p-3.5 rounded-xl space-y-1 text-left">
+                <div class="flex justify-between items-center text-[10px] font-mono text-stone-400">
+                    <span>Compra mínima requerida:</span>
+                    <span id="premio-minima" class="text-amber-400 font-bold"></span>
+                </div>
+                <div class="flex justify-between items-center text-[10px] font-mono text-stone-400">
+                    <span>Código de Canje:</span>
+                    <span id="premio-codigo" class="text-amber-400 font-bold tracking-widest"></span>
+                </div>
             </div>
-            <div class="bg-stone-950 border border-stone-800 p-4 rounded-xl space-y-1">
-                <span class="text-[9px] uppercase text-stone-500 font-bold font-futurista block">Código de Canje Verificado</span>
-                <span id="premio-codigo" class="text-sm font-mono font-bold text-amber-400 tracking-widest"></span>
-            </div>
-            <div class="flex gap-3">
+
+            <div class="flex gap-3 pt-2">
                 <button onclick="cerrarModalPremio()" class="w-full bg-stone-900 border border-stone-800 text-stone-300 hover:text-white font-futurista font-bold p-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer">
                     Cerrar
                 </button>
-                <button onclick="reclamarPorWhatsApp()" class="w-full bg-amber-500 text-black font-futurista font-black p-3.5 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i> Reclamar
+                <button onclick="enviarAlCarrito()" class="w-full bg-amber-500 text-black font-futurista font-black p-3.5 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg hover:bg-amber-400 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> Añadir al Carrito
                 </button>
             </div>
         </div>
@@ -91,25 +93,16 @@
         let listaCuponesDB = [];
         let cuponSeleccionado = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            descargarCuponesDeSupabase();
-        });
+        window.addEventListener('DOMContentLoaded', () => { descargarCuponesDeSupabase(); });
 
         async function descargarCuponesDeSupabase() {
-            const { data, error } = await supabaseClient
-                .from('cupones')
-                .select('*')
-                .eq('activo', true)
-                .order('numero_casilla', { ascending: true });
-
+            const { data, error } = await supabaseClient.from('cupones').select('*').eq('activo', true).order('numero_casilla', { ascending: true });
             document.getElementById('loading-cupones').classList.add('hidden');
-
             if (!error && data) {
                 listaCuponesDB = data;
                 renderizarCasillas();
             } else {
-                console.error("Error al cargar cupones:", error);
-                document.getElementById('grid-cupones').innerHTML = `<p class="col-span-full text-center text-red-400 text-xs font-mono">Error al conectar con la bóveda de Supabase.</p>`;
+                document.getElementById('grid-cupones').innerHTML = `<p class="col-span-full text-center text-red-400 text-xs font-mono">Error al conectar con Supabase.</p>`;
                 document.getElementById('grid-cupones').classList.remove('hidden');
             }
         }
@@ -117,7 +110,6 @@
         function renderizarCasillas() {
             const grid = document.getElementById('grid-cupones');
             grid.classList.remove('hidden');
-            
             grid.innerHTML = listaCuponesDB.map((c) => `
                 <div onclick="abrirCasilla(${c.numero_casilla})" class="glass-panel h-36 rounded-2xl border border-stone-900 hover:border-amber-500/50 p-4 flex flex-col justify-between items-center text-center cursor-pointer group transition-all duration-300 hover:scale-105">
                     <span class="text-[10px] font-mono text-stone-500 group-hover:text-amber-400">Casilla #${c.numero_casilla}</span>
@@ -139,15 +131,7 @@
             document.getElementById('premio-titulo').innerText = cuponSeleccionado.titulo;
             document.getElementById('premio-descripcion').innerText = cuponSeleccionado.descripcion;
             document.getElementById('premio-codigo').innerText = cuponSeleccionado.codigo;
-
-            const contenedorImg = document.getElementById('contenedor-imagen-premio');
-            const imgElement = document.getElementById('premio-imagen');
-            if (cuponSeleccionado.imagen_url) {
-                imgElement.src = cuponSeleccionado.imagen_url;
-                contenedorImg.classList.remove('hidden');
-            } else {
-                contenedorImg.classList.add('hidden');
-            }
+            document.getElementById('premio-minima').innerText = `$${parseFloat(cuponSeleccionado.compra_minima || 0).toFixed(2)}`;
 
             document.getElementById('modal-premio').classList.remove('hidden');
             lucide.createIcons();
@@ -157,12 +141,32 @@
             document.getElementById('modal-premio').classList.add('hidden');
         }
 
-        function reclamarPorWhatsApp() {
+        function enviarAlCarrito() {
             if(!cuponSeleccionado) return;
-            const numeroWhatsApp = "584120000000"; 
-            const mensaje = `💎 *CANJE DE CUPÓN - D'UNIG LUXURY* 💎\n\n🎁 *PREMIO:* ${cuponSeleccionado.titulo}\n🏷️ *CATEGORÍA:* ${cuponSeleccionado.categoria}\n🔢 *CÓDIGO:* ${cuponSeleccionado.codigo}\n\n¡Hola! He destapado este cupón en la bóveda digital y deseo validarlo.`;
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensaje)}`;
-            window.open(urlWhatsApp, '_blank');
+
+            // Recuperar el carrito actual del localStorage (clave estándar usada en tus apps)
+            let carrito = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Crear el objeto del cupón como ítem especial en el carrito con su condición
+            const itemCupone = {
+                id: `cupone_${cuponSeleccionado.id}`,
+                nombre: `[CUPÓN VIP] ${cuponSeleccionado.titulo}`,
+                precio: 0, // El cupón en sí aplica beneficio o descuento
+                cantidad: 1,
+                detalle: cuponSeleccionado.descripcion,
+                codigoCanje: cuponSeleccionado.codigo,
+                compraMinima: cuponSeleccionado.compra_minima || 0
+            };
+
+            // Evitar duplicados exactos del cupón
+            const existe = carrito.find(i => i.id === itemCupone.id);
+            if (!existe) {
+                carrito.push(itemCupone);
+                localStorage.setItem('cart', JSON.stringify(carrito));
+            }
+
+            alert("¡Cupón añadido al carrito con éxito! Redirigiendo a tu vitrina principal para completar el checkout.");
+            window.location.href = "index.html";
         }
     </script>
 </body>
