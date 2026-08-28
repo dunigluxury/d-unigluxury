@@ -15,6 +15,16 @@
         .text-gold { color: #e5c158; text-shadow: 0 0 12px rgba(229, 193, 88, 0.2); }
         .glass-panel { background: linear-gradient(135deg, rgba(28, 25, 23, 0.45) 0%, rgba(12, 10, 9, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.02); }
         .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
+        /* Estilo para el botón flotante de oro fino */
+        .btn-oro-flotante {
+            background: linear-gradient(135deg, #f5d77f 0%, #dfb347 50%, #c79524 100%);
+            box-shadow: 0 4px 20px rgba(223, 179, 71, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+        .btn-oro-flotante:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 25px rgba(223, 179, 71, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
     </style>
@@ -40,11 +50,6 @@
         </div>
 
         <div class="absolute right-2 flex items-center gap-2">
-            <!-- Botón de acceso a la cuponera -->
-            <a href="cuponera.html" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1 hover:border-amber-400/50 transition-colors" title="Ver Cuponera">
-                <i data-lucide="gift" class="w-4 h-4 text-amber-400"></i>
-            </a>
-
             <!-- Botón del carrito -->
             <button onclick="irAPantallaCarrito()" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1 cursor-pointer">
                 <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
@@ -176,6 +181,11 @@
             </div>
         </section>
     </main>
+
+    <!-- BOTÓN FLOTANTE DE CUPONERA (ESTILO ORO FINO) -->
+    <a href="cuponera.html" class="btn-oro-flotante fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full flex items-center justify-center text-stone-950 shadow-2xl cursor-pointer" title="Ver Cuponera">
+        <i data-lucide="ticket" class="w-7 h-7 stroke-[2.5]"></i>
+    </a>
 
     <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out" onclick="cerrarAmplificacion()">
         <button class="absolute top-6 right-6 text-stone-400 hover:text-white transition-colors cursor-pointer">
