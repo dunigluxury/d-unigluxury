@@ -40,7 +40,13 @@
         </div>
 
         <div class="absolute right-2 flex items-center gap-2">
-            <button onclick="irAPantallaCarrito()" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1">
+            <!-- Botón de acceso a la cuponera -->
+            <a href="cuponera.html" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1 hover:border-amber-400/50 transition-colors" title="Ver Cuponera">
+                <i data-lucide="gift" class="w-4 h-4 text-amber-400"></i>
+            </a>
+
+            <!-- Botón del carrito -->
+            <button onclick="irAPantallaCarrito()" class="bg-stone-900 border border-amber-500/20 p-2 rounded-lg flex items-center gap-1 cursor-pointer">
                 <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
                 <span id="contador-carrito-global" class="bg-amber-500 text-black font-mono text-[10px] font-black px-1.5 rounded">0</span>
             </button>
@@ -50,21 +56,14 @@
 
     <main id="pantalla-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-950/60 p-6 rounded-2xl border border-stone-900">
-        
         <div>
             <h2 class="text-xl sm:text-2xl font-black text-white font-futurista tracking-widest uppercase">
                 MENÚ DIGITAL
             </h2>
             <p class="text-[10px] sm:text-xs text-amber-500/70 font-bold uppercase tracking-[0.2em] mt-1">
-                
+                Selecciona tus especialidades favoritas
             </p>
         </div>
-
-        <div class="bg-stone-900/50 px-4 py-2 rounded-xl border border-stone-800 flex items-center gap-2 hidden">
-    <span class="text-[10px] text-stone-500 font-bold uppercase tracking-widest">Canal:</span>
-    <span class="text-xs font-black text-amber-400 tracking-wider font-futurista uppercase">LUXURY_STORE</span>
-</div>
-        
     </div>
 
     <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -104,21 +103,19 @@
 
             <div id="contenedor-adicionales" class="w-full"></div>
 
-<div class="grid grid-cols-2 gap-4 border-t border-stone-900 pt-4">
-    <div class="hidden">
-        <span class="text-[9px] uppercase text-stone-500 font-bold block">Disponibilidad:</span>
-        <span id="detalle-stock" class="text-xs text-white font-bold">0 unidades</span>
-    </div>
-    
-    <div>
-        <span class="text-[9px] uppercase text-stone-500 font-bold block">Autenticidad VIP:</span>
-        <span class="text-xs text-green-400 font-bold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Certificada</span>
-    </div>
-</div>
-                <button onclick="agregarAlCarritoYVolver()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
-                    <i data-lucide="shopping-bag" class="w-4 h-4"></i> AÑADIR A LA BOLSA VIP
-                </button>
+            <div class="grid grid-cols-2 gap-4 border-t border-stone-900 pt-4">
+                <div class="hidden">
+                    <span class="text-[9px] uppercase text-stone-500 font-bold block">Disponibilidad:</span>
+                    <span id="detalle-stock" class="text-xs text-white font-bold">0 unidades</span>
+                </div>
+                <div>
+                    <span class="text-[9px] uppercase text-stone-500 font-bold block">Autenticidad VIP:</span>
+                    <span class="text-xs text-green-400 font-bold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Certificada</span>
+                </div>
             </div>
+            <button onclick="agregarAlCarritoYVolver()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i> AÑADIR A LA BOLSA VIP
+            </button>
         </div>
     </div>
 </main>
@@ -173,9 +170,10 @@
                            class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-400/40 font-mono tracking-wider">
                 </div>
 
-            <button onclick="finalizarOrdenCompraVIP()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-3 px-4 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
-                <i data-lucide="shield-check" class="w-4 h-4"></i> PROCEED TO CHECKOUT
-            </button>
+                <button onclick="finalizarOrdenCompraVIP()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-3 px-4 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> PROCEED TO CHECKOUT
+                </button>
+            </div>
         </section>
     </main>
 
@@ -216,11 +214,6 @@
         async function descargarCatalogoDeSupabase() {
             const { data, error } = await supabaseClient.from('productos').select('*').eq('instagram_dueno', filtroInstagram);
             if (!error && data) { baseProductos = data; renderizarVitrinaPrincipal(); }
-        }
-
-        function actualizarFiltroVitrina() {
-            const val = document.getElementById('vitrina-owner-input').value.trim().toLowerCase();
-            if (val) { filtroInstagram = val; descargarCatalogoDeSupabase(); }
         }
 
         function renderizarVitrinaPrincipal() {
