@@ -84,9 +84,15 @@
                 <img id="cupon-imagen-modal" src="" alt="Cupón Exclusivo" class="w-full h-full object-contain">
             </div>
             <p id="cupon-descripcion-modal" class="text-xs text-stone-300 leading-relaxed"></p>
-            <button onclick="cerrarCuponExito()" class="w-full bg-stone-900 hover:bg-stone-800 border border-stone-800 text-white font-futurista font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition-colors cursor-pointer">
-                Cerrar Ventana
-            </button>
+            
+            <div class="space-y-2 pt-2">
+                <a id="btn-whatsapp-canje" href="#" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-futurista font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors shadow-lg cursor-pointer">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i> Reclamar por WhatsApp
+                </a>
+                <button onclick="cerrarCuponExito()" class="w-full bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-400 hover:text-white font-futurista font-bold py-2.5 rounded-xl text-[10px] uppercase tracking-widest transition-colors cursor-pointer">
+                    Cerrar Ventana
+                </button>
+            </div>
         </div>
     </div>
 
@@ -104,7 +110,6 @@
                 return;
             }
 
-            // Búsqueda directa en la tabla cupones por la columna codigo
             const { data, error } = await supabaseClient
                 .from('cupones')
                 .select('*')
@@ -116,11 +121,16 @@
                 return;
             }
 
-            // Si lo encuentra, muestra los datos en el modal
+            // Textos del modal
             document.getElementById('cupon-titulo-modal').innerText = data.titulo || "Cupón Canjeado";
             document.getElementById('cupon-descripcion-modal').innerText = data.descripcion || "¡Disfruta de tu beneficio exclusivo en Pizza Planeta!";
             document.getElementById('cupon-imagen-modal').src = data.imagen_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600";
             
+            // Configurar enlace de WhatsApp
+            const numeroWp = data.whatsapp ? data.whatsapp.trim() : "584120000000"; // Pon tu número por defecto si viene vacío
+            const mensajeWp = encodeURIComponent(`¡Hola! Desbloqueé el siguiente cupón VIP:\n\n*${data.titulo || 'Cupón Exclusivo'}*\n${data.descripcion || ''}\nCódigo: ${data.codigo}`);
+            document.getElementById('btn-whatsapp-canje').href = `https://wa.me/${numeroWp}?text=${mensajeWp}`;
+
             document.getElementById('modal-cupon-exito').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
