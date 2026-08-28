@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Cupones D'UNIG LUXURY</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Supabase JS v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;700&display=swap');
@@ -31,14 +28,13 @@
                 <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">CONTROL DE BÓVEDA</p>
             </div>
         </div>
-        <a href="cuponera.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-3.5 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2">
+        <a href="cuponera.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-3.5 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer">
             <i data-lucide="eye" class="w-3.5 h-3.5"></i> Ver Cuponera
         </a>
     </header>
 
     <main class="max-w-4xl mx-auto w-full flex-grow space-y-8">
         
-        <!-- Alerta de estado -->
         <div id="alerta-sistema" class="hidden p-4 rounded-xl text-xs font-mono"></div>
 
         <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-stone-800 glow-gold space-y-6">
@@ -105,7 +101,6 @@
     </footer>
 
     <script>
-        // ⚠️ REEMPLAZA ESTOS DOS DATOS CON LOS REALES DE TU PROYECTO SUPABASE ⚠️
         const SUPABASE_URL = 'https://vcymfspywjabnbddbruh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA';
 
@@ -114,14 +109,10 @@
         try {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         } catch (err) {
-            mostrarAlerta("Error al iniciar Supabase. Revisa las credenciales en el código.", "error");
+            mostrarAlerta("Error al iniciar Supabase.", "error");
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (SUPABASE_URL.includes('tu-proyecto')) {
-                mostrarAlerta("⚠️ Faltan tus credenciales reales de Supabase en el archivo admin-cupones.html", "error");
-                return;
-            }
             cargarCupones();
         });
 
@@ -185,7 +176,6 @@
             let imagenUrl = null;
 
             try {
-                // Intento de subida de imagen si seleccionaron una
                 if (fileInput.files && fileInput.files.length > 0) {
                     const file = fileInput.files[0];
                     const fileExt = file.name.split('.').pop();
@@ -200,12 +190,9 @@
                             .from('cupones-img')
                             .getPublicUrl(fileName);
                         imagenUrl = urlData.publicUrl;
-                    } else {
-                        console.warn("Aviso de imagen:", uploadError.message);
                     }
                 }
 
-                // Guardado de datos en la tabla
                 const { error: dbError } = await supabaseClient
                     .from('cupones')
                     .upsert([
