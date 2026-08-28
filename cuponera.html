@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CUPONERA VIP 🌎🪐 - Acceso por Código</title>
+    <title>PIZZA PLANETA - Cuponera VIP</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,18 +12,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #1c1917 0%, #0c0a09 100%); background-color: #030202; }
         .font-futurista { font-family: 'Orbitron', sans-serif; }
         .glow-gold { box-shadow: 0 0 25px rgba(229, 193, 88, 0.15); }
-        .text-gold { color: #e5c158; text-shadow: 0 0 12px rgba(229, 193, 88, 0.2); }
         .glass-panel { background: linear-gradient(135deg, rgba(28, 25, 23, 0.45) 0%, rgba(12, 10, 9, 0.6) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.02); }
         .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
-        /* Estilo para botón dorado */
         .btn-oro {
             background: linear-gradient(135deg, #f5d77f 0%, #dfb347 50%, #c79524 100%);
-            box-shadow: 0 4px 20px rgba(223, 179, 71, 0.3), inset 0 2px 3px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(223, 179, 71, 0.4), inset 0 2px 3px rgba(255, 255, 255, 0.6);
             transition: all 0.3s ease;
         }
         .btn-oro:hover {
             transform: scale(1.02);
-            box-shadow: 0 6px 25px rgba(223, 179, 71, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.7);
+            box-shadow: 0 6px 25px rgba(223, 179, 71, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8);
         }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
@@ -31,98 +29,86 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
 
-    <!-- HEADER -->
     <header class="bg-black/40 backdrop-blur-xl border-b border-stone-900/80 sticky top-0 z-40 px-4">
         <div class="max-w-7xl mx-auto h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='index.html'">
+            <div class="flex items-center gap-3">
                 <div class="border border-amber-500/30 p-2 rounded-xl bg-stone-950/80 glow-gold">
                     <i data-lucide="ticket" class="w-6 h-6 text-amber-400"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg sm:text-xl font-black tracking-[0.15em] text-white font-futurista">
-                        CUPONERA <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">VIP 🌎🪐</span>
+                    <h1 class="text-base sm:text-xl font-black tracking-[0.15em] text-white font-futurista">
+                        CUPONERA <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">VIP</span>
                     </h1>
-                    <p class="text-[8px] text-amber-500/70 uppercase tracking-[0.25em] font-bold font-futurista">
+                    <p class="text-[8px] text-amber-500/70 uppercase tracking-[0.2em] font-bold font-futurista">
                         VALIDACIÓN POR CÓDIGO INDIVIDUAL
                     </p>
                 </div>
             </div>
-            <button onclick="window.location.href='index.html'" class="bg-stone-900 border border-amber-500/20 px-3 py-2 rounded-lg text-xs font-futurista text-amber-400 hover:bg-stone-800 transition-colors cursor-pointer flex items-center gap-2">
+            <a href="index.html" class="bg-stone-900 border border-amber-500/20 hover:border-amber-500/50 text-amber-400 px-4 py-2 rounded-xl text-xs font-futurista font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Menú
-            </button>
+            </a>
         </div>
     </header>
 
-    <!-- VISTA 1: INGRESO DE CÓDIGO -->
-    <main id="vista-ingreso-codigo" class="max-w-md w-full mx-auto px-4 py-16 flex-grow flex flex-col justify-center relative z-10">
-        <div class="glass-panel p-8 rounded-3xl space-y-6 shadow-2xl border border-stone-800 text-center">
-            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto text-amber-400 glow-gold">
-                <i data-lucide="lock" class="w-8 h-8"></i>
-            </div>
-            
-            <div class="space-y-2">
-                <h2 class="text-xl font-black font-futurista text-white uppercase tracking-wider">Acceso a Cupón VIP</h2>
-                <p class="text-xs text-stone-400">Ingresa el código secreto asignado a tu cupón para desbloquear su vista exclusiva en pantalla completa.</p>
+    <main class="max-w-md w-full mx-auto px-4 py-12 flex-grow flex flex-col justify-center relative z-10 space-y-6">
+        <div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6 border border-stone-800">
+            <div class="text-center space-y-2">
+                <h2 class="text-lg font-black font-futurista text-white uppercase tracking-wider">Canjear Cupón Exclusivo</h2>
+                <p class="text-xs text-stone-400">Introduce tu código secreto de acceso para revelar el beneficio.</p>
             </div>
 
-            <div class="space-y-3">
-                <input type="text" id="input-codigo-cupon" placeholder="EJ: PLANETA2026" class="w-full bg-stone-900 border border-stone-800 text-center text-sm font-mono text-white p-4 rounded-xl focus:outline-none focus:border-amber-400 uppercase tracking-widest font-bold">
-                
-                <button onclick="verificarCodigoYDesbloquear()" class="w-full btn-oro text-stone-950 font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg">
-                    <i data-lucide="key-round" class="w-4 h-4"></i> DESBLOQUEAR CUPÓN
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[9px] uppercase text-amber-400/80 font-bold tracking-widest block font-futurista mb-2">Código Secreto *</label>
+                    <input type="text" id="input-codigo-ingresado" placeholder="Ej: 37373" class="w-full bg-stone-900 border border-stone-800 text-sm text-center text-white font-mono p-4 rounded-xl focus:outline-none focus:border-amber-400 tracking-widest uppercase">
+                </div>
+
+                <button onclick="desbloquearCuponVIP()" class="w-full btn-oro text-stone-950 font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                    <i data-lucide="key" class="w-4 h-4 stroke-[2.5]"></i> DESBLOQUEAR CUPÓN
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- VISTA 2: CUPÓN EXCLUSIVO EN PANTALLA COMPLETA (IMAGEN + RECLAMAR) -->
-    <main id="vista-cupon-exclusivo" class="hidden fixed inset-0 bg-stone-950 z-50 flex flex-col items-center justify-between p-4 sm:p-8">
-        <!-- Top bar dentro de la vista exclusiva -->
-        <div class="w-full max-w-4xl flex justify-between items-center bg-black/60 backdrop-blur-md px-6 py-3 rounded-2xl border border-stone-800">
-            <div class="flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-5 h-5 text-amber-400"></i>
-                <span id="titulo-cupon-activo" class="text-xs font-futurista font-bold text-white uppercase tracking-widest">Cupón Verificado</span>
+    <!-- MODAL LIGHTBOX PARA MOSTRAR LA IMAGEN DEL CUPÓN -->
+    <div id="modal-cupon-exito" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4" onclick="cerrarCuponExito()">
+        <div class="relative max-w-lg w-full bg-stone-950 border border-amber-500/30 rounded-3xl p-6 text-center space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="cerrarCuponExito()" class="absolute top-4 right-4 text-stone-400 hover:text-white transition-colors cursor-pointer">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="space-y-1">
+                <span class="text-[9px] uppercase tracking-widest font-futurista text-amber-400 font-bold">¡Cupón Validado con Éxito!</span>
+                <h3 id="cupon-titulo-modal" class="text-xl font-bold font-futurista text-white">Beneficio Exclusivo</h3>
             </div>
-            <button onclick="cerrarCuponYReiniciar()" class="text-xs text-stone-400 hover:text-white font-futurista uppercase tracking-wider flex items-center gap-1 cursor-pointer">
-                <i data-lucide="x" class="w-4 h-4"></i> Salir
+            <div class="rounded-2xl overflow-hidden bg-black border border-stone-900 aspect-video flex items-center justify-center">
+                <img id="cupon-imagen-modal" src="" alt="Cupón Exclusivo" class="w-full h-full object-contain">
+            </div>
+            <p id="cupon-descripcion-modal" class="text-xs text-stone-300 leading-relaxed"></p>
+            <button onclick="cerrarCuponExito()" class="w-full bg-stone-900 hover:bg-stone-800 border border-stone-800 text-white font-futurista font-bold py-3 rounded-xl text-xs uppercase tracking-widest transition-colors cursor-pointer">
+                Cerrar Ventana
             </button>
         </div>
+    </div>
 
-        <!-- Contenedor Central de Imagen a Pantalla Completa -->
-        <div class="my-auto w-full max-w-4xl max-h-[65vh] flex items-center justify-center overflow-hidden rounded-3xl border border-amber-500/20 bg-black shadow-2xl relative group">
-            <img id="imagen-cupon-exclusivo" src="" alt="Cupón Exclusivo" class="w-full h-full object-contain max-h-[65vh]">
-        </div>
-
-        <!-- Botón Inferior de Reclamar -->
-        <div class="w-full max-w-4xl">
-            <button onclick="reclamarCuponActivo()" class="w-full btn-oro text-stone-950 font-futurista font-black py-5 px-6 rounded-2xl text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 cursor-pointer shadow-2xl">
-                <i data-lucide="gift" class="w-6 h-6"></i> RECLAMAR ESTE CUPÓN AHORA
-            </button>
-        </div>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest">© 2026 D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
         const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let cuponEncontradoActual = null;
-
-        async function verificarCodigoYDesbloquear() {
-            const inputCodigo = document.getElementById('input-codigo-cupon').value.trim().toUpperCase();
-            if (!inputCodigo) {
-                alert("Por favor, ingresa un código de cupón.");
+        async function desbloquearCuponVIP() {
+            const inputVal = document.getElementById('input-codigo-ingresado').value.trim();
+            if(!inputVal) {
+                alert("Por favor ingresa un código de cupón.");
                 return;
             }
 
-            // Consultar en la tabla cupones de Supabase si existe un cupón con ese código
+            // Búsqueda directa en la tabla cupones por la columna codigo
             const { data, error } = await supabaseClient
                 .from('cupones')
                 .select('*')
-                .eq('codigo', inputCodigo)
+                .eq('codigo', inputVal)
                 .single();
 
             if (error || !data) {
@@ -130,46 +116,19 @@
                 return;
             }
 
-            cuponEncontradoActual = data;
-
-            // Mostrar la imagen del cupón en pantalla completa
-            const imagenUrl = data.imagen_url || data.imagen || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800";
-            document.getElementById('imagen-cupon-exclusivo').src = imagenUrl;
-            document.getElementById('titulo-cupon-activo').innerText = data.descripcion || `Cupón: ${data.codigo}`;
-
-            // Cambiar vistas
-            document.getElementById('vista-ingreso-codigo').classList.add('hidden');
-            document.getElementById('vista-cupon-exclusivo').classList.remove('hidden');
+            // Si lo encuentra, muestra los datos en el modal
+            document.getElementById('cupon-titulo-modal').innerText = data.titulo || "Cupón Canjeado";
+            document.getElementById('cupon-descripcion-modal').innerText = data.descripcion || "¡Disfruta de tu beneficio exclusivo en Pizza Planeta!";
+            document.getElementById('cupon-imagen-modal').src = data.imagen_url || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600";
             
-            lucide.createIcons();
+            document.getElementById('modal-cupon-exito').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        function cerrarCuponYReiniciar() {
-            cuponEncontradoActual = null;
-            document.getElementById('input-codigo-cupon').value = "";
-            document.getElementById('vista-cupon-exclusivo').classList.add('hidden');
-            document.getElementById('vista-ingreso-codigo').classList.remove('hidden');
-        }
-
-        async function reclamarCuponActivo() {
-            if (!cuponEncontradoActual) return;
-
-            // Obtener número de WhatsApp de notificaciones desde ajustes
-            let numeroWhatsApp = "584120000000"; 
-            const { data: configData, error: configError } = await supabaseClient
-                .from('ajustes_sistema')
-                .select('valor')
-                .eq('id', 'whatsapp_notificaciones')
-                .single();
-            
-            if(!configError && configData) {
-                numeroWhatsApp = configData.valor.replace(/[^0-9]/g, "");
-            }
-
-            const mensaje = `🎁 *¡HOLA! DESEO RECLAMAR ESTE CUPÓN* 🎁\n\n🎟️ *CÓDIGO:* ${cuponEncontradoActual.codigo}\n📝 *DESCRIPCIÓN:* ${cuponEncontradoActual.descripcion || 'Especial VIP'}\n\n¡Por favor validarlo para hacer efectivo mi beneficio!`;
-
-            const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensaje)}`;
-            window.open(urlWhatsApp, '_blank');
+        function cerrarCuponExito() {
+            document.getElementById('modal-cupon-exito').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('input-codigo-ingresado').value = "";
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
