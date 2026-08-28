@@ -6,7 +6,6 @@
     <title>Cuponera Exclusiva - D'UNIG LUXURY</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Cliente de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;700&display=swap');
@@ -22,7 +21,6 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg p-4 sm:p-8">
 
-    <!-- ENCABEZADO -->
     <header class="max-w-5xl mx-auto w-full flex items-center justify-between border-b border-stone-900 pb-6 mb-8">
         <div class="flex items-center space-x-4">
             <div class="border border-amber-500/30 p-2.5 rounded-xl bg-stone-950/80 glow-gold text-amber-400">
@@ -33,25 +31,22 @@
                 <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">BÓVEDA DE CUPONES VIP (SUPABASE)</p>
             </div>
         </div>
-        <a href="index.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-4 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2">
+        <a href="index.html" class="bg-stone-900 border border-stone-800 text-stone-300 hover:text-white px-4 py-2 rounded-xl text-[10px] uppercase font-futurista font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer">
             <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Volver a la Vitrina
         </a>
     </header>
 
-    <!-- CONTENIDO PRINCIPAL: 20 CASILLAS -->
     <main class="max-w-5xl mx-auto w-full flex-grow space-y-8">
         <div class="text-center space-y-2">
             <h2 class="text-2xl sm:text-3xl font-black font-futurista text-white tracking-wide">Selecciona tu Casilla de la Suerte</h2>
-            <p class="text-xs text-stone-400 font-mono">Los beneficios son administrados de forma segura desde tu base de datos.</p>
+            <p class="text-xs text-stone-400 font-mono">Toca una casilla para destapar tu beneficio exclusivo.</p>
         </div>
 
-        <!-- INDICADOR DE CARGA -->
         <div id="loading-cupones" class="text-center py-20">
             <div class="inline-block w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p class="text-xs text-amber-400 font-mono tracking-widest uppercase">Sincronizando bóveda segura...</p>
         </div>
 
-        <!-- GRID DE 20 CASILLAS -->
         <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 hidden" id="grid-cupones"></div>
     </main>
 
@@ -65,6 +60,9 @@
                 <span id="premio-categoria" class="text-[10px] uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-xl font-futurista font-bold"></span>
                 <h3 id="premio-titulo" class="text-lg sm:text-xl font-black font-futurista text-white tracking-wide mt-2"></h3>
                 <p id="premio-descripcion" class="text-xs text-stone-300 font-mono leading-relaxed"></p>
+            </div>
+            <div id="contenedor-imagen-premio" class="hidden rounded-xl overflow-hidden border border-stone-800 max-h-40">
+                <img id="premio-imagen" src="" class="w-full h-full object-cover">
             </div>
             <div class="bg-stone-950 border border-stone-800 p-4 rounded-xl space-y-1">
                 <span class="text-[9px] uppercase text-stone-500 font-bold font-futurista block">Código de Canje Verificado</span>
@@ -81,15 +79,13 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="max-w-5xl mx-auto w-full border-t border-stone-900/80 mt-16 pt-6 text-center text-xs text-stone-500 font-mono tracking-widest">
         <p>© 2026 D'UNIG LUXURY ECOSISTEMA. CUPONERA SEGURA SUPABASE.</p>
     </footer>
 
     <script>
-        // CONFIGURACIÓN DE SUPABASE (Asegúrate de colocar tus credenciales reales)
-        const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-        const SUPABASE_KEY = 'TU-ANON-KEY';
+        const SUPABASE_URL = 'https://vcymfspywjabnbddbruh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let listaCuponesDB = [];
@@ -122,7 +118,6 @@
             const grid = document.getElementById('grid-cupones');
             grid.classList.remove('hidden');
             
-            // Genera las casillas del 1 al 20 basándose en los datos reales de la base de datos
             grid.innerHTML = listaCuponesDB.map((c) => `
                 <div onclick="abrirCasilla(${c.numero_casilla})" class="glass-panel h-36 rounded-2xl border border-stone-900 hover:border-amber-500/50 p-4 flex flex-col justify-between items-center text-center cursor-pointer group transition-all duration-300 hover:scale-105">
                     <span class="text-[10px] font-mono text-stone-500 group-hover:text-amber-400">Casilla #${c.numero_casilla}</span>
@@ -144,6 +139,16 @@
             document.getElementById('premio-titulo').innerText = cuponSeleccionado.titulo;
             document.getElementById('premio-descripcion').innerText = cuponSeleccionado.descripcion;
             document.getElementById('premio-codigo').innerText = cuponSeleccionado.codigo;
+
+            const contenedorImg = document.getElementById('contenedor-imagen-premio');
+            const imgElement = document.getElementById('premio-imagen');
+            if (cuponSeleccionado.imagen_url) {
+                imgElement.src = cuponSeleccionado.imagen_url;
+                contenedorImg.classList.remove('hidden');
+            } else {
+                contenedorImg.classList.add('hidden');
+            }
+
             document.getElementById('modal-premio').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -154,7 +159,6 @@
 
         function reclamarPorWhatsApp() {
             if(!cuponSeleccionado) return;
-            // Número de WhatsApp al que llegará el pedido/cupón (puedes cambiarlo si usas otra variable)
             const numeroWhatsApp = "584120000000"; 
             const mensaje = `💎 *CANJE DE CUPÓN - D'UNIG LUXURY* 💎\n\n🎁 *PREMIO:* ${cuponSeleccionado.titulo}\n🏷️ *CATEGORÍA:* ${cuponSeleccionado.categoria}\n🔢 *CÓDIGO:* ${cuponSeleccionado.codigo}\n\n¡Hola! He destapado este cupón en la bóveda digital y deseo validarlo.`;
             const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensaje)}`;
