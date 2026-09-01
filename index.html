@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>el el RINCÓN DEL SABOR- Ecosistema Integrado</title>
+    <title>el RINCÓN DEL SABOR- Ecosistema Integrado</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -456,7 +456,7 @@
 
             const CONFIG_REF = "684908";
 
-            const textoMensaje = `💎 *NUEVO PEDIDO - LA NOTA BURGER* 💎\n\n🛍️ *PRODUCTOS:*\n${listaProductosTexto}\n💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}\n\n🏦 *PAGO:* ${cuentaActual.plataforma} - ${cuentaActual.banco}\n🔢 *REF:* ${transaccionRef}\n\n[SYS-VER:${CONFIG_REF}]`;
+            const textoMensaje = `💎 *NUEVO PEDIDO -EL RINCON DEL SABOR* 💎\n\n🛍️ *PRODUCTOS:*\n${listaProductosTexto}\n💵 *TOTAL:* $${subtotalGlobal.toFixed(2)}\n\n🏦 *PAGO:* ${cuentaActual.plataforma} - ${cuentaActual.banco}\n🔢 *REF:* ${transaccionRef}\n\n[SYS-VER:${CONFIG_REF}]`;
 
             await supabaseClient.from('ordenes_vip').insert([{
                 productos: carritoVIP.map(item => item.titulo).join(', '),
