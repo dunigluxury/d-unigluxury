@@ -30,10 +30,6 @@
             transform: scale(1.08);
             box-shadow: 0 6px 25px rgba(223, 179, 71, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8);
         }
-        /* Ocultar marca de agua de Leaflet y textos del mapa */
-        .leaflet-control-attribution {
-            display: none !important;
-        }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
     </style>
@@ -59,7 +55,7 @@
 
             <div class="flex items-center gap-3">
                 <button onclick="cambiarPantalla('simulador3d')" class="hidden sm:flex bg-stone-900 border border-amber-500/30 hover:border-amber-500/60 px-4 py-2 rounded-xl items-center gap-2 text-xs font-futurista uppercase font-bold text-amber-400 cursor-pointer transition-all">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i> Simulador 3D🍔
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Simulador 3D
                 </button>
                 <button onclick="cambiarPantalla('carrito')" class="bg-stone-900 border border-amber-500/30 p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:border-amber-500/60">
                     <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
@@ -225,7 +221,7 @@
                 <p class="text-xs text-stone-400">Tu ubicación exacta se capturará automáticamente del GPS de tu dispositivo para calcular el costo de envío exacto.</p>
                 
                 <!-- Contenedor del Mapa Leaflet -->
-                <div id="mapa-delivery" class="w-full h-64 rounded-2xl border border-stone-800 relative z-10 bg-white"></div>
+                <div id="mapa-delivery" class="w-full h-64 rounded-2xl border border-stone-800 relative z-10 bg-stone-950"></div>
                 
                 <div class="grid grid-cols-2 gap-4 text-xs font-mono bg-stone-900 p-4 rounded-xl border border-stone-800">
                     <div>
@@ -291,18 +287,18 @@
         <img id="lightbox-imagen-completa" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition-transform duration-300">
     </div>
 
-    <footer class="border-t border-stone-950 bg-black/80 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 PIZZA PLANETA & D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <footer class="border-t border-stone-950 bg-black/80 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 CASA DE LAS PAPAS & D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
-        const SUPABASE_URL = "https://xikiwlmxhnrymwmbsyug.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpa2l3bG14aG5yeW13bWJzeXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0NDg3NTMsImV4cCI6MjEwMTAyNDc1M30.1HkgasBvA763iO6u0FnEhOIiCoTkBLJ8O8fL1WpGeDM"; 
+        const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let carrito = [];
         let capasActuales = []; 
         let catalogoIngredientes3D = [];
         let baseProductos = [], cuentasDB = [];
-        let productoSeleccionado = null, filtroInstagram = "luxury_store";
+        let productoSeleccionado = null;
         let fotoSeleccionadaParaLightbox = "";
         const precioBasePan = 1.00;
 
@@ -317,7 +313,7 @@
         let gpsClienteLng = null;
         const LOCAL_LAT = 8.5897;  // Coordenadas base en Mérida / Ejido
         const LOCAL_LNG = -71.1418;
-        let TARIFA_POR_KM = 0.50; // Valor por defecto actualizado
+        let TARIFA_POR_KM = 0.80; // Tarifa por defecto de respaldo
 
         // Función para cargar la tarifa de delivery desde Supabase
         async function cargarTarifaDeliveryDesdeSupabase() {
@@ -767,7 +763,7 @@
         }
 
         // ==========================================
-        // MÓDULO DE MAPA LEAFLET Y GPS OBLIGATORIO (FONDO CLARO TIPO GOOGLE MAPS)
+        // MÓDULO DE MAPA LEAFLET Y GPS OBLIGATORIO
         // ==========================================
         function inicializarMapaDelivery() {
             const contenedorMapa = document.getElementById('mapa-delivery');
@@ -775,9 +771,9 @@
 
             mapaDelivery = L.map('mapa-delivery').setView([LOCAL_LAT, LOCAL_LNG], 14);
 
-            // Capa estilo limpio claro similar a Google Maps (OpenStreetMap estándar)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors & CartoDB'
             }).addTo(mapaDelivery);
 
             // Icono del Local
@@ -837,7 +833,7 @@
             distanciaCalculadaKm = calcularDistanciaEnKm(LOCAL_LAT, LOCAL_LNG, lat, lng);
             
             let costoCalculado = distanciaCalculadaKm * TARIFA_POR_KM;
-            if (costoCalculado < 0.50 && distanciaCalculadaKm > 0.1) costoCalculado = 0.50; 
+            if (costoCalculado < 1.00 && distanciaCalculadaKm > 0.1) costoCalculado = 1.00; 
             if (distanciaCalculadaKm <= 0.1) costoCalculado = 0.00;
 
             costoDeliveryKm = parseFloat(costoCalculado.toFixed(2));
@@ -955,6 +951,7 @@
         async function finalizarOrdenWhatsApp() {
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
+            // Validar que se tenga la ubicación GPS del cliente obligatoria
             if(gpsClienteLat === null || gpsClienteLng === null) {
                 alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
                 return;
@@ -987,7 +984,7 @@
                 estado: "Pendiente",
                 codigo_referido: codigoReferidoCliente,
                 coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
-            }]);
+            }]); 
 
             carrito = [];
             document.getElementById('contador-carrito-badge').innerText = "0";
