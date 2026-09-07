@@ -40,39 +40,29 @@
             <div class="flex items-center space-x-4">
                 <div class="border border-amber-500/30 p-3 rounded-xl bg-stone-950/80 glow-gold"><i data-lucide="terminal" class="w-7 h-7 text-amber-400"></i></div>
                 <div>
-                    <h1 class="text-2xl font-black tracking-[0.2em] text-white font-futurista">CASA DE LAS<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">PAPAS</span></h1>
+                    <h1 class="text-2xl font-black tracking-[0.2em] text-white font-futurista">Vendaval<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">house</span></h1>
                     <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">PANEL DE CONTROL</p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
-    <!-- Contenedor de Instagram -->
-    <div id="contenedor-instagram" class="hidden sm:flex items-center justify-center bg-stone-950/90 border border-stone-800 p-2 rounded-xl w-40 h-10">
-        <span class="text-xs text-amber-400 font-bold">@</span>
-        <span id="owner-instagram-display" class="text-xs font-bold text-white ml-2">luxury_store</span>
-    </div>
+            <div class="flex flex-col gap-1.5 items-end">
+    <!-- Botón Ver Vitrina -->
+    <a href="https://dunigluxury.github.io/dunig-luxury/" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-stone-800 text-stone-400 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
+        <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> Ver Vitrina
+    </a>
 
-    <!-- Botones en columna -->
-    <div class="flex flex-col gap-1.5 items-end">
-        <!-- Botón Ver Vitrina -->
-        <a href="https://dunigluxury.github.io/d-unigluxury/" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-stone-800 text-stone-400 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
-            <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> Ver Vitrina
-        </a>
-
-        <!-- Botón Salir -->
-        <button onclick="ejecutarLogout()" class="px-2.5 py-1.5 rounded-lg border border-red-900/30 text-red-400 hover:text-red-300 transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
-        </button>
-    </div>
+    <!-- Botón Salir -->
+    <button onclick="ejecutarLogout()" class="px-2.5 py-1.5 rounded-lg border border-red-900/30 text-red-400 hover:text-red-300 transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
+    </button>
 </div>
-
-    <div class="max-w-7xl w-full mx-auto px-4 mt-8 relative z-10">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-stone-950/80 p-1.5 rounded-xl border border-stone-900 w-full">
-            <button id="tab-btn-principal" onclick="cambiarSeccionPanel('principal')" class="py-3 text-center text-[11px] uppercase tracking-widest font-futurista font-black rounded-lg bg-gradient-to-r from-amber-500 to-amber-400 text-black shadow-lg cursor-pointer transition-all">Gestión General</button>
-            <button id="tab-btn-ordenes" onclick="cambiarSeccionPanel('ordenes')" class="py-3 text-center text-[11px] uppercase tracking-widest font-futurista font-bold text-stone-500 rounded-lg hover:text-stone-200 cursor-pointer transition-all">Órdenes VIP</button>
-            <button id="tab-btn-extras" onclick="cambiarSeccionPanel('extras')" class="py-3 text-center text-[11px] uppercase tracking-widest font-futurista font-bold text-stone-500 rounded-lg hover:text-stone-200 cursor-pointer transition-all">Configurar Extras</button>
+                <div id="contenedor-instagram" class="hidden flex items-center justify-center bg-stone-950/90 border border-stone-800 p-2 rounded-xl w-40 h-10">
+    <span class="text-xs text-amber-400 font-bold">@</span>
+    <span id="owner-instagram-display" class="text-xs font-bold text-white ml-2">luxury_store</span>
+</div>
+            </div>
         </div>
-    </div>
+    </header>
 
     <main id="panel-seccion-principal" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-6">
