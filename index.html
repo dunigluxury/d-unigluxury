@@ -219,7 +219,6 @@
                 
                 <div id="mapa-delivery" class="w-full h-64 rounded-2xl border border-stone-800 relative z-10 bg-stone-950"></div>
                 
-                <!-- Panel inferior del mapa con Distancia, Tarifa y Botón GPS reubicado -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center text-xs font-mono bg-stone-900 p-4 rounded-xl border border-stone-800">
                     <div>
                         <span class="text-stone-400 block text-[9px] uppercase font-futurista">Distancia calculada:</span>
@@ -303,15 +302,14 @@
 
         let scene, camera, renderer, hamburguesaGrupo;
 
-        // Variables de Mapa y Delivery por GPS con Ruta Exacta
         let mapaDelivery = null;
         let marcadorCliente = null;
-        let lineaRutaDelivery = null; // Capa para la línea de ruta exacta
+        let lineaRutaDelivery = null;
         let costoDeliveryKm = 0;
         let distanciaCalculadaKm = 0;
         let gpsClienteLat = null;
         let gpsClienteLng = null;
-        const LOCAL_LAT = 8.5897;  // Coordenadas base en Mérida / Ejido
+        const LOCAL_LAT = 8.5897;  
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
@@ -761,9 +759,6 @@
             cambiarPantalla('vitrina');
         }
 
-        // =======================================================
-        // MÓDULO DE MAPA LEAFLET, BLOQUEO Y RUTA EXACTA DESDE LOCAL
-        // =======================================================
         function inicializarMapaDelivery() {
             const contenedorMapa = document.getElementById('mapa-delivery');
             if (!contenedorMapa || mapaDelivery) return;
@@ -775,7 +770,6 @@
                 attribution: ''
             }).addTo(mapaDelivery);
 
-            // Icono del Local (Casa de las Papas)
             const iconoLocal = L.divIcon({
                 className: 'custom-local-icon',
                 html: '<div style="background:#f59e0b; width:16px; height:16px; border-radius:50%; border:2px solid #000; box-shadow: 0 0 10px #f59e0b;" title="Casa de las Papas"></div>',
@@ -783,13 +777,9 @@
             });
             L.marker([LOCAL_LAT, LOCAL_LNG], { icon: iconoLocal }).addTo(mapaDelivery).bindPopup("<b>CASA DE LAS PAPAS</b><br>Punto de Salida");
 
-            // Marcador del Cliente
             marcadorCliente = L.marker([LOCAL_LAT, LOCAL_LNG], { draggable: true }).addTo(mapaDelivery);
 
-            // Deshabilitar la edición manual por defecto hasta que el usuario decida desbloquear o usar GPS
             bloquearInteraccionMapa();
-
-            // Obtener GPS del navegador de inmediato al entrar al carrito
             obtenerUbicacionGPSActual();
         }
 
@@ -819,7 +809,7 @@
                         marcadorCliente.setLatLng([lat, lng]);
                         mapaDelivery.setView([lat, lng], 15);
                         actualizarCoordenadasYTrazarRuta(lat, lng);
-                        bloquearInteraccionMapa(); // Se asegura de bloquear el mapa tras fijar la posición GPS
+                        bloquearInteraccionMapa();
                     }
                 },
                 (error) => {
@@ -845,7 +835,6 @@
             document.getElementById('display-km').innerText = `${distanciaCalculadaKm.toFixed(2)} km`;
             document.getElementById('display-costo-km').innerText = `$${costoDeliveryKm.toFixed(2)}`;
 
-            // Trazar línea de ruta exacta desde el local hasta el cliente
             if (lineaRutaDelivery) {
                 mapaDelivery.removeLayer(lineaRutaDelivery);
             }
@@ -996,14 +985,20 @@
 
             const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
-            await supabaseClient.from('ordenes_vip').insert([{
+            // Objeto sincronizado con todos los campos necesarios incluyendo costo_delivery y duplicados limpios
+            datosOrdenPendiente = {
                 productos: carrito.map(i => i.titulo).join(', '),
                 total: totalGeneral,
+                monto_total: totalGeneral,
                 referencia: ref,
+                referencia_bancaria: ref,
                 estado: "Pendiente",
                 codigo_referido: codigoReferidoCliente,
-                coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
-            }]); 
+                coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`,
+                costo_delivery: costoDeliveryKm
+            };
+
+            await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
 
             carrito = [];
             document.getElementById('contador-carrito-badge').innerText = "0";
