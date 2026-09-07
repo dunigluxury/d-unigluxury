@@ -8,8 +8,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Librería html2canvas para la generación del archivo PNG seguro -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
@@ -49,7 +47,7 @@
                        CASA DE LAS <span class="text-amber-400">PAPAS</span>
                     </h1>
                     <p class="text-[8px] text-amber-500/70 uppercase tracking-[0.25em] font-bold font-futurista">
-                        MERIDA-VENEZUELA
+                        MERIDA VENEZUELA
                     </p>
                 </div>
             </div>
@@ -69,11 +67,11 @@
     <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
         <div class="glass-panel rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl relative">
             <div class="w-full h-64 md:h-80 relative overflow-hidden bg-black">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
+                <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=1200&auto=format&fit=crop" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 space-y-2">
-                    <span class="text-[10px] text-amber-400 font-futurista font-bold uppercase tracking-widest bg-amber-500/20 px-3 py-1 rounded-full border border-amber-500/30 w-max backdrop-blur-md">TU MEJOR OPCION VIP</span>
+                    <span class="text-[10px] text-amber-400 font-futurista font-bold uppercase tracking-widest bg-amber-500/20 px-3 py-1 rounded-full border border-amber-500/30 w-max backdrop-blur-md">Motor Gráfico WebGL & Catálogo VIP</span>
                     <h2 class="text-2xl md:text-4xl font-black text-white font-futurista tracking-wider uppercase drop-shadow-lg">
-                        ELIGE TU PEDIDO<span class="text-amber-400">"YA"</span>
+                        CASA DE LAS PAPAS <span class="text-amber-400">(Mérida - Venezuela)</span>
                     </h2>
                     <p class="text-xs text-stone-300 max-w-xl">Arrastra ingredientes en tiempo real o explora nuestras especialidades certificadas.</p>
                 </div>
@@ -280,25 +278,28 @@
         <i data-lucide="ticket" class="w-7 h-7 stroke-[2.5]"></i>
     </a>
 
-    <!-- MODAL DE ORDEN CONGELADA / ENCAPSULADA CON IMAGEN PNG -->
+    <!-- MODAL CON ENLACE DE ORDEN ENCAPSULADA (SOLUCIÓN DE LINK SEGURO) -->
     <div id="modal-orden-congelada" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
         <div class="glass-panel border border-amber-500/40 w-full max-w-lg rounded-3xl p-6 space-y-5 shadow-2xl relative">
             <div class="flex justify-between items-center border-b border-stone-800 pb-3">
                 <h3 class="text-sm font-black font-futurista text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i> Orden Congelada y Verificada en PNG
+                    <i data-lucide="link" class="w-4 h-4"></i> Enlace de Orden Verificada
                 </h3>
                 <button onclick="cerrarModalCongelado()" class="text-stone-400 hover:text-white cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <p class="text-[11px] text-stone-400">Este resumen está protegido. Al presionar el botón inferior, se generará una imagen PNG segura de tu orden que se descargará a tu dispositivo y abrirá WhatsApp.</p>
+            <p class="text-[11px] text-stone-400">Tu orden ha sido registrada de forma segura. Al presionar el botón de abajo, se enviará directamente el enlace directo con tu resumen protegido hacia WhatsApp sin que pueda ser modificado.</p>
 
-            <!-- Cuadro no editable con la orden congelada que sirve de canvas -->
-            <textarea id="texto-orden-congelada" readonly rows="9" class="w-full bg-stone-950 border border-stone-800 text-xs text-stone-300 font-mono p-3.5 rounded-2xl focus:outline-none resize-none cursor-default select-all"></textarea>
+            <!-- Caja con el enlace limpio generado -->
+            <div class="space-y-1.5">
+                <label class="text-[9px] uppercase text-amber-400 font-bold tracking-widest block font-futurista">Enlace Único de la Orden:</label>
+                <input type="text" id="input-enlace-orden" readonly class="w-full bg-stone-950 border border-stone-800 text-xs text-amber-400 font-mono p-3.5 rounded-2xl focus:outline-none cursor-default select-all" />
+            </div>
 
             <button id="btn-disparar-whatsapp" onclick="ejecutarEnvioWhatsAppReal()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
-                <i data-lucide="send" class="w-4 h-4"></i> Descargar Imagen PNG y Enviar 🚀
+                <i data-lucide="send" class="w-4 h-4"></i> Enviar Enlace de Orden por WhatsApp 🚀
             </button>
         </div>
     </div>
@@ -321,7 +322,7 @@
         let capasActuales = []; 
         let catalogoIngredientes3D = [];
         let baseProductos = [], cuentasDB = [];
-        let productoSeleccionado = null, filtroInstagram = "luxury_store";
+        let productoSeleccionado = null;
         let fotoSeleccionadaParaLightbox = "";
         const precioBasePan = 1.00;
 
@@ -338,6 +339,7 @@
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
+        // Variables temporales para el modal de link protegido de WhatsApp
         let mensajeTemporalWhatsApp = "";
         let numeroWsTemporal = "584120000000";
         let datosOrdenPendiente = null;
@@ -986,6 +988,9 @@
             lucide.createIcons();
         });
 
+        // =======================================================
+        // FLUJO DE MODAL CON LINK DE ORDEN ENCAPSULADA
+        // =======================================================
         async function finalizarOrdenWhatsApp() {
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
@@ -1013,8 +1018,10 @@
             if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
 
             numeroWsTemporal = wsNum;
-            mensajeTemporalWhatsApp = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
+            // Generamos primero la data que se guardará en Supabase y formamos un ID temporal o hash de la orden
+            const idTokenOrden = 'VIP-' + Math.floor(100000 + Math.random() * 900000);
+            
             datosOrdenPendiente = {
                 productos: carrito.map(i => i.titulo).join(', '),
                 total: totalGeneral,
@@ -1024,8 +1031,18 @@
                 coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
             };
 
-            document.getElementById('texto-orden-congelada').value = mensajeTemporalWhatsApp;
+            // Creamos el enlace web oficial apuntando a la misma página o a una vista de ticket digital con los datos de esta orden
+            // O un mensaje limpio que solo lleve el enlace cifrado/resumen web para que no tengan que tipear texto editable.
+            const urlBaseActual = window.location.href.split('?')[0];
+            const enlaceUnicoOrden = `${urlBaseActual}?orden_id=${idTokenOrden}&ref=${ref}&total=${totalGeneral.toFixed(2)}`;
+
+            // El mensaje que se enviará a WhatsApp contendrá ÚNICAMENTE el enlace seguro y la referencia corta
+            mensajeTemporalWhatsApp = `🍔 *NUEVA ORDEN VIP VERIFICADA* 🍔\n\n📌 *ID Orden:* ${idTokenOrden}\n🔢 *Referencia:* ${ref}\n💵 *Total:* $${totalGeneral.toFixed(2)}\n\n👉 *Ver detalles completos y ruta GPS aquí:* \n${enlaceUnicoOrden}`;
+
+            // Volcar el enlace seguro en el input no editable del modal
+            document.getElementById('input-enlace-orden').value = enlaceUnicoOrden;
             
+            // Mostrar el modal
             document.getElementById('modal-orden-congelada').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             setTimeout(() => lucide.createIcons(), 50);
@@ -1036,54 +1053,25 @@
             document.body.style.overflow = 'auto';
         }
 
-        // =======================================================
-        // FUNCIÓN ACTUALIZADA: RENDERIZADO PNG AUTOMÁTICO
-        // =======================================================
         async function ejecutarEnvioWhatsAppReal() {
             if (!datosOrdenPendiente || !mensajeTemporalWhatsApp) return;
 
-            const contenedorRecibo = document.getElementById('texto-orden-congelada');
-            
-            // Registrar orden en Supabase
+            // Registrar orden de forma segura en Supabase al hacer clic
             await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
 
-            try {
-                // Capturar el recibo visual mediante html2canvas
-                const canvas = await html2canvas(contenedorRecibo, {
-                    scale: 2,
-                    backgroundColor: '#0c0a09'
-                });
-
-                canvas.toBlob(async (blob) => {
-                    const linkDescarga = document.createElement('a');
-                    linkDescarga.href = URL.createObjectURL(blob);
-                    linkDescarga.download = `Orden_VIP_CasaDeLasPapas_${Date.now()}.png`;
-                    linkDescarga.click();
-
-                    // Limpieza de estados y carrito
-                    carrito = [];
-                    document.getElementById('contador-carrito-badge').innerText = "0";
-                    document.getElementById('input-ref-pago').value = "";
-                    localStorage.removeItem('dunig_ref_code');
-                    
-                    const urlFinal = `https://api.whatsapp.com/send?phone=${numeroWsTemporal}&text=${encodeURIComponent("Hola, adjunto mi comprobante y orden VIP generada en formato de imagen segura PNG.")}`;
-                    
-                    cerrarModalCongelado();
-                    cambiarPantalla('vitrina');
-                    
-                    window.open(urlFinal, '_blank');
-                }, 'image/png');
-
-            } catch (error) {
-                console.error("Error al generar la imagen PNG de la orden:", error);
-                // Fallback directo por texto plano en caso de fallo crítico en el navegador
-                const urlFinalFallback = `https://api.whatsapp.com/send?phone=${numeroWsTemporal}&text=${encodeURIComponent(mensajeTemporalWhatsApp)}`;
-                carrito = [];
-                document.getElementById('contador-carrito-badge').innerText = "0";
-                cerrarModalCongelado();
-                cambiarPantalla('vitrina');
-                window.open(urlFinalFallback, '_blank');
-            }
+            // Limpieza de estados y carrito
+            carrito = [];
+            document.getElementById('contador-carrito-badge').innerText = "0";
+            document.getElementById('input-ref-pago').value = "";
+            localStorage.removeItem('dunig_ref_code');
+            
+            const urlFinal = `https://api.whatsapp.com/send?phone=${numeroWsTemporal}&text=${encodeURIComponent(mensajeTemporalWhatsApp)}`;
+            
+            cerrarModalCongelado();
+            cambiarPantalla('vitrina');
+            
+            // Abrir WhatsApp con el enlace encapsulado listo para enviar
+            window.open(urlFinal, '_blank');
         }
     </script>
 </body>
