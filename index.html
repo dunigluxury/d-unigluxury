@@ -71,7 +71,7 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 space-y-2">
                     <span class="text-[10px] text-amber-400 font-futurista font-bold uppercase tracking-widest bg-amber-500/20 px-3 py-1 rounded-full border border-amber-500/30 w-max backdrop-blur-md">Motor Gráfico WebGL & Catálogo VIP</span>
                     <h2 class="text-2xl md:text-4xl font-black text-white font-futurista tracking-wider uppercase drop-shadow-lg">
-                        REALIZA TU PEDIDO<span class="text-amber-400">"AHORA MISMO"</span>
+                        ELIGE TU PEDIDO<span class="text-amber-400">"YA"</span>
                     </h2>
                     <p class="text-xs text-stone-300 max-w-xl">Arrastra ingredientes en tiempo real o explora nuestras especialidades certificadas.</p>
                 </div>
@@ -279,6 +279,29 @@
         <i data-lucide="ticket" class="w-7 h-7 stroke-[2.5]"></i>
     </a>
 
+    <!-- MODAL DE ORDEN CONGELADA / ENCAPSULADA -->
+    <div id="modal-orden-congelada" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="glass-panel border border-amber-500/40 w-full max-w-lg rounded-3xl p-6 space-y-5 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-stone-800 pb-3">
+                <h3 class="text-sm font-black font-futurista text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Orden Congelada y Verificada
+                </h3>
+                <button onclick="cerrarModalCongelado()" class="text-stone-400 hover:text-white cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <p class="text-[11px] text-stone-400">Este resumen está protegido y encapsulado. Revisa los datos y presiona el botón inferior para enviar definitivamente a WhatsApp.</p>
+
+            <!-- Cuadro no editable con la orden congelada -->
+            <textarea id="texto-orden-congelada" readonly rows="9" class="w-full bg-stone-950 border border-stone-800 text-xs text-stone-300 font-mono p-3.5 rounded-2xl focus:outline-none resize-none cursor-default select-all"></textarea>
+
+            <button id="btn-disparar-whatsapp" onclick="ejecutarEnvioWhatsAppReal()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
+                <i data-lucide="send" class="w-4 h-4"></i> Enviar Orden por WhatsApp 🚀
+            </button>
+        </div>
+    </div>
+
     <div id="modal-lightbox" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out" onclick="cerrarAmplificacion()">
         <button class="absolute top-6 right-6 text-stone-400 hover:text-white transition-colors cursor-pointer">
             <i data-lucide="x" class="w-8 h-8"></i>
@@ -306,14 +329,19 @@
         // Variables de Mapa y Delivery por GPS con Ruta Exacta
         let mapaDelivery = null;
         let marcadorCliente = null;
-        let lineaRutaDelivery = null; // Capa para la línea de ruta exacta
+        let lineaRutaDelivery = null; 
         let costoDeliveryKm = 0;
         let distanciaCalculadaKm = 0;
         let gpsClienteLat = null;
         let gpsClienteLng = null;
-        const LOCAL_LAT = 8.5897;  // Coordenadas base en Mérida / Ejido
+        const LOCAL_LAT = 8.5897;  
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
+
+        // Variables temporales para el modal protegido de WhatsApp
+        let mensajeTemporalWhatsApp = "";
+        let numeroWsTemporal = "584120000000";
+        let datosOrdenPendiente = null;
 
         async function cargarTarifaDeliveryDesdeSupabase() {
             const { data, error } = await supabaseClient
@@ -786,10 +814,7 @@
             // Marcador del Cliente
             marcadorCliente = L.marker([LOCAL_LAT, LOCAL_LNG], { draggable: true }).addTo(mapaDelivery);
 
-            // Deshabilitar la edición manual por defecto hasta que el usuario decida desbloquear o usar GPS
             bloquearInteraccionMapa();
-
-            // Obtener GPS del navegador de inmediato al entrar al carrito
             obtenerUbicacionGPSActual();
         }
 
@@ -819,7 +844,7 @@
                         marcadorCliente.setLatLng([lat, lng]);
                         mapaDelivery.setView([lat, lng], 15);
                         actualizarCoordenadasYTrazarRuta(lat, lng);
-                        bloquearInteraccionMapa(); // Se asegura de bloquear el mapa tras fijar la posición GPS
+                        bloquearInteraccionMapa(); 
                     }
                 },
                 (error) => {
@@ -845,7 +870,6 @@
             document.getElementById('display-km').innerText = `${distanciaCalculadaKm.toFixed(2)} km`;
             document.getElementById('display-costo-km').innerText = `$${costoDeliveryKm.toFixed(2)}`;
 
-            // Trazar línea de ruta exacta desde el local hasta el cliente
             if (lineaRutaDelivery) {
                 mapaDelivery.removeLayer(lineaRutaDelivery);
             }
@@ -968,53 +992,81 @@
             lucide.createIcons();
         });
 
+        // =======================================================
+        // FLUJO MODAL PROTEGIDO PARA WHATSAPP
+        // =======================================================
         async function finalizarOrdenWhatsApp() {
-    if(carrito.length === 0) { alert("Agrega productos primero."); return; }
-    
-    if(gpsClienteLat === null || gpsClienteLng === null) {
-        alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
-        return;
-    }
+            if(carrito.length === 0) { alert("Agrega productos primero."); return; }
+            
+            if(gpsClienteLat === null || gpsClienteLng === null) {
+                alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
+                return;
+            }
 
-    const ref = document.getElementById('input-ref-pago').value.trim();
-    const idx = document.getElementById('select-metodo-pago').value;
+            const ref = document.getElementById('input-ref-pago').value.trim();
+            const idx = document.getElementById('select-metodo-pago').value;
 
-    if(idx === "" || !cuentasDB[idx]) { alert("Selecciona un método de pago."); return; }
-    if(!/^\d{12}$/.test(ref)) { alert("Inserta un número de referencia válido de exactamente 12 dígitos."); return; }
+            if(idx === "" || !cuentasDB[idx]) { alert("Selecciona un método de pago."); return; }
+            if(!/^\d{12}$/.test(ref)) { alert("Inserta un número de referencia válido de exactamente 12 dígitos."); return; }
 
-    const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
-    const cuenta = cuentasDB[idx];
-    
-    let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
-    let totalGeneral = subtotalProductos + costoDeliveryKm;
-    let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
-    const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
+            const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
+            const cuenta = cuentasDB[idx];
+            
+            let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
+            let totalGeneral = subtotalProductos + costoDeliveryKm;
+            let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
+            const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
 
-    let wsNum = "584120000000";
-    const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
-    if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
+            let wsNum = "584120000000";
+            const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
+            if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
 
-    // El mensaje se encapsula por completo de forma interna
-    const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
+            numeroWsTemporal = wsNum;
+            mensajeTemporalWhatsApp = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
-    await supabaseClient.from('ordenes_vip').insert([{
-        productos: carrito.map(i => i.titulo).join(', '),
-        total: totalGeneral,
-        referencia: ref,
-        estado: "Pendiente",
-        codigo_referido: codigoReferidoCliente,
-        coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
-    }]); 
+            datosOrdenPendiente = {
+                productos: carrito.map(i => i.titulo).join(', '),
+                total: totalGeneral,
+                referencia: ref,
+                estado: "Pendiente",
+                codigo_referido: codigoReferidoCliente,
+                coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
+            };
 
-    carrito = [];
-    document.getElementById('contador-carrito-badge').innerText = "0";
-    document.getElementById('input-ref-pago').value = "";
-    localStorage.removeItem('dunig_ref_code');
-    cambiarPantalla('vitrina');
-    
-    // Se abre directamente el enlace con el texto encapsulado, sin inputs intermedios de texto
-    window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
-}
+            // Volcar el texto en el cuadro no editable del modal
+            document.getElementById('texto-orden-congelada').value = mensajeTemporalWhatsApp;
+            
+            // Mostrar el modal
+            document.getElementById('modal-orden-congelada').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        function cerrarModalCongelado() {
+            document.getElementById('modal-orden-congelada').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        async function ejecutarEnvioWhatsAppReal() {
+            if (!datosOrdenPendiente || !mensajeTemporalWhatsApp) return;
+
+            // Registrar en Supabase justo al confirmar desde el modal blindado
+            await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
+
+            // Limpieza de estados y carrito
+            carrito = [];
+            document.getElementById('contador-carrito-badge').innerText = "0";
+            document.getElementById('input-ref-pago').value = "";
+            localStorage.removeItem('dunig_ref_code');
+            
+            const urlFinal = `https://api.whatsapp.com/send?phone=${numeroWsTemporal}&text=${encodeURIComponent(mensajeTemporalWhatsApp)}`;
+            
+            cerrarModalCongelado();
+            cambiarPantalla('vitrina');
+            
+            // Abrir WhatsApp con la orden protegida
+            window.open(urlFinal, '_blank');
+        }
     </script>
 </body>
 </html>
