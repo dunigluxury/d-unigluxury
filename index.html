@@ -969,49 +969,52 @@
         });
 
         async function finalizarOrdenWhatsApp() {
-            if(carrito.length === 0) { alert("Agrega productos primero."); return; }
-            
-            if(gpsClienteLat === null || gpsClienteLng === null) {
-                alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
-                return;
-            }
+    if(carrito.length === 0) { alert("Agrega productos primero."); return; }
+    
+    if(gpsClienteLat === null || gpsClienteLng === null) {
+        alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
+        return;
+    }
 
-            const ref = document.getElementById('input-ref-pago').value.trim();
-            const idx = document.getElementById('select-metodo-pago').value;
+    const ref = document.getElementById('input-ref-pago').value.trim();
+    const idx = document.getElementById('select-metodo-pago').value;
 
-            if(idx === "" || !cuentasDB[idx]) { alert("Selecciona un método de pago."); return; }
-            if(!/^\d{12}$/.test(ref)) { alert("Inserta un número de referencia válido de exactamente 12 dígitos."); return; }
+    if(idx === "" || !cuentasDB[idx]) { alert("Selecciona un método de pago."); return; }
+    if(!/^\d{12}$/.test(ref)) { alert("Inserta un número de referencia válido de exactamente 12 dígitos."); return; }
 
-            const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
-            const cuenta = cuentasDB[idx];
-            
-            let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
-            let totalGeneral = subtotalProductos + costoDeliveryKm;
-            let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
-            const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
+    const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
+    const cuenta = cuentasDB[idx];
+    
+    let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
+    let totalGeneral = subtotalProductos + costoDeliveryKm;
+    let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
+    const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
 
-            let wsNum = "584120000000";
-            const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
-            if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
+    let wsNum = "584120000000";
+    const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
+    if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
 
-            const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
+    // El mensaje se encapsula por completo de forma interna
+    const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
-            await supabaseClient.from('ordenes_vip').insert([{
-                productos: carrito.map(i => i.titulo).join(', '),
-                total: totalGeneral,
-                referencia: ref,
-                estado: "Pendiente",
-                codigo_referido: codigoReferidoCliente,
-                coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
-            }]); 
+    await supabaseClient.from('ordenes_vip').insert([{
+        productos: carrito.map(i => i.titulo).join(', '),
+        total: totalGeneral,
+        referencia: ref,
+        estado: "Pendiente",
+        codigo_referido: codigoReferidoCliente,
+        coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`
+    }]); 
 
-            carrito = [];
-            document.getElementById('contador-carrito-badge').innerText = "0";
-            document.getElementById('input-ref-pago').value = "";
-            localStorage.removeItem('dunig_ref_code');
-            cambiarPantalla('vitrina');
-            window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
-        }
+    carrito = [];
+    document.getElementById('contador-carrito-badge').innerText = "0";
+    document.getElementById('input-ref-pago').value = "";
+    localStorage.removeItem('dunig_ref_code');
+    cambiarPantalla('vitrina');
+    
+    // Se abre directamente el enlace con el texto encapsulado, sin inputs intermedios de texto
+    window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
+}
     </script>
 </body>
 </html>
