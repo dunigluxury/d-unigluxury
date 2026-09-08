@@ -56,10 +56,6 @@
                     <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
                 </button>
             </div>
-            <div id="contenedor-instagram" class="hidden flex items-center justify-center bg-stone-950/90 border border-stone-800 p-2 rounded-xl w-40 h-10">
-                <span class="text-xs text-amber-400 font-bold">@</span>
-                <span id="owner-instagram-display" class="text-xs font-bold text-white ml-2">luxury_store</span>
-            </div>
         </div>
     </header>
 
@@ -265,7 +261,8 @@
         </div>
     </main>
 
-    <main id="panel-seccion-extras" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
+    <main id="panel-seccion-extras" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10 space-y-6">
+        <!-- Canal WhatsApp -->
         <div class="max-w-md mx-auto glass-panel p-6 rounded-2xl shadow-2xl border border-stone-900/60 space-y-4">
             <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-3">
                 <i data-lucide="phone-call" class="w-4 h-4"></i>
@@ -280,6 +277,27 @@
             </div>
             <button onclick="guardarAjusteWhatsAppEnSupabase()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform hover:scale-[1.01]">
                 Sincronizar Canal VIP
+            </button>
+        </div>
+
+        <!-- NUEVO: Aviso de Abierto / Cerrado para la Vitrina -->
+        <div class="max-w-md mx-auto glass-panel p-6 rounded-2xl shadow-2xl border border-stone-900/60 space-y-4">
+            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-3">
+                <i data-lucide="store" class="w-4 h-4"></i>
+                <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Estado del Negocio (Vitrina)</h3>
+            </div>
+            <p class="text-[11px] text-stone-400 leading-relaxed font-mono">
+                Define si el local se encuentra abierto o cerrado para reflejar el aviso automáticamente en la vitrina pública.
+            </p>
+            <div class="space-y-1.5">
+                <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">Estado Actual</label>
+                <select id="config-estado-negocio" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white font-mono p-3.5 rounded-xl focus:outline-none focus:border-amber-400/40">
+                    <option value="abierto">🟢 Abierto - Recibiendo Órdenes</option>
+                    <option value="cerrado">🔴 Cerrado - Temporalmente Inactivo</option>
+                </select>
+            </div>
+            <button onclick="guardarEstadoNegocioEnSupabase()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform hover:scale-[1.01]">
+                Actualizar Estado en Vitrina
             </button>
         </div>
     </main>
@@ -356,7 +374,10 @@
             document.getElementById(`tab-btn-${target}`).className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
 
             if (target === 'ordenes') descargarHistorialDeOrdenes();
-            if (target === 'extras') descargarAjusteWhatsApp();
+            if (target === 'extras') {
+                descargarAjusteWhatsApp();
+                descargarEstadoNegocio();
+            }
         }
 
         async function descargarCatalogoDeSupabase() {
@@ -824,7 +845,7 @@
                 document.getElementById('pago-telefono').value = cuenta.telefono || '';
             } else if (cuenta.plataforma === "zelle") {
                 document.getElementById('pago-email').value = cuenta.email || '';
-                document.getElementById('pangle-titular').value = cuenta.titular || '';
+                document.getElementById('pago-titular').value = cuenta.titular || '';
             } else if (cuenta.plataforma === "nequi") {
                 document.getElementById('pago-telefono').value = cuenta.telefono || '';
                 document.getElementById('pago-titular').value = cuenta.titular || '';
@@ -927,6 +948,33 @@
                 .upsert({ id: 'whatsapp_notificaciones', valor: num, updated_at: new Date().toISOString() });
 
             if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
+        }
+
+        // NUEVO: Funciones para el estado de Abierto / Cerrado
+        async function descargarEstadoNegocio() {
+            const { data, error } = await supabaseClient
+                .from('ajustes_sistema')
+                .select('valor')
+                .eq('id', 'estado_negocio')
+                .single();
+            
+            if(!error && data) {
+                document.getElementById('config-estado-negocio').value = data.valor;
+            }
+        }
+
+        async function guardarEstadoNegocioEnSupabase() {
+            const estado = document.getElementById('config-estado-negocio').value;
+
+            const { error } = await supabaseClient
+                .from('ajustes_sistema')
+                .upsert({ id: 'estado_negocio', valor: estado, updated_at: new Date().toISOString() });
+
+            if(!error) { 
+                alert("¡Estado del negocio actualizado correctamente para la vitrina!"); 
+            } else { 
+                alert("Error al guardar estado: " + error.message); 
+            }
         }
     </script>
 </body>
