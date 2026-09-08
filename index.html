@@ -282,7 +282,7 @@
                     </select>
                 </div>
 
-                <!-- CASILLA DE REFERENCIA (SE OCULTA SI ES EFECTIVO) -->
+                <!-- CASILLA DE REFERENCIA (SE OCULTa SI ES EFECTIVO) -->
                 <div id="contenedorReferenciaCart" class="space-y-1.5 hidden">
                     <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
                     <input type="text" id="input-ref-pago" placeholder="Ingresa datos o código de referencia" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider">
@@ -954,7 +954,7 @@
             }
         }
 
-        // --- GESTIÓN DE CAMPOS DE PAGO ---
+        // --- NUEVA LÓGICA DE GESTIÓN DE PAGOS ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
