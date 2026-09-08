@@ -126,7 +126,24 @@
                     <div id="lista-adicionales" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
                 </div>
             </div>
-
+            <!-- Formulario de Ingredientes 3D -->
+            <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
+                <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
+                    <i data-lucide="box" class="w-4 h-4"></i>
+                    <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Ingredientes 3D</h3>
+                </div>
+                <div class="space-y-2">
+                    <input type="text" id="ing3d-nombre" placeholder="Nombre (Ej: Papa Extra)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+                    <input type="number" id="ing3d-precio" step="0.01" placeholder="Precio ($)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+                    <input type="text" id="ing3d-modelo" placeholder="URL o Referencia del Modelo 3D" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+                    <button onclick="guardarIngrediente3D()" class="w-full bg-stone-900 border border-stone-800 text-amber-400 font-futurista font-bold p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-800">Inyectar Ingrediente 3D</button>
+                </div>
+                
+                <div class="border-t border-stone-900 pt-4 mt-4">
+                    <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Ingredientes 3D Registrados</h4>
+                    <div id="lista-ingredientes-3d" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
             <!-- Método de Pago -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -557,58 +574,69 @@
             }
         }
 
-        async function guardarIngredienteSupabase() {
-            const input = document.getElementById('ingrediente-nombre');
-            const nombre = input.value.trim();
+        // GESTIÓN DE INGREDIENTES 3D
+        async function guardarIngrediente3D() {
+            const nombre = document.getElementById('ing3d-nombre').value.trim();
+            const precio = parseFloat(document.getElementById('ing3d-precio').value);
+            const modeloUrl = document.getElementById('ing3d-modelo').value.trim();
 
-            if (!nombre) {
-                alert("Por favor, ingresa el nombre del ingrediente.");
+            if (!nombre || isNaN(precio)) {
+                alert("Por favor, ingresa al menos un nombre y un precio válido.");
                 return;
             }
 
             const { error } = await supabaseClient
-                .from('ingredientes')
-                .insert([{ nombre: nombre, instagram_dueno: filtroInstagram }]);
+                .from('ingredientes_3d')
+                .insert([{ 
+                    nombre: nombre, 
+                    precio: precio, 
+                    imagen_url: modeloUrl, 
+                    instagram_dueno: filtroInstagram 
+                }]);
 
             if (error) {
-                alert("Error al guardar ingrediente: " + error.message);
+                alert("Error al guardar el ingrediente 3D: " + error.message);
             } else {
-                input.value = "";
-                descargarIngredientesSupabase();
+                alert("Ingrediente 3D registrado con éxito.");
+                document.getElementById('ing3d-nombre').value = "";
+                document.getElementById('ing3d-precio').value = "";
+                document.getElementById('ing3d-modelo').value = "";
+                descargarIngredientes3D();
             }
         }
 
-        async function descargarIngredientesSupabase() {
+        async function descargarIngredientes3D() {
             const { data, error } = await supabaseClient
-                .from('ingredientes')
+                .from('ingredientes_3d')
                 .select('*')
                 .eq('instagram_dueno', filtroInstagram);
 
             if (!error && data) {
-                const lista = document.getElementById('lista-ingredientes');
+                const lista = document.getElementById('lista-ingredientes-3d');
                 if (lista) {
                     lista.innerHTML = "";
-                    if (data.length === 0) {
-                        lista.innerHTML = `<span class="text-[10px] text-stone-600 font-mono">Sin ingredientes registrados.</span>`;
-                        return;
-                    }
-                    data.forEach(item => {
+                    data.forEach(ing => {
                         lista.innerHTML += `
                             <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
-                                <span>${item.nombre}</span>
-                                <button onclick="eliminarIngredienteSupabase(${item.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
+                                <div>
+                                    <span class="text-white font-bold">${ing.nombre}</span> - <span class="text-amber-400">$${ing.precio}</span>
+                                    <div class="text-[9px] text-stone-500 truncate max-w-[150px]">${ing.imagen_url || 'Sin modelo 3D'}</div>
+                                </div>
+                                <button onclick="eliminarIngrediente3D('${ing.id}')" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
                             </div>`;
                     });
                 }
             }
         }
 
-        async function eliminarIngredienteSupabase(id) {
-            const { error } = await supabaseClient.from('ingredientes').delete().eq('id', id);
-            if (!error) {
-                descargarIngredientesSupabase();
-            } else {
-                alert("Error al eliminar: " + error.message);
+        async function eliminarIngrediente3D(id) {
+            if (confirm("¿Estás seguro de eliminar este ingrediente 3D?")) {
+                const { error } = await supabaseClient.from('ingredientes_3d').delete().eq('id', id);
+                if (!error) {
+                    descargarIngredientes3D();
+                } else {
+                    alert("Error al eliminar: " + error.message);
+                }
             }
         }
 
