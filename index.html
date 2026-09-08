@@ -270,16 +270,22 @@
             </div>
             
             <div class="space-y-3 pt-2 border-t border-stone-900">
+                <!-- SELECCIÓN DEL MÉTODO DE PAGO -->
                 <div class="space-y-1.5">
-                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">1. Cuenta Destino Colectora</label>
-                    <select id="select-metodo-pago" onchange="mostrarDetallesBanco()" class="w-full bg-stone-900 border border-stone-800 text-xs text-stone-300 p-3.5 rounded-xl focus:outline-none focus:border-amber-500/40 font-medium"></select>
+                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">1. Selecciona Método de Pago</label>
+                    <select id="tipoMetodoPago" onchange="gestionarCamposPagoCart()" class="w-full bg-stone-900 border border-stone-800 text-xs text-stone-300 p-3.5 rounded-xl focus:outline-none focus:border-amber-500/40 font-medium">
+                        <option value="">Seleccione una opción...</option>
+                        <option value="zelle">Zelle</option>
+                        <option value="nequi">Nequi</option>
+                        <option value="pago_movil">Pago Móvil</option>
+                        <option value="efectivo">Efectivo</option>
+                    </select>
                 </div>
 
-                <div id="caja-banco-detalle" class="hidden bg-stone-900/90 border border-amber-500/20 p-4 rounded-xl text-xs space-y-1.5 text-stone-300 font-mono"></div>
-
-                <div class="space-y-1.5">
-                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Referencia (12 Dígitos)</label>
-                    <input type="text" id="input-ref-pago" maxlength="12" inputmode="numeric" placeholder="000012345678" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider">
+                <!-- CASILLA DE REFERENCIA (SE OCULTa SI ES EFECTIVO) -->
+                <div id="contenedorReferenciaCart" class="space-y-1.5 hidden">
+                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
+                    <input type="text" id="input-ref-pago" placeholder="Ingresa datos o código de referencia" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider">
                 </div>
 
                 <div id="contenedor-ref-info" class="hidden bg-stone-900 border border-amber-500/30 p-3 rounded-xl text-xs">
@@ -315,8 +321,8 @@
         let carrito = [];
         let capasActuales = []; 
         let catalogoIngredientes3D = [];
-        let baseProductos = [], cuentasDB = [];
-        let productoSeleccionado = null, filtroInstagram = "luxury_store";
+        let baseProductos = [];
+        let productoSeleccionado = null;
         let fotoSeleccionadaParaLightbox = "";
         const precioBasePan = 1.00;
 
@@ -372,7 +378,6 @@
             if (nombre === 'carrito') {
                 await cargarTarifaDeliveryDesdeSupabase();
                 renderizarCarrito();
-                cargarCuentasPago();
                 setTimeout(() => {
                     if (!mapaDelivery) {
                         inicializarMapaDelivery();
@@ -425,7 +430,6 @@
             lucide.createIcons();
         }
 
-        // --- FUNCIONES DE BÚSQUEDA Y FILTRADO ---
         function filtrarProductosVitrina() {
             const textoBusqueda = document.getElementById('input-buscador-vitrina').value.toLowerCase();
             const tarjetasProductos = document.querySelectorAll('#grid-productos-vitrina > div'); 
@@ -447,7 +451,6 @@
                 filtrarProductosVitrina();
             }
         }
-        // ----------------------------------------
 
         function verDetalleDeProducto(idProducto) {
             productoSeleccionado = baseProductos.find(p => p.id === idProducto); 
@@ -951,35 +954,22 @@
             }
         }
 
-        async function cargarCuentasPago() {
-            const sel = document.getElementById('select-metodo-pago');
-            if(!sel) return;
-            const { data } = await supabaseClient.from('cuentas_pago').select('*');
-            if(data) {
-                cuentasDB = data;
-                sel.innerHTML = "<option value=''>-- Seleccionar Método --</option>";
-                data.forEach((c, i) => {
-                    const plataformaStr = c.plataforma ? c.plataforma.toUpperCase() : 'MÉTODO';
-                    const bancoStr = c.banco ? ` - ${c.banco}` : '';
-                    sel.innerHTML += `<option value="${i}">[${plataformaStr}]${bancoStr}</option>`;
-                });
-            }
-        }
+        // --- NUEVA LÓGICA DE GESTIÓN DE PAGOS ---
+        function gestionarCamposPagoCart() {
+            const metodo = document.getElementById('tipoMetodoPago').value;
+            const contenedorRef = document.getElementById('contenedorReferenciaCart');
+            const inputRef = document.getElementById('input-ref-pago');
 
-        function mostrarDetallesBanco() {
-            const idx = document.getElementById('select-metodo-pago').value;
-            const caja = document.getElementById('caja-banco-detalle');
-            if(!caja) return;
-            if(idx === "" || !cuentasDB[idx]) { caja.classList.add('hidden'); return; }
-            const c = cuentasDB[idx];
-            caja.classList.remove('hidden');
-            caja.innerHTML = `
-                <div><b>Banco:</b> ${c.banco || 'N/A'}</div>
-                <div><b>Titular:</b> ${c.titular || 'N/A'}</div>
-                <div><b>CI/RIF:</b> ${c.ci || 'N/A'}</div>
-                <div><b>Teléfono:</b> ${c.telefono || 'N/A'}</div>
-                ${c.detalles ? `<div class="italic text-stone-400 mt-1">${c.detalles}</div>` : ''}
-            `;
+            if (metodo === 'efectivo') {
+                contenedorRef.classList.add('hidden');
+                if(inputRef) inputRef.value = 'EFECTIVO';
+            } else if (metodo !== '') {
+                contenedorRef.classList.remove('hidden');
+                if(inputRef && inputRef.value === 'EFECTIVO') inputRef.value = '';
+            } else {
+                contenedorRef.classList.add('hidden');
+                if(inputRef) inputRef.value = '';
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1011,14 +1001,18 @@
                 return;
             }
 
-            const ref = document.getElementById('input-ref-pago').value.trim();
-            const idx = document.getElementById('select-metodo-pago').value;
+            const metodo = document.getElementById('tipoMetodoPago').value;
+            if(!metodo) { alert("Por favor selecciona un método de pago."); return; }
 
-            if(idx === "" || !cuentasDB[idx]) { alert("Selecciona un método de pago."); return; }
-            if(!/^\d{12}$/.test(ref)) { alert("Inserta un número de referencia válido de exactamente 12 dígitos."); return; }
+            let ref = "";
+            if (metodo === 'efectivo') {
+                ref = "Efectivo / Sin Referencia";
+            } else {
+                ref = document.getElementById('input-ref-pago').value.trim();
+                if(!ref) { alert("Por favor ingresa el número o código de referencia."); return; }
+            }
 
             const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
-            const cuenta = cuentasDB[idx];
             
             let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
             let totalGeneral = subtotalProductos + costoDeliveryKm;
@@ -1029,9 +1023,9 @@
             const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
             if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
 
-            const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *PAGO:* ${cuenta.plataforma} (${cuenta.banco})\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
+            const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *MÉTODO DE PAGO:* ${metodo.toUpperCase()}\n🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
-            datosOrdenPendiente = {
+            const datosOrdenPendiente = {
                 productos: carrito.map(i => i.titulo).join(', '),
                 total: totalGeneral,
                 monto_total: totalGeneral,
@@ -1047,7 +1041,9 @@
 
             carrito = [];
             document.getElementById('contador-carrito-badge').innerText = "0";
+            document.getElementById('tipoMetodoPago').value = "";
             document.getElementById('input-ref-pago').value = "";
+            document.getElementById('contenedorReferenciaCart').classList.add('hidden');
             localStorage.removeItem('dunig_ref_code');
             cambiarPantalla('vitrina');
             window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
