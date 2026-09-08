@@ -300,6 +300,24 @@
                 Actualizar Estado en Vitrina
             </button>
         </div>
+
+        <!-- NUEVO: Configurar Hora en Vitrina -->
+        <div class="max-w-md mx-auto glass-panel p-6 rounded-2xl shadow-2xl border border-stone-900/60 space-y-4">
+            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-3">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Horario / Hora en Vitrina</h3>
+            </div>
+            <p class="text-[11px] text-stone-400 leading-relaxed font-mono">
+                Configura el texto o la hora personalizada que se visualizará en la vitrina pública (ej: 08:00 AM - 10:00 PM o un mensaje de horario).
+            </p>
+            <div class="space-y-1.5">
+                <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">Hora o Texto de Atención</label>
+                <input type="text" id="config-hora-vitrina" placeholder="Ej: 10:00 AM - 11:00 PM" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white font-mono p-3.5 rounded-xl focus:outline-none focus:border-amber-400/40">
+            </div>
+            <button onclick="guardarHoraVitrinaEnSupabase()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform hover:scale-[1.01]">
+                Actualizar Hora en Vitrina
+            </button>
+        </div>
     </main>
 
     <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
@@ -377,6 +395,7 @@
             if (target === 'extras') {
                 descargarAjusteWhatsApp();
                 descargarEstadoNegocio();
+                descargarHoraVitrina();
             }
         }
 
@@ -973,6 +992,34 @@
                 alert("¡Estado del negocio actualizado correctamente para la vitrina!"); 
             } else { 
                 alert("Error al guardar estado: " + error.message); 
+            }
+        }
+
+        // NUEVO: Funciones para la hora en vitrina
+        async function descargarHoraVitrina() {
+            const { data, error } = await supabaseClient
+                .from('ajustes_sistema')
+                .select('valor')
+                .eq('id', 'hora_vitrina')
+                .single();
+            
+            if(!error && data) {
+                document.getElementById('config-hora-vitrina').value = data.valor;
+            }
+        }
+
+        async function guardarHoraVitrinaEnSupabase() {
+            const hora = document.getElementById('config-hora-vitrina').value.trim();
+            if(!hora) { alert("Por favor ingresa una hora o texto de horario válido."); return; }
+
+            const { error } = await supabaseClient
+                .from('ajustes_sistema')
+                .upsert({ id: 'hora_vitrina', valor: hora, updated_at: new Date().toISOString() });
+
+            if(!error) { 
+                alert("¡Hora en vitrina actualizada correctamente!"); 
+            } else { 
+                alert("Error al guardar hora: " + error.message); 
             }
         }
     </script>
