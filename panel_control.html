@@ -46,32 +46,40 @@
             </div>
             
             <div class="flex flex-col gap-1.5 items-end">
+                <!-- Botón Ver Vitrina -->
                 <a href="https://dunigluxury.github.io/d-unigluxury/" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-stone-800 text-stone-400 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
                     <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> Ver Vitrina
                 </a>
+
+                <!-- Botón Salir -->
                 <button onclick="ejecutarLogout()" class="px-2.5 py-1.5 rounded-lg border border-red-900/30 text-red-400 hover:text-red-300 transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
                     <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
                 </button>
             </div>
+            <div id="contenedor-instagram" class="hidden flex items-center justify-center bg-stone-950/90 border border-stone-800 p-2 rounded-xl w-40 h-10">
+                <span class="text-xs text-amber-400 font-bold">@</span>
+                <span id="owner-instagram-display" class="text-xs font-bold text-white ml-2">luxury_store</span>
+            </div>
         </div>
     </header>
 
-    <!-- Pestañas de Navegación del Panel -->
-    <div class="w-full max-w-5xl mx-auto px-4 mt-6">
-        <div class="grid grid-cols-2 gap-2 bg-stone-950 p-2 rounded-2xl border border-stone-900 shadow-xl">
-            <!-- Botón Gestión General -->
-            <button onclick="cambiarSeccion('gestion')" id="btn-tab-gestion" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer">
+    <!-- Pestañas de Navegación del Panel (Gestión General, Órdenes VIP, Configurar Extras) -->
+    <div class="w-full max-w-7xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 bg-stone-950/80 p-2 rounded-2xl border border-stone-900 shadow-xl">
+            <button onclick="cambiarSeccionPanel('principal')" id="tab-btn-principal" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center">
                 Gestión General
             </button>
-            <!-- Botón Órdenes VIP -->
-            <button onclick="cambiarSeccion('ordenes')" id="btn-tab-ordenes" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer">
+            <button onclick="cambiarSeccionPanel('ordenes')" id="tab-btn-ordenes" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center">
                 Órdenes VIP
+            </button>
+            <button onclick="cambiarSeccionPanel('extras')" id="tab-btn-extras" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center">
+                Configurar Extras
             </button>
         </div>
     </div>
 
-    <!-- Sección Principal: Gestión -->
-    <main id="seccion-gestion" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+    <!-- Sección Principal / Gestión General -->
+    <main id="panel-seccion-principal" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-6">
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -85,6 +93,7 @@
                 <div id="lista-categorias" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
             </div>
 
+            <!-- Formulario de Adicionales -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -101,44 +110,33 @@
                 </div>
             </div>
 
-            <!-- Formulario de Ingredientes 3D -->
-            <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
-                <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
-                    <i data-lucide="box" class="w-4 h-4"></i>
-                    <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Ingredientes 3D</h3>
-                </div>
-                <div class="space-y-2">
-                    <input type="text" id="ing3d-nombre" placeholder="Nombre (Ej: Papa Extra)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
-                    <input type="number" id="ing3d-precio" step="0.01" placeholder="Precio ($)" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
-                    <input type="text" id="ing3d-modelo" placeholder="URL o Referencia del Modelo 3D" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
-                    <button onclick="guardarIngrediente3D()" class="w-full bg-stone-900 border border-stone-800 text-amber-400 font-futurista font-bold p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-800">Inyectar Ingrediente 3D</button>
-                </div>
-                
-                <div class="border-t border-stone-900 pt-4 mt-4">
-                    <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Ingredientes 3D Registrados</h4>
-                    <div id="lista-ingredientes-3d" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
-                </div>
-            </div>
-
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
                     <i data-lucide="credit-card" class="w-4 h-4"></i>
                     <h3 id="pago-form-titulo" class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Registrar Método de Pago</h3>
                 </div>
+                
                 <input type="hidden" id="pago-id-edicion" value="">
+                
                 <div class="space-y-3">
                     <div>
                         <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Banco o Plataforma</label>
                         <select id="pago-plataforma" onchange="alternarCamposPago()" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none focus:border-amber-500/30">
                             <option value="pago_movil">Pago Móvil</option>
+                            <option value="zelle">Zelle</option>
+                            <option value="nequi">Nequi</option>
+                            <option value="efectivo">Efectivo</option>
                         </select>
                     </div>
+
                     <div id="wrapper-campos-dinamicos" class="space-y-3"></div>
+                    
                     <div class="flex gap-2 pt-2">
                         <button id="btn-cancelar-pago" onclick="limpiarFormularioPago()" class="hidden bg-stone-900 text-stone-400 font-futurista font-bold px-4 rounded-xl text-xs uppercase cursor-pointer hover:bg-stone-800">X</button>
                         <button onclick="guardarCuentaPagoSupabase()" id="btn-guardar-pago" class="flex-1 bg-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-[0.2em] cursor-pointer shadow-md hover:bg-amber-600 transition-colors">Sincronizar Cuenta</button>
                     </div>
                 </div>
+
                 <div class="border-t border-stone-900 pt-4">
                     <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Cuentas Habilitadas</h4>
                     <div class="overflow-x-auto max-h-48 overflow-y-auto">
@@ -166,7 +164,9 @@
                     </div>
                     <div class="text-xs font-black text-white font-futurista"><span id="txt-limite-actual" class="text-amber-400">0</span> ITEMS</div>
                 </div>
+                
                 <input type="hidden" id="prod-id-edicion" value="">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Título de la Pieza</label>
@@ -176,15 +176,17 @@
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Categoría</label>
                         <select id="prod-categoria" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-stone-400 p-3.5 rounded-xl focus:outline-none"></select>
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-1 md:col-span-2">
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Precio ($)</label>
                         <input type="number" id="prod-precio" step="0.01" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
                     </div>
+                    
                     <div class="md:col-span-2 space-y-1">
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Descripción Exclusiva</label>
                         <textarea id="prod-descripcion" rows="3" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none resize-none"></textarea>
                     </div>
                 </div>
+                
                 <div class="space-y-2 border-t border-stone-900 pt-4">
                     <div class="flex justify-between items-center">
                         <label class="text-[10px] uppercase tracking-widest font-futurista font-black text-amber-400">Imágenes del Slider (Alta Calidad)</label>
@@ -192,6 +194,7 @@
                     </div>
                     <div class="grid grid-cols-5 gap-2" id="grid-inputs-fotos"></div>
                 </div>
+
                 <div class="flex gap-3 pt-2">
                     <button id="btn-cancelar-edicion" onclick="limpiarFormularioCompleto()" class="hidden bg-stone-900 text-stone-400 font-futurista font-bold px-6 py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-850">Cancelar</button>
                     <button id="btn-guardar-producto" onclick="inyectarProductoASupabase()" class="flex-1 bg-amber-500 text-black font-futurista font-black p-4 rounded-xl text-xs uppercase tracking-[0.2em] cursor-pointer shadow-lg hover:bg-amber-600 transition-colors">Sincronizar Producto</button>
@@ -217,21 +220,67 @@
         </div>
     </main>
 
-    <!-- Sección Órdenes VIP (Oculta por defecto) -->
-    <main id="seccion-ordenes" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow hidden relative z-10">
-        <div class="glass-panel p-6 lg:p-8 rounded-3xl space-y-6 shadow-2xl">
-            <h3 class="font-futurista font-black text-sm uppercase tracking-[0.2em] text-white border-b border-stone-800/40 pb-4">Órdenes VIP Registradas</h3>
-            <div class="text-stone-500 text-xs font-mono">Aquí aparecerán las órdenes recibidas.</div>
+    <main id="panel-seccion-ordenes" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
+        <div class="glass-panel p-6 rounded-3xl border border-stone-900 shadow-2xl">
+            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-4 mb-4">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                <h2 class="text-sm font-futurista font-black uppercase tracking-widest text-white">Registro de Órdenes Recibidas</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-stone-900 text-stone-500 uppercase tracking-widest text-[9px] font-futurista">
+                            <th class="p-3">ID Order</th>
+                            <th class="p-3">Fecha</th>
+                            <th class="p-3">Productos Solicitados</th>
+                            <th class="p-3">Total ($)</th>
+                            <th class="p-3">Referencia Registrada</th>
+                            <th class="p-3 text-right">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ordenes-body"></tbody>
+                </table>
+            </div>
         </div>
     </main>
+
+    <main id="panel-seccion-extras" class="hidden max-w-7xl w-full mx-auto px-4 py-8 flex-grow relative z-10">
+        <div class="max-w-md mx-auto glass-panel p-6 rounded-2xl shadow-2xl border border-stone-900/60 space-y-4">
+            <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800 pb-3">
+                <i data-lucide="phone-call" class="w-4 h-4"></i>
+                <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Configurar Extras: Canal WhatsApp</h3>
+            </div>
+            <p class="text-[11px] text-stone-400 leading-relaxed font-mono">
+                Introduce el número de teléfono encargado de recibir los pedidos directos (con código de país sin el símbolo '+').
+            </p>
+            <div class="space-y-1.5">
+                <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">Número Destinatario Colector</label>
+                <input type="text" id="config-whatsapp-num" placeholder="Ej: 584121234567" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white font-mono p-3.5 rounded-xl focus:outline-none focus:border-amber-400/40">
+            </div>
+            <button onclick="guardarAjusteWhatsAppEnSupabase()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-transform hover:scale-[1.01]">
+                Sincronizar Canal VIP
+            </button>
+        </div>
+    </main>
+
+    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 D'UNIG LUXURY PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
         const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        async function verificarAcceso() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = "login.html"; 
+                return null;
+            }
+            return session.user.email;
+        }
+
         let baseProductos = [];
-        let categoriasDB = [];
+        let categoriasDB = []; 
         let filtroInstagram = "luxury_store";
         let fotosSliderArray = Array(5).fill("");
         let listaCuentas = [];
@@ -243,8 +292,7 @@
             }
             
             await descargarCategoriasDesdeSupabase(); 
-            await descargarAdicionales();
-            await descargarIngredientes3D(); 
+            await descargarAdicionales(); 
             descargarCatalogoDeSupabase(); 
             alternarCamposPago(); 
             descargarCuentasPago(); 
@@ -252,30 +300,11 @@
             lucide.createIcons(); 
         });
 
-        function cambiarSeccion(seccion) {
-            const btnGestion = document.getElementById('btn-tab-gestion');
-            const btnOrdenes = document.getElementById('btn-tab-ordenes');
-            const secGestion = document.getElementById('seccion-gestion');
-            const secOrdenes = document.getElementById('seccion-ordenes');
-
-            if (seccion === 'gestion') {
-                btnGestion.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer";
-                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer";
-                secGestion.classList.remove('hidden');
-                secOrdenes.classList.add('hidden');
-            } else {
-                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer";
-                btnGestion.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer";
-                secOrdenes.classList.remove('hidden');
-                secGestion.classList.add('hidden');
-            }
-        }
-
         async function ejecutarLogin() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-pass').value;
 
-            const { error } = await supabaseClient.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -292,119 +321,20 @@
             location.reload();
         }
 
-        // GESTIÓN DE ADICIONALES
-        async function guardarAdicional() {
-            const nombre = document.getElementById('add-nombre').value.trim();
-            const precio = parseFloat(document.getElementById('add-precio').value);
+        function cambiarSeccionPanel(target) {
+            document.getElementById('panel-seccion-principal').classList.add('hidden');
+            document.getElementById('panel-seccion-ordenes').classList.add('hidden');
+            document.getElementById('panel-seccion-extras').classList.add('hidden');
 
-            if (!nombre || isNaN(precio)) {
-                alert("Por favor, ingresa un nombre y un precio válido.");
-                return;
-            }
+            document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+                btn.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center";
+            });
 
-            const { error } = await supabaseClient
-                .from('adicionales')
-                .insert([{ nombre: nombre, precio: precio, instagram_dueno: filtroInstagram }]);
+            document.getElementById(`panel-seccion-${target}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${target}`).className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
 
-            if (error) {
-                alert("Error al guardar adicional: " + error.message);
-            } else {
-                alert("Adicional registrado con éxito.");
-                document.getElementById('add-nombre').value = "";
-                document.getElementById('add-precio').value = "";
-                descargarAdicionales();
-            }
-        }
-
-        async function descargarAdicionales() {
-            const { data, error } = await supabaseClient
-                .from('adicionales')
-                .select('*')
-                .eq('instagram_dueno', filtroInstagram);
-
-            if (!error && data) {
-                const lista = document.getElementById('lista-adicionales');
-                if (lista) {
-                    lista.innerHTML = "";
-                    data.forEach(a => {
-                        lista.innerHTML += `
-                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
-                                <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
-                                <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
-                            </div>`;
-                    });
-                }
-            }
-        }
-
-        async function eliminarAdicional(id) {
-            const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
-            if (!error) {
-                descargarAdicionales();
-            } else {
-                alert("Error al eliminar: " + error.message);
-            }
-        }
-
-        // GESTIÓN DE INGREDIENTES 3D
-        async function guardarIngrediente3D() {
-            const nombre = document.getElementById('ing3d-nombre').value.trim();
-            const precio = parseFloat(document.getElementById('ing3d-precio').value);
-            const modeloUrl = document.getElementById('ing3d-modelo').value.trim();
-
-            if (!nombre || isNaN(precio)) {
-                alert("Por favor, ingresa al menos un nombre y un precio válido.");
-                return;
-            }
-
-            const { error } = await supabaseClient
-                .from('ingredientes_3d')
-                .insert([{ nombre: nombre, precio: precio, imagen_url: modeloUrl, instagram_dueno: filtroInstagram }]);
-
-            if (error) {
-                alert("Error al guardar el ingrediente 3D: " + error.message);
-            } else {
-                alert("Ingrediente 3D registrado con éxito.");
-                document.getElementById('ing3d-nombre').value = "";
-                document.getElementById('ing3d-precio').value = "";
-                document.getElementById('ing3d-modelo').value = "";
-                descargarIngredientes3D();
-            }
-        }
-
-        async function descargarIngredientes3D() {
-            const { data, error } = await supabaseClient
-                .from('ingredientes_3d')
-                .select('*')
-                .eq('instagram_dueno', filtroInstagram);
-
-            if (!error && data) {
-                const lista = document.getElementById('lista-ingredientes-3d');
-                if (lista) {
-                    lista.innerHTML = "";
-                    data.forEach(ing => {
-                        lista.innerHTML += `
-                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
-                                <div>
-                                    <span class="text-white font-bold">${ing.nombre}</span> - <span class="text-amber-400">$${ing.precio}</span>
-                                    <div class="text-[9px] text-stone-500 truncate max-w-[150px]">${ing.imagen_url || 'Sin modelo 3D'}</div>
-                                </div>
-                                <button onclick="eliminarIngrediente3D('${ing.id}')" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
-                            </div>`;
-                    });
-                }
-            }
-        }
-
-        async function eliminarIngrediente3D(id) {
-            if (confirm("¿Estás seguro de eliminar este ingrediente 3D?")) {
-                const { error } = await supabaseClient.from('ingredientes_3d').delete().eq('id', id);
-                if (!error) {
-                    descargarIngredientes3D();
-                } else {
-                    alert("Error al eliminar: " + error.message);
-                }
-            }
+            if (target === 'ordenes') descargarHistorialDeOrdenes();
+            if (target === 'extras') descargarAjusteWhatsApp();
         }
 
         async function descargarCatalogoDeSupabase() {
@@ -559,7 +489,7 @@
                 lista.innerHTML += `
                     <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
                         <span>${c}</span>
-                        <button onclick="eliminarCategoria('${c}')" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
+                        <button onclick="eliminarCategoria('${c}')" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
                     </div>`;
             });
         }
@@ -575,7 +505,7 @@
                     
                 if (!error) {
                     inp.value = ""; 
-                    await descargarCategoriasDesdeSupabase();
+                    await descargarCategoriasDesdeSupabase(); 
                 } else {
                     alert("Error al guardar: " + error.message);
                 }
@@ -590,7 +520,7 @@
                 .eq('instagram_dueno', filtroInstagram);
 
             if (!error) {
-                await descargarCategoriasDesdeSupabase();
+                await descargarCategoriasDesdeSupabase(); 
             } else {
                 alert("Error al eliminar: " + error.message);
             }
@@ -615,6 +545,32 @@
                         <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Teléfono:</label>
                         <input type="text" id="pago-telefono" placeholder="Ej: 04121234567" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none font-mono">
                     </div>`;
+            } else if (plataforma === "zelle") {
+                wrapper.innerHTML = `
+                    <div>
+                        <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Correo Electrónico:</label>
+                        <input type="email" id="pago-email" placeholder="ejemplo@zelle.com" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none font-mono">
+                    </div>
+                    <div>
+                        <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Titular de la Cuenta:</label>
+                        <input type="text" id="pago-titular" placeholder="Nombre completo..." class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none">
+                    </div>`;
+            } else if (plataforma === "nequi") {
+                wrapper.innerHTML = `
+                    <div>
+                        <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Número de Cuenta / Teléfono:</label>
+                        <input type="text" id="pago-telefono" placeholder="Ej: 3001234567" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none font-mono">
+                    </div>
+                    <div>
+                        <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Nombre del Titular:</label>
+                        <input type="text" id="pago-titular" placeholder="Nombre en Nequi..." class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none">
+                    </div>`;
+            } else if (plataforma === "efectivo") {
+                wrapper.innerHTML = `
+                    <div>
+                        <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Detalles de Entrega o Retiro:</label>
+                        <input type="text" id="pago-detalles" placeholder="Ej: Retiro en tienda física / Acuerdo previo" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3 rounded-xl focus:outline-none">
+                    </div>`;
             }
         }
 
@@ -631,7 +587,17 @@
                 }
                 
                 listaCuentas.forEach(c => {
-                    let infoRender = `<span class="text-stone-300 font-mono">${c.banco || ''} | CI: ${c.ci || ''} | Tlf: ${c.telefono || ''}</span>`;
+                    let infoRender = "";
+                    if (c.plataforma === "pago_movil") {
+                        infoRender = `<span class="text-stone-300 font-mono">${c.banco || ''} | CI: ${c.ci || ''} | Tlf: ${c.telefono || ''}</span>`;
+                    } else if (c.plataforma === "zelle") {
+                        infoRender = `<span class="text-stone-300 font-mono">${c.email || ''} | ${c.titular || ''}</span>`;
+                    } else if (c.plataforma === "nequi") {
+                        infoRender = `<span class="text-stone-300 font-mono">Nequi: ${c.telefono || ''} | ${c.titular || ''}</span>`;
+                    } else {
+                        infoRender = `<span class="text-stone-300">${c.detalles || 'Pago en efectivo contra entrega'}</span>`;
+                    }
+
                     const nombrePlataforma = c.plataforma.replace('_', ' ').toUpperCase();
 
                     tbody.innerHTML += `<tr class="border-b border-stone-900/40 hover:bg-stone-900/20 transition-colors">
@@ -650,14 +616,25 @@
             const id = document.getElementById('pago-id-edicion').value;
             const plataforma = document.getElementById('pago-plataforma').value;
 
-            let payload = { 
-                plataforma: plataforma,
-                banco: document.getElementById('pago-banco').value.trim(),
-                ci: document.getElementById('pago-ci').value.trim(),
-                telefono: document.getElementById('pago-telefono').value.trim()
-            };
+            let payload = { plataforma: plataforma };
 
-            if(!payload.banco || !payload.ci || !payload.telefono) { alert("Por favor complete todos los datos de Pago Móvil."); return; }
+            if (plataforma === "pago_movil") {
+                payload.banco = document.getElementById('pago-banco').value.trim();
+                payload.ci = document.getElementById('pago-ci').value.trim();
+                payload.telefono = document.getElementById('pago-telefono').value.trim();
+                if(!payload.banco || !payload.ci || !payload.telefono) { alert("Por favor complete todos los datos de Pago Móvil."); return; }
+            } else if (plataforma === "zelle") {
+                payload.email = document.getElementById('pago-email').value.trim();
+                payload.titular = document.getElementById('pago-titular').value.trim();
+                if(!payload.email || !payload.titular) { alert("Complete el correo y el titular de Zelle."); return; }
+            } else if (plataforma === "nequi") {
+                payload.telefono = document.getElementById('pago-telefono').value.trim();
+                payload.titular = document.getElementById('pago-titular').value.trim();
+                if(!payload.telefono || !payload.titular) { alert("Complete el número y titular de Nequi."); return; }
+            } else if (plataforma === "efectivo") {
+                payload.detalles = document.getElementById('pago-detalles').value.trim();
+                if(!payload.detalles) { alert("Escriba los detalles de entrega en efectivo."); return; }
+            }
 
             let res;
             if (id) {
@@ -681,11 +658,22 @@
 
             document.getElementById('pago-id-edicion').value = cuenta.id;
             document.getElementById('pago-plataforma').value = cuenta.plataforma;
+            
             alternarCamposPago();
 
-            document.getElementById('pago-banco').value = cuenta.banco || '';
-            document.getElementById('pago-ci').value = cuenta.ci || '';
-            document.getElementById('pago-telefono').value = cuenta.telefono || '';
+            if (cuenta.plataforma === "pago_movil") {
+                document.getElementById('pago-banco').value = cuenta.banco || '';
+                document.getElementById('pago-ci').value = cuenta.ci || '';
+                document.getElementById('pago-telefono').value = cuenta.telefono || '';
+            } else if (cuenta.plataforma === "zelle") {
+                document.getElementById('pago-email').value = cuenta.email || '';
+                document.getElementById('pago-titular').value = cuenta.titular || '';
+            } else if (cuenta.plataforma === "nequi") {
+                document.getElementById('pago-telefono').value = cuenta.telefono || '';
+                document.getElementById('pago-titular').value = cuenta.titular || '';
+            } else if (cuenta.plataforma === "efectivo") {
+                document.getElementById('pago-detalles').value = cuenta.detalles || '';
+            }
 
             document.getElementById('pago-form-titulo').innerText = "Modificar Cuenta";
             document.getElementById('btn-guardar-pago').innerText = "Actualizar Cuenta";
@@ -708,6 +696,82 @@
             }
         }
 
+        async function descargarHistorialDeOrdenes() {
+            const { data, error } = await supabaseClient
+                .from('ordenes_vip')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                const tbody = document.getElementById('tabla-ordenes-body'); 
+                if (!tbody) return;
+                
+                tbody.innerHTML = "";
+                data.forEach(o => {
+                    const fechaFormateada = new Date(o.created_at).toLocaleDateString();
+                    
+                    tbody.innerHTML += `<tr class="border-b border-stone-900/40 hover:bg-stone-900/10 transition-colors">
+                        <td class="p-3 font-mono text-amber-400 font-bold">#${o.id}</td>
+                        <td class="p-3 text-stone-400">${fechaFormateada}</td>
+                        <td class="p-3 text-white truncate max-w-xs">${o.productos}</td>
+                        <td class="p-3 font-mono font-bold text-stone-200">$${parseFloat(o.total || 0).toFixed(2)}</td>
+                        <td class="p-3 font-mono text-stone-500">${o.referencia || 'N/A'}</td>
+                        <td class="p-3 text-right">
+                            <select 
+                                onchange="actualizarEstadoOrden(${o.id}, this.value)" 
+                                class="bg-stone-950 border border-stone-700 text-[10px] px-2 py-1 rounded-md font-bold uppercase cursor-pointer outline-none transition-colors 
+                                ${o.estado === 'verificado' ? 'text-green-500 border-green-900/50' : 
+                                  o.estado === 'cancelado' ? 'text-red-500 border-red-900/50' : 
+                                  'text-amber-400 border-stone-700'}"
+                            >
+                                <option value="pendiente" ${o.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="verificado" ${o.estado === 'verificado' ? 'selected' : ''}>Verificado</option>
+                                <option value="cancelado" ${o.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                            </select>
+                        </td>
+                    </tr>`;
+                });
+            } else if (error) {
+                console.error("Error al descargar órdenes:", error.message);
+            }
+        }
+
+        async function actualizarEstadoOrden(idOrden, nuevoEstado) {
+            const { error } = await supabaseClient
+                .from('ordenes_vip')
+                .update({ estado: nuevoEstado })
+                .eq('id', idOrden);
+
+            if (!error) {
+                await descargarHistorialDeOrdenes();
+            } else {
+                alert("Error al actualizar estado: " + error.message);
+            }
+        }
+
+        async function descargarAjusteWhatsApp() {
+            const { data, error } = await supabaseClient
+                .from('ajustes_sistema')
+                .select('valor')
+                .eq('id', 'whatsapp_notificaciones')
+                .single();
+            
+            if(!error && data) {
+                document.getElementById('config-whatsapp-num').value = data.valor;
+            }
+        }
+
+        async function guardarAjusteWhatsAppEnSupabase() {
+            const num = document.getElementById('config-whatsapp-num').value.trim().replace(/[^0-9]/g, "");
+            if(!num || num.length < 10) { alert("Ingrese un número válido con código de país."); return; }
+
+            const { error } = await supabaseClient
+                .from('ajustes_sistema')
+                .upsert({ id: 'whatsapp_notificaciones', valor: num, updated_at: new Date().toISOString() });
+
+            if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
+        }
+
         async function descargarCategoriasDesdeSupabase() {
             const { data, error } = await supabaseClient
                 .from('categorias')
@@ -716,7 +780,64 @@
 
             if (data) {
                 categoriasDB = data.map(c => c.nombre);
-                renderizarCategorias();
+                renderizarCategorias(); 
+            }
+        }
+
+        async function guardarAdicional() {
+            const nombre = document.getElementById('add-nombre').value.trim();
+            const precio = parseFloat(document.getElementById('add-precio').value);
+
+            if (!nombre || isNaN(precio)) {
+                alert("Por favor, ingresa un nombre y un precio válido.");
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('adicionales')
+                .insert([{ 
+                    nombre: nombre, 
+                    precio: precio, 
+                    instagram_dueno: filtroInstagram 
+                }]);
+
+            if (error) {
+                alert("Error al guardar adicional: " + error.message);
+            } else {
+                alert("Adicional registrado con éxito.");
+                document.getElementById('add-nombre').value = "";
+                document.getElementById('add-precio').value = "";
+                descargarAdicionales();
+            }
+        }
+
+        async function descargarAdicionales() {
+            const { data, error } = await supabaseClient
+                .from('adicionales')
+                .select('*')
+                .eq('instagram_dueno', filtroInstagram);
+
+            if (!error && data) {
+                const lista = document.getElementById('lista-adicionales');
+                if(lista) {
+                    lista.innerHTML = "";
+                    data.forEach(a => {
+                        lista.innerHTML += `
+                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                                <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
+                                <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
+                            </div>`;
+                    });
+                }
+            }
+        }
+
+        async function eliminarAdicional(id) {
+            const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
+            if (!error) {
+                descargarAdicionales();
+            } else {
+                alert("Error al eliminar: " + error.message);
             }
         }
     </script>
