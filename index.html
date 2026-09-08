@@ -86,6 +86,26 @@
                 </button>
             </div>
         </div>
+
+        <!-- BARRA DE BÚSQUEDA EN TIEMPO REAL -->
+        <div class="w-full max-w-3xl mx-auto px-2">
+            <div class="relative flex items-center bg-stone-950 border border-stone-800 rounded-2xl p-2 shadow-xl focus-within:border-amber-500/50 transition-colors">
+                <div class="pl-3 pr-2 text-amber-500">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </div>
+                <input 
+                    type="text" 
+                    id="input-buscador-vitrina" 
+                    placeholder="Buscar especialidades o categorías..." 
+                    oninput="filtrarProductosVitrina()"
+                    class="w-full bg-transparent text-white text-xs sm:text-sm focus:outline-none font-futurista placeholder:text-stone-600 px-2 py-2"
+                >
+                <button onclick="limpiarBuscadorVitrina()" class="p-2 text-stone-500 hover:text-white transition-colors cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
         <div id="grid-productos-vitrina" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </main>
 
@@ -404,6 +424,30 @@
             }
             lucide.createIcons();
         }
+
+        // --- FUNCIONES DE BÚSQUEDA Y FILTRADO ---
+        function filtrarProductosVitrina() {
+            const textoBusqueda = document.getElementById('input-buscador-vitrina').value.toLowerCase();
+            const tarjetasProductos = document.querySelectorAll('#grid-productos-vitrina > div'); 
+
+            tarjetasProductos.forEach(tarjeta => {
+                const textoTarjeta = tarjeta.innerText.toLowerCase();
+                if (textoTarjeta.includes(textoBusqueda)) {
+                    tarjeta.style.display = 'flex'; 
+                } else {
+                    tarjeta.style.display = 'none';
+                }
+            });
+        }
+
+        function limpiarBuscadorVitrina() {
+            const input = document.getElementById('input-buscador-vitrina');
+            if (input) {
+                input.value = '';
+                filtrarProductosVitrina();
+            }
+        }
+        // ----------------------------------------
 
         function verDetalleDeProducto(idProducto) {
             productoSeleccionado = baseProductos.find(p => p.id === idProducto); 
