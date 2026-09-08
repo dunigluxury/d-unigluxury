@@ -53,14 +53,25 @@
                     <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Salir
                 </button>
             </div>
-            <div id="contenedor-instagram" class="hidden flex items-center justify-center bg-stone-950/90 border border-stone-800 p-2 rounded-xl w-40 h-10">
-                <span class="text-xs text-amber-400 font-bold">@</span>
-                <span id="owner-instagram-display" class="text-xs font-bold text-white ml-2">luxury_store</span>
-            </div>
         </div>
     </header>
 
-    <main id="panel-seccion-principal" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+    <!-- Pestañas de Navegación del Panel -->
+    <div class="w-full max-w-5xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-2 gap-2 bg-stone-950 p-2 rounded-2xl border border-stone-900 shadow-xl">
+            <!-- Botón Gestión General -->
+            <button onclick="cambiarSeccion('gestion')" id="btn-tab-gestion" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer">
+                Gestión General
+            </button>
+            <!-- Botón Órdenes VIP -->
+            <button onclick="cambiarSeccion('ordenes')" id="btn-tab-ordenes" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer">
+                Órdenes VIP
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección Principal: Gestión -->
+    <main id="seccion-gestion" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-6">
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -114,9 +125,7 @@
                     <i data-lucide="credit-card" class="w-4 h-4"></i>
                     <h3 id="pago-form-titulo" class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Registrar Método de Pago</h3>
                 </div>
-                
                 <input type="hidden" id="pago-id-edicion" value="">
-                
                 <div class="space-y-3">
                     <div>
                         <label class="text-[9px] uppercase text-stone-400 font-bold tracking-wider">Banco o Plataforma</label>
@@ -124,15 +133,12 @@
                             <option value="pago_movil">Pago Móvil</option>
                         </select>
                     </div>
-
                     <div id="wrapper-campos-dinamicos" class="space-y-3"></div>
-                    
                     <div class="flex gap-2 pt-2">
                         <button id="btn-cancelar-pago" onclick="limpiarFormularioPago()" class="hidden bg-stone-900 text-stone-400 font-futurista font-bold px-4 rounded-xl text-xs uppercase cursor-pointer hover:bg-stone-800">X</button>
                         <button onclick="guardarCuentaPagoSupabase()" id="btn-guardar-pago" class="flex-1 bg-amber-500 text-black font-futurista font-black p-3 rounded-xl text-xs uppercase tracking-[0.2em] cursor-pointer shadow-md hover:bg-amber-600 transition-colors">Sincronizar Cuenta</button>
                     </div>
                 </div>
-
                 <div class="border-t border-stone-900 pt-4">
                     <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Cuentas Habilitadas</h4>
                     <div class="overflow-x-auto max-h-48 overflow-y-auto">
@@ -160,9 +166,7 @@
                     </div>
                     <div class="text-xs font-black text-white font-futurista"><span id="txt-limite-actual" class="text-amber-400">0</span> ITEMS</div>
                 </div>
-                
                 <input type="hidden" id="prod-id-edicion" value="">
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Título de la Pieza</label>
@@ -176,13 +180,11 @@
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Precio ($)</label>
                         <input type="number" id="prod-precio" step="0.01" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
                     </div>
-                    
                     <div class="md:col-span-2 space-y-1">
                         <label class="text-[9px] uppercase text-stone-400 font-bold">Descripción Exclusiva</label>
                         <textarea id="prod-descripcion" rows="3" class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none resize-none"></textarea>
                     </div>
                 </div>
-                
                 <div class="space-y-2 border-t border-stone-900 pt-4">
                     <div class="flex justify-between items-center">
                         <label class="text-[10px] uppercase tracking-widest font-futurista font-black text-amber-400">Imágenes del Slider (Alta Calidad)</label>
@@ -190,7 +192,6 @@
                     </div>
                     <div class="grid grid-cols-5 gap-2" id="grid-inputs-fotos"></div>
                 </div>
-
                 <div class="flex gap-3 pt-2">
                     <button id="btn-cancelar-edicion" onclick="limpiarFormularioCompleto()" class="hidden bg-stone-900 text-stone-400 font-futurista font-bold px-6 py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-850">Cancelar</button>
                     <button id="btn-guardar-producto" onclick="inyectarProductoASupabase()" class="flex-1 bg-amber-500 text-black font-futurista font-black p-4 rounded-xl text-xs uppercase tracking-[0.2em] cursor-pointer shadow-lg hover:bg-amber-600 transition-colors">Sincronizar Producto</button>
@@ -216,19 +217,18 @@
         </div>
     </main>
 
+    <!-- Sección Órdenes VIP (Oculta por defecto) -->
+    <main id="seccion-ordenes" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow hidden relative z-10">
+        <div class="glass-panel p-6 lg:p-8 rounded-3xl space-y-6 shadow-2xl">
+            <h3 class="font-futurista font-black text-sm uppercase tracking-[0.2em] text-white border-b border-stone-800/40 pb-4">Órdenes VIP Registradas</h3>
+            <div class="text-stone-500 text-xs font-mono">Aquí aparecerán las órdenes recibidas.</div>
+        </div>
+    </main>
+
     <script>
         const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function verificarAcceso() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = "login.html"; 
-                return null;
-            }
-            return session.user.email;
-        }
 
         let baseProductos = [];
         let categoriasDB = [];
@@ -252,11 +252,30 @@
             lucide.createIcons(); 
         });
 
+        function cambiarSeccion(seccion) {
+            const btnGestion = document.getElementById('btn-tab-gestion');
+            const btnOrdenes = document.getElementById('btn-tab-ordenes');
+            const secGestion = document.getElementById('seccion-gestion');
+            const secOrdenes = document.getElementById('seccion-ordenes');
+
+            if (seccion === 'gestion') {
+                btnGestion.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer";
+                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer";
+                secGestion.classList.remove('hidden');
+                secOrdenes.classList.add('hidden');
+            } else {
+                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer";
+                btnGestion.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer";
+                secOrdenes.classList.remove('hidden');
+                secGestion.classList.add('hidden');
+            }
+        }
+
         async function ejecutarLogin() {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-pass').value;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
+            const { error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -285,11 +304,7 @@
 
             const { error } = await supabaseClient
                 .from('adicionales')
-                .insert([{ 
-                    nombre: nombre, 
-                    precio: precio, 
-                    instagram_dueno: filtroInstagram 
-                }]);
+                .insert([{ nombre: nombre, precio: precio, instagram_dueno: filtroInstagram }]);
 
             if (error) {
                 alert("Error al guardar adicional: " + error.message);
@@ -331,7 +346,7 @@
             }
         }
 
-        // GESTIÓN DE INGREDIENTES 3D (Corregido con imagen_url)
+        // GESTIÓN DE INGREDIENTES 3D
         async function guardarIngrediente3D() {
             const nombre = document.getElementById('ing3d-nombre').value.trim();
             const precio = parseFloat(document.getElementById('ing3d-precio').value);
@@ -344,12 +359,7 @@
 
             const { error } = await supabaseClient
                 .from('ingredientes_3d')
-                .insert([{ 
-                    nombre: nombre, 
-                    precio: precio, 
-                    imagen_url: modeloUrl, 
-                    instagram_dueno: filtroInstagram 
-                }]);
+                .insert([{ nombre: nombre, precio: precio, imagen_url: modeloUrl, instagram_dueno: filtroInstagram }]);
 
             if (error) {
                 alert("Error al guardar el ingrediente 3D: " + error.message);
