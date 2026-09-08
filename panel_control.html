@@ -60,6 +60,22 @@
         </div>
     </header>
 
+    <!-- Pestañas de Navegación del Panel -->
+    <div class="w-full max-w-7xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-3 gap-2 bg-stone-950/80 p-2 rounded-2xl border border-stone-900 shadow-xl">
+            <button onclick="cambiarSeccionPanel('principal')" id="tab-btn-principal" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center">
+                Gestión General
+            </button>
+            <button onclick="cambiarSeccionPanel('ordenes')" id="tab-btn-ordenes" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center">
+                Órdenes VIP
+            </button>
+            <button onclick="cambiarSeccionPanel('extras')" id="tab-btn-extras" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center">
+                Configurar Extras
+            </button>
+        </div>
+    </div>
+
+    <!-- Sección Principal / Gestión General -->
     <main id="panel-seccion-principal" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-6">
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
@@ -221,6 +237,27 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        function cambiarSeccionPanel(seccion) {
+            // Función opcional para manejar la navegación de las pestañas superiores si se añaden las vistas correspondientes
+            const btnPrincipal = document.getElementById('tab-btn-principal');
+            const btnOrdenes = document.getElementById('tab-btn-ordenes');
+            const btnExtras = document.getElementById('tab-btn-extras');
+
+            [btnPrincipal, btnOrdenes, btnExtras].forEach(btn => {
+                if(btn) {
+                    btn.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center";
+                }
+            });
+
+            if(seccion === 'principal' && btnPrincipal) {
+                btnPrincipal.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            } else if(seccion === 'ordenes' && btnOrdenes) {
+                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            } else if(seccion === 'extras' && btnExtras) {
+                btnExtras.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            }
+        }
+
         async function verificarAcceso() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
@@ -331,7 +368,7 @@
             }
         }
 
-        // GESTIÓN DE INGREDIENTES 3D (Corregido con imagen_url)
+        // GESTIÓN DE INGREDIENTES 3D
         async function guardarIngrediente3D() {
             const nombre = document.getElementById('ing3d-nombre').value.trim();
             const precio = parseFloat(document.getElementById('ing3d-precio').value);
