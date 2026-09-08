@@ -53,6 +53,12 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <!-- AVISO DE ESTADO DE TIENDA EN HEADER -->
+                <div id="badge-estado-header" class="hidden sm:flex items-center gap-2 bg-stone-950 border border-stone-800 px-3 py-1.5 rounded-xl text-[10px] font-futurista font-bold shadow-inner">
+                    <span id="punto-estado-header" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="texto-estado-header" class="text-emerald-400 uppercase tracking-widest">Abierto</span>
+                </div>
+
                 <button onclick="cambiarPantalla('simulador3d')" class="hidden sm:flex bg-stone-900 border border-amber-500/30 hover:border-amber-500/60 px-4 py-2 rounded-xl items-center gap-2 text-xs font-futurista uppercase font-bold text-amber-400 cursor-pointer transition-all">
                     <i data-lucide="sparkles" class="w-4 h-4"></i> Simulador 3D
                 </button>
@@ -65,6 +71,26 @@
     </header>
 
     <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
+        
+        <!-- AVISO DE ABIERTO / CERRADO DESTACADO EN LA VITRINA -->
+        <div id="banner-estado-tienda" class="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div class="flex items-center gap-3">
+                <div id="icono-estado-wrapper" class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="store" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="badge-punto-vitrina" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <h3 id="titulo-estado-vitrina" class="text-xs font-black font-futurista text-white uppercase tracking-widest">ESTADO DEL LOCAL: ABIERTOS</h3>
+                    </div>
+                    <p id="descripcion-estado-vitrina" class="text-[11px] text-stone-400 mt-0.5">Recibiendo pedidos y despachando con normalidad.</p>
+                </div>
+            </div>
+            <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
+                Horario: <span class="text-amber-400 font-bold">11:00 AM - 10:00 PM</span>
+            </div>
+        </div>
+
         <div class="glass-panel rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl relative">
             <div class="w-full h-64 md:h-80 relative overflow-hidden bg-black">
                 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
@@ -282,7 +308,7 @@
                     </select>
                 </div>
 
-                <!-- CASILLA DE REFERENCIA (SE OCULTa SI ES EFECTIVO) -->
+                <!-- CASILLA DE REFERENCIA -->
                 <div id="contenedorReferenciaCart" class="space-y-1.5 hidden">
                     <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
                     <input type="text" id="input-ref-pago" placeholder="Ingresa datos o código de referencia" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider">
@@ -339,6 +365,59 @@
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
+        // --- VERIFICAR ESTADO ABIERTO / CERRADO ---
+        async function verificarEstadoTienda() {
+            let estaAbierto = true; // Por defecto abierto si no hay configuración
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ajustes_sistema')
+                    .select('valor')
+                    .eq('id', 'estado_tienda')
+                    .single();
+
+                if (!error && data && data.valor !== undefined) {
+                    const val = String(data.valor).toLowerCase();
+                    if (val === 'cerrado' || val === 'false' || val === '0') {
+                        estaAbierto = false;
+                    }
+                }
+            } catch (err) {
+                console.log("Usando estado predeterminado por horario o conexión");
+            }
+
+            actualizarInterfazEstadoTienda(estaAbierto);
+        }
+
+        function actualizarInterfazEstadoTienda(abierto) {
+            const puntoHeader = document.getElementById('punto-estado-header');
+            const textoHeader = document.getElementById('texto-estado-header');
+            const bannerVitrina = document.getElementById('banner-estado-tienda');
+            const puntoVitrina = document.getElementById('badge-punto-vitrina');
+            const tituloVitrina = document.getElementById('titulo-estado-vitrina');
+            const descVitrina = document.getElementById('descripcion-estado-vitrina');
+            const iconoWrapper = document.getElementById('icono-estado-wrapper');
+
+            if (abierto) {
+                if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse"; }
+                if(textoHeader) { textoHeader.innerText = "Abierto"; textoHeader.className = "text-emerald-400 uppercase tracking-widest"; }
+                
+                if(bannerVitrina) { bannerVitrina.className = "w-full bg-stone-950 border border-emerald-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"; }
+                if(puntoVitrina) { puntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"; }
+                if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: ABIERTOS"; tituloVitrina.className = "text-xs font-black font-futurista text-emerald-400 uppercase tracking-widest"; }
+                if(descVitrina) { descVitrina.innerText = "Recibiendo pedidos y despachando con normalidad."; }
+                if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"; }
+            } else {
+                if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-red-500"; }
+                if(textoHeader) { textoHeader.innerText = "Cerrado"; textoHeader.className = "text-red-400 uppercase tracking-widest"; }
+                
+                if(bannerVitrina) { bannerVitrina.className = "w-full bg-stone-950 border border-red-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"; }
+                if(puntoVitrina) { puntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500"; }
+                if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: CERRADOS"; tituloVitrina.className = "text-xs font-black font-futurista text-red-400 uppercase tracking-widest"; }
+                if(descVitrina) { descVitrina.innerText = "En este momento estamos cerrados, pero puedes programar tus pedidos para el horario de apertura."; }
+                if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400"; }
+            }
+        }
+
         async function cargarTarifaDeliveryDesdeSupabase() {
             const { data, error } = await supabaseClient
                 .from('tarifa_delivery')
@@ -360,6 +439,9 @@
             const target = document.getElementById(`vista-${nombre}`);
             if(target) target.classList.remove('hidden');
 
+            if (nombre === 'vitrina') {
+                await verificarEstadoTienda();
+            }
             if (nombre === 'simulador3d') {
                 setTimeout(async () => {
                     if (!scene) inicializarThreeJS();
@@ -954,7 +1036,6 @@
             }
         }
 
-        // --- NUEVA LÓGICA DE GESTIÓN DE PAGOS ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
@@ -972,7 +1053,7 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const codigoReferido = urlParams.get('ref');
 
@@ -988,6 +1069,7 @@
                 if(contenedorRef) contenedorRef.classList.remove('hidden');
             }
 
+            await verificarEstadoTienda();
             descargarCatalogoDeSupabase();
             descargarAdicionalesDeSupabase();
             lucide.createIcons();
