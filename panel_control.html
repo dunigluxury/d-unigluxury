@@ -232,29 +232,55 @@
         </div>
     </main>
 
+    <!-- Sección Adicional para Órdenes VIP (Oculta por defecto) -->
+    <div id="panel-seccion-ordenes" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow hidden relative z-10">
+        <div class="glass-panel p-8 rounded-3xl space-y-6 shadow-2xl">
+            <h3 class="font-futurista font-black text-sm uppercase tracking-[0.2em] text-white">Órdenes VIP Recibidas</h3>
+            <p class="text-xs text-stone-400">Aquí puedes visualizar y gestionar las órdenes que ingresen desde la vitrina digital.</p>
+            <div id="lista-ordenes-vip" class="text-xs text-stone-500 font-mono">No hay órdenes pendientes por procesar.</div>
+        </div>
+    </div>
+
+    <!-- Sección Adicional para Extras (Oculta por defecto) -->
+    <div id="panel-seccion-extras" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow hidden relative z-10">
+        <div class="glass-panel p-8 rounded-3xl space-y-6 shadow-2xl">
+            <h3 class="font-futurista font-black text-sm uppercase tracking-[0.2em] text-white">Configuración Avanzada de Extras</h3>
+            <p class="text-xs text-stone-400">Administra configuraciones globales o parámetros adicionales del ecosistema.</p>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         function cambiarSeccionPanel(seccion) {
-            // Función opcional para manejar la navegación de las pestañas superiores si se añaden las vistas correspondientes
             const btnPrincipal = document.getElementById('tab-btn-principal');
             const btnOrdenes = document.getElementById('tab-btn-ordenes');
             const btnExtras = document.getElementById('tab-btn-extras');
 
+            const secPrincipal = document.getElementById('panel-seccion-principal');
+            const secOrdenes = document.getElementById('panel-seccion-ordenes');
+            const secExtras = document.getElementById('panel-seccion-extras');
+
+            // Ocultar todas las secciones y resetear estilos de botones
+            [secPrincipal, secOrdenes, secExtras].forEach(sec => { if(sec) sec.classList.add('hidden'); });
             [btnPrincipal, btnOrdenes, btnExtras].forEach(btn => {
                 if(btn) {
                     btn.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all text-stone-400 hover:text-white bg-stone-900/50 cursor-pointer text-center";
                 }
             });
 
-            if(seccion === 'principal' && btnPrincipal) {
-                btnPrincipal.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
-            } else if(seccion === 'ordenes' && btnOrdenes) {
-                btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
-            } else if(seccion === 'extras' && btnExtras) {
-                btnExtras.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            // Mostrar la sección seleccionada y activar su respectivo botón
+            if(seccion === 'principal') {
+                if(secPrincipal) secPrincipal.classList.remove('hidden');
+                if(btnPrincipal) btnPrincipal.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            } else if(seccion === 'ordenes') {
+                if(secOrdenes) secOrdenes.classList.remove('hidden');
+                if(btnOrdenes) btnOrdenes.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
+            } else if(seccion === 'extras') {
+                if(secExtras) secExtras.classList.remove('hidden');
+                if(btnExtras) btnExtras.className = "py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center";
             }
         }
 
