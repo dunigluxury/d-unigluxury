@@ -110,6 +110,7 @@
                     <div id="lista-adicionales" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
                 </div>
             </div>
+
             <!-- Formulario de Ingredientes 3D -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -128,6 +129,7 @@
                     <div id="lista-ingredientes-3d" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
                 </div>
             </div>
+
             <!-- Método de Pago -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
@@ -311,7 +313,7 @@
             }
             
             await descargarCategoriasDesdeSupabase(); 
-            await descargarIngredientesSupabase();
+            await descargarIngredientes3D();
             await descargarAdicionales(); 
             descargarCatalogoDeSupabase(); 
             alternarCamposPago(); 
