@@ -36,33 +36,7 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
 
-    <!-- CAPA DE BLOQUEO Y MODAL DE NEGOCIO CERRADO -->
-    <div id="modal-negocio-cerrado" class="fixed inset-0 bg-stone-950/85 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
-        <div class="max-w-md w-full bg-stone-900 border border-red-500/30 p-8 rounded-3xl shadow-2xl space-y-6 animate-pulse">
-            <div class="w-20 h-20 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto text-3xl">
-                🔒
-            </div>
-            <div class="space-y-2">
-                <h2 class="text-2xl font-bold text-white uppercase tracking-wider font-futurista">¡Negocio Cerrado Temporalmente!</h2>
-                <p class="text-stone-400 text-xs leading-relaxed">En este momento no estamos recibiendo pedidos online. Vuelve a visitarnos más tarde o comunícate con nosotros.</p>
-            </div>
-            <div class="pt-2">
-                <span class="inline-block bg-red-500/10 text-red-400 border border-red-500/20 font-mono text-xs px-4 py-2 rounded-xl">
-                    ESTADO: CERRADO DESDE EL PANEL
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOTÓN FLOTANTE PERMANENTE CUANDO ESTÁ CERRADO -->
-    <div id="btn-flotante-cerrado" class="fixed bottom-24 right-5 z-40 hidden">
-        <button onclick="mostrarAvisoCerrado()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase px-5 py-3 rounded-2xl shadow-lg border border-red-400/40 flex items-center gap-3 transition-transform hover:scale-105 cursor-pointer animate-bounce">
-            <span class="w-3 h-3 bg-white rounded-full animate-ping"></span>
-            <span>🔴 Negocio Cerrado</span>
-        </button>
-    </div>
-
-    <header class="bg-black/80 backdrop-blur-xl border-b border-stone-900 sticky top-0 z-40 px-4">
+    <header class="bg-black/80 backdrop-blur-xl border-b border-stone-900 sticky top-0 z-50 px-4">
         <div class="max-w-7xl mx-auto h-20 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="cambiarPantalla('vitrina')">
                 <div class="border border-amber-500/30 p-2.5 rounded-2xl bg-stone-950 shadow-[0_0_20px_rgba(229,193,88,0.15)] glow-gold">
@@ -90,7 +64,7 @@
         </div>
     </header>
 
-    <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10 transition-all duration-300">
+    <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
         <div class="glass-panel rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl relative">
             <div class="w-full h-64 md:h-80 relative overflow-hidden bg-black">
                 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
@@ -351,9 +325,6 @@
         let productoSeleccionado = null;
         let fotoSeleccionadaParaLightbox = "";
         const precioBasePan = 1.00;
-        
-        // Variable global para controlar el estado operativo de la tienda
-        window.negocioAbierto = true;
 
         let scene, camera, renderer, hamburguesaGrupo;
 
@@ -367,69 +338,6 @@
         const LOCAL_LAT = 8.5897;  
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
-
-        // --- SISTEMA DE CONTROL DE NEGOCIO CERRADO / ABIIERTO ---
-        async function verificarEstadoDelNegocio() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('ajustes_sistema')
-                    .select('*')
-                    .eq('id', 'estado_negocio')
-                    .single();
-
-                if (!error && data) {
-                    const valorBruto = data.valor !== undefined ? data.valor : data.estado;
-                    const valorString = String(valorBruto).toLowerCase().trim();
-
-                    const estaCerrado = (
-                        valorString === 'cerrado' || 
-                        valorString === 'false' || 
-                        valorString === '0' || 
-                        valorString === 'inactivo' ||
-                        valorBruto === false
-                    );
-
-                    bloquearVitrinaPorCierre(estaCerrado);
-                }
-            } catch (err) {
-                console.log("Verificando estado del negocio:", err);
-            }
-        }
-
-        function bloquearVitrinaPorCierre(cerrado) {
-            window.negocioAbierto = !cerrado;
-            const modalCerrado = document.getElementById('modal-negocio-cerrado');
-            const btnFlotante = document.getElementById('btn-flotante-cerrado');
-            const vitrina = document.getElementById('vista-vitrina');
-
-            if (cerrado) {
-                if (modalCerrado) modalCerrado.classList.remove('hidden');
-                if (btnFlotante) btnFlotante.classList.remove('hidden');
-                if (vitrina) {
-                    vitrina.style.pointerEvents = 'none';
-                    vitrina.style.opacity = '0.35';
-                }
-            } else {
-                if (modalCerrado) modalCerrado.classList.add('hidden');
-                if (btnFlotante) btnFlotante.classList.add('hidden');
-                if (vitrina) {
-                    vitrina.style.pointerEvents = 'auto';
-                    vitrina.style.opacity = '1';
-                }
-            }
-        }
-
-        function mostrarAvisoCerrado() {
-            const modalCerrado = document.getElementById('modal-negocio-cerrado');
-            if (modalCerrado) modalCerrado.classList.remove('hidden');
-        }
-
-        document.getElementById('modal-negocio-cerrado')?.addEventListener('click', (e) => {
-            if (e.target.id === 'modal-negocio-cerrado') {
-                e.target.classList.add('hidden');
-            }
-        });
-        // --------------------------------------------------------
 
         async function cargarTarifaDeliveryDesdeSupabase() {
             const { data, error } = await supabaseClient
@@ -445,12 +353,6 @@
         }
 
         async function cambiarPantalla(nombre) {
-            // Si el negocio está cerrado y el usuario intenta ir a pantallas de interacción de compra, mostramos aviso
-            if (!window.negocioAbierto && (nombre === 'carrito' || nombre === 'simulador3d')) {
-                mostrarAvisoCerrado();
-                return;
-            }
-
             ['vitrina', 'detalle', 'simulador3d', 'carrito'].forEach(v => {
                 const el = document.getElementById(`vista-${v}`);
                 if(el) el.classList.add('hidden');
@@ -551,11 +453,6 @@
         }
 
         function verDetalleDeProducto(idProducto) {
-            if (!window.negocioAbierto) {
-                mostrarAvisoCerrado();
-                return;
-            }
-
             productoSeleccionado = baseProductos.find(p => p.id === idProducto); 
             if (!productoSeleccionado) return;
 
@@ -647,10 +544,6 @@
         }
 
         function agregarDetalleAlCarritoYVolver() {
-            if (!window.negocioAbierto) {
-                mostrarAvisoCerrado();
-                return;
-            }
             if (!productoSeleccionado) return;
 
             const checkboxes = document.querySelectorAll('.check-adicional:checked');
@@ -894,10 +787,6 @@
         }
 
         function enviarCreacion3DAlCarrito() {
-            if (!window.negocioAbierto) {
-                mostrarAvisoCerrado();
-                return;
-            }
             if (capasActuales.length === 0) {
                 alert("Arma tu hamburguesa 3D agregando al menos un ingrediente.");
                 return;
@@ -1065,6 +954,7 @@
             }
         }
 
+        // --- GESTIÓN DE CAMPOS DE PAGO ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
@@ -1100,20 +990,10 @@
 
             descargarCatalogoDeSupabase();
             descargarAdicionalesDeSupabase();
-            
-            // Verificamos estado inicial del negocio y mantenemos chequeo automático cada 30 segundos
-            verificarEstadoDelNegocio();
-            setInterval(verificarEstadoDelNegocio, 30000);
-
             lucide.createIcons();
         });
 
         async function finalizarOrdenWhatsApp() {
-            if (!window.negocioAbierto) {
-                mostrarAvisoCerrado();
-                return;
-            }
-
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
             if(gpsClienteLat === null || gpsClienteLng === null) {
