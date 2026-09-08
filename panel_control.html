@@ -63,7 +63,7 @@
         </div>
     </header>
 
-    <!-- Pestañas de Navegación del Panel (Gestión General, Órdenes VIP, Configurar Extras) -->
+    <!-- Pestañas de Navegación del Panel -->
     <div class="w-full max-w-7xl mx-auto px-4 mt-6">
         <div class="grid grid-cols-3 gap-2 bg-stone-950/80 p-2 rounded-2xl border border-stone-900 shadow-xl">
             <button onclick="cambiarSeccionPanel('principal')" id="tab-btn-principal" class="py-3 px-4 rounded-xl font-futurista text-xs font-bold uppercase tracking-wider transition-all bg-amber-500 text-black shadow-lg shadow-amber-500/10 cursor-pointer text-center">
@@ -81,6 +81,7 @@
     <!-- Sección Principal / Gestión General -->
     <main id="panel-seccion-principal" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         <div class="space-y-6">
+            <!-- Categorías Indexadas -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
                     <i data-lucide="tag" class="w-4 h-4"></i>
@@ -93,8 +94,24 @@
                 <div id="lista-categorias" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
             </div>
 
-            <!-- Formulario de Adicionales -->
-            <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl mt-6">
+            <!-- Ingredientes / Componentes -->
+            <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
+                <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                    <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Ingredientes</h3>
+                </div>
+                <div class="space-y-2">
+                    <input type="text" id="ingrediente-nombre" placeholder="Nombre del ingrediente..." class="w-full bg-stone-950/80 border border-stone-800 text-xs text-white p-3.5 rounded-xl focus:outline-none">
+                    <button onclick="guardarIngredienteSupabase()" class="w-full bg-stone-900 border border-stone-800 text-amber-400 font-futurista font-bold p-3 rounded-xl text-xs uppercase tracking-widest cursor-pointer hover:bg-stone-800">Inyectar Ingrediente</button>
+                </div>
+                <div class="border-t border-stone-900 pt-4 mt-4">
+                    <h4 class="font-futurista font-bold text-[10px] uppercase text-amber-400/80 tracking-wider mb-2">Ingredientes Registrados</h4>
+                    <div id="lista-ingredientes" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- Adicionales -->
+            <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <h3 class="font-futurista font-black text-xs uppercase tracking-[0.2em] text-white">Adicionales</h3>
@@ -110,6 +127,7 @@
                 </div>
             </div>
 
+            <!-- Método de Pago -->
             <div class="glass-panel p-6 rounded-2xl space-y-4 shadow-2xl">
                 <div class="flex items-center gap-2 text-amber-400 border-b border-stone-800/60 pb-3">
                     <i data-lucide="credit-card" class="w-4 h-4"></i>
@@ -292,6 +310,7 @@
             }
             
             await descargarCategoriasDesdeSupabase(); 
+            await descargarIngredientesSupabase();
             await descargarAdicionales(); 
             descargarCatalogoDeSupabase(); 
             alternarCamposPago(); 
@@ -526,6 +545,130 @@
             }
         }
 
+        async function descargarCategoriasDesdeSupabase() {
+            const { data, error } = await supabaseClient
+                .from('categorias')
+                .select('nombre')
+                .eq('instagram_dueno', filtroInstagram);
+
+            if (data) {
+                categoriasDB = data.map(c => c.nombre);
+                renderizarCategorias(); 
+            }
+        }
+
+        async function guardarIngredienteSupabase() {
+            const input = document.getElementById('ingrediente-nombre');
+            const nombre = input.value.trim();
+
+            if (!nombre) {
+                alert("Por favor, ingresa el nombre del ingrediente.");
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('ingredientes')
+                .insert([{ nombre: nombre, instagram_dueno: filtroInstagram }]);
+
+            if (error) {
+                alert("Error al guardar ingrediente: " + error.message);
+            } else {
+                input.value = "";
+                descargarIngredientesSupabase();
+            }
+        }
+
+        async function descargarIngredientesSupabase() {
+            const { data, error } = await supabaseClient
+                .from('ingredientes')
+                .select('*')
+                .eq('instagram_dueno', filtroInstagram);
+
+            if (!error && data) {
+                const lista = document.getElementById('lista-ingredientes');
+                if (lista) {
+                    lista.innerHTML = "";
+                    if (data.length === 0) {
+                        lista.innerHTML = `<span class="text-[10px] text-stone-600 font-mono">Sin ingredientes registrados.</span>`;
+                        return;
+                    }
+                    data.forEach(item => {
+                        lista.innerHTML += `
+                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                                <span>${item.nombre}</span>
+                                <button onclick="eliminarIngredienteSupabase(${item.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold cursor-pointer">✕</button>
+                            </div>`;
+                    });
+                }
+            }
+        }
+
+        async function eliminarIngredienteSupabase(id) {
+            const { error } = await supabaseClient.from('ingredientes').delete().eq('id', id);
+            if (!error) {
+                descargarIngredientesSupabase();
+            } else {
+                alert("Error al eliminar: " + error.message);
+            }
+        }
+
+        async function guardarAdicional() {
+            const nombre = document.getElementById('add-nombre').value.trim();
+            const precio = parseFloat(document.getElementById('add-precio').value);
+
+            if (!nombre || isNaN(precio)) {
+                alert("Por favor, ingresa un nombre y un precio válido.");
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('adicionales')
+                .insert([{ 
+                    nombre: nombre, 
+                    precio: precio, 
+                    instagram_dueno: filtroInstagram 
+                }]);
+
+            if (error) {
+                alert("Error al guardar adicional: " + error.message);
+            } else {
+                alert("Adicional registrado con éxito.");
+                document.getElementById('add-nombre').value = "";
+                document.getElementById('add-precio').value = "";
+                descargarAdicionales();
+            }
+        }
+
+        async function descargarAdicionales() {
+            const { data, error } = await supabaseClient
+                .from('adicionales')
+                .select('*')
+                .eq('instagram_dueno', filtroInstagram);
+
+            if (!error && data) {
+                const lista = document.getElementById('lista-adicionales');
+                if(lista) {
+                    lista.innerHTML = "";
+                    data.forEach(a => {
+                        lista.innerHTML += `
+                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
+                                <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
+                                <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
+                            </div>`;
+                    });
+                }
+            }
+        }
+
+        async function eliminarAdicional(id) {
+            const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
+            if (!error) {
+                descargarAdicionales();
+            } else {
+                alert("Error al eliminar: " + error.message);
+            }
+        }
+
         function alternarCamposPago() {
             const plataforma = document.getElementById('pago-plataforma').value;
             const wrapper = document.getElementById('wrapper-campos-dinamicos');
@@ -667,7 +810,7 @@
                 document.getElementById('pago-telefono').value = cuenta.telefono || '';
             } else if (cuenta.plataforma === "zelle") {
                 document.getElementById('pago-email').value = cuenta.email || '';
-                document.getElementById('pago-titular').value = cuenta.titular || '';
+                document.getElementById('pangle-titular').value = cuenta.titular || '';
             } else if (cuenta.plataforma === "nequi") {
                 document.getElementById('pago-telefono').value = cuenta.telefono || '';
                 document.getElementById('pago-titular').value = cuenta.titular || '';
@@ -770,75 +913,6 @@
                 .upsert({ id: 'whatsapp_notificaciones', valor: num, updated_at: new Date().toISOString() });
 
             if(!error) { alert("¡Canal WhatsApp guardado con éxito!"); } else { alert("Error al guardar: " + error.message); }
-        }
-
-        async function descargarCategoriasDesdeSupabase() {
-            const { data, error } = await supabaseClient
-                .from('categorias')
-                .select('nombre')
-                .eq('instagram_dueno', filtroInstagram);
-
-            if (data) {
-                categoriasDB = data.map(c => c.nombre);
-                renderizarCategorias(); 
-            }
-        }
-
-        async function guardarAdicional() {
-            const nombre = document.getElementById('add-nombre').value.trim();
-            const precio = parseFloat(document.getElementById('add-precio').value);
-
-            if (!nombre || isNaN(precio)) {
-                alert("Por favor, ingresa un nombre y un precio válido.");
-                return;
-            }
-
-            const { error } = await supabaseClient
-                .from('adicionales')
-                .insert([{ 
-                    nombre: nombre, 
-                    precio: precio, 
-                    instagram_dueno: filtroInstagram 
-                }]);
-
-            if (error) {
-                alert("Error al guardar adicional: " + error.message);
-            } else {
-                alert("Adicional registrado con éxito.");
-                document.getElementById('add-nombre').value = "";
-                document.getElementById('add-precio').value = "";
-                descargarAdicionales();
-            }
-        }
-
-        async function descargarAdicionales() {
-            const { data, error } = await supabaseClient
-                .from('adicionales')
-                .select('*')
-                .eq('instagram_dueno', filtroInstagram);
-
-            if (!error && data) {
-                const lista = document.getElementById('lista-adicionales');
-                if(lista) {
-                    lista.innerHTML = "";
-                    data.forEach(a => {
-                        lista.innerHTML += `
-                            <div class="bg-stone-950/60 p-3 rounded-xl text-xs border border-stone-900 text-stone-400 flex justify-between items-center">
-                                <span>${a.nombre} - <span class="text-amber-400">$${a.precio}</span></span>
-                                <button onclick="eliminarAdicional(${a.id})" class="text-red-500 hover:text-red-300 ml-2 font-bold">✕</button>
-                            </div>`;
-                    });
-                }
-            }
-        }
-
-        async function eliminarAdicional(id) {
-            const { error } = await supabaseClient.from('adicionales').delete().eq('id', id);
-            if (!error) {
-                descargarAdicionales();
-            } else {
-                alert("Error al eliminar: " + error.message);
-            }
         }
     </script>
 </body>
