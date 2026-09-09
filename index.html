@@ -388,35 +388,88 @@
 
     actualizarInterfazEstadoTienda(estaAbierto);
 }
-        function actualizarInterfazEstadoTienda(abierto) {
-            const puntoHeader = document.getElementById('punto-estado-header');
-            const textoHeader = document.getElementById('texto-estado-header');
-            const bannerVitrina = document.getElementById('banner-estado-tienda');
-            const puntoVitrina = document.getElementById('badge-punto-vitrina');
-            const tituloVitrina = document.getElementById('titulo-estado-vitrina');
-            const descVitrina = document.getElementById('descripcion-estado-vitrina');
-            const iconoWrapper = document.getElementById('icono-estado-wrapper');
+        function actualizarInterfazEstadoTienda(estaAbierto) {
+    // 1. Elementos del Header
+    const puntoHeader = document.getElementById('punto-estado-header');
+    const textoHeader = document.getElementById('texto-estado-header');
 
-            if (abierto) {
-                if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse"; }
-                if(textoHeader) { textoHeader.innerText = "Abierto"; textoHeader.className = "text-emerald-400 uppercase tracking-widest"; }
-                
-                if(bannerVitrina) { bannerVitrina.className = "w-full bg-stone-950 border border-emerald-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"; }
-                if(puntoVitrina) { puntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"; }
-                if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: ABIERTOS"; tituloVitrina.className = "text-xs font-black font-futurista text-emerald-400 uppercase tracking-widest"; }
-                if(descVitrina) { descVitrina.innerText = "Recibiendo pedidos y despachando con normalidad."; }
-                if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"; }
-            } else {
-                if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-red-500"; }
-                if(textoHeader) { textoHeader.innerText = "Cerrado"; textoHeader.className = "text-red-400 uppercase tracking-widest"; }
-                
-                if(bannerVitrina) { bannerVitrina.className = "w-full bg-stone-950 border border-red-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"; }
-                if(puntoVitrina) { puntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500"; }
-                if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: CERRADOS"; tituloVitrina.className = "text-xs font-black font-futurista text-red-400 uppercase tracking-widest"; }
-                if(descVitrina) { descVitrina.innerText = "En este momento estamos cerrados, pero puedes programar tus pedidos para el horario de apertura."; }
-                if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400"; }
-            }
+    // 2. Elementos del Banner de la Vitrina
+    const badgePuntoVitrina = document.getElementById('badge-punto-vitrina');
+    const tituloVitrina = document.getElementById('titulo-estado-vitrina');
+    const descVitrina = document.getElementById('descripcion-estado-vitrina');
+    const iconoWrapper = document.getElementById('icono-estado-wrapper');
+    const vistaVitrina = document.getElementById('vista-vitrina');
+
+    if (estaAbierto) {
+        // --- ESTADO: ABIERTO ---
+        if (puntoHeader) {
+            puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
         }
+        if (textoHeader) {
+            textoHeader.className = "text-emerald-400 uppercase tracking-widest";
+            textoHeader.textContent = "Abierto";
+        }
+
+        if (badgePuntoVitrina) {
+            badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
+        }
+        if (tituloVitrina) {
+            tituloVitrina.textContent = "ESTADO DEL LOCAL: ABIERTOS";
+        }
+        if (descVitrina) {
+            descVitrina.textContent = "Recibiendo pedidos y despachando con normalidad.";
+        }
+        if (iconoWrapper) {
+            iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400";
+        }
+
+        // Habilitar la vitrina (quitar opacidad y permitir clics)
+        if (vistaVitrina) {
+            vistaVitrina.style.pointerEvents = "auto";
+            vistaVitrina.style.opacity = "1";
+        }
+
+        // Remover cartel de cerrado si existiera
+        const avisoCerrado = document.getElementById('overlay-tienda-cerrada');
+        if (avisoCerrado) avisoCerrado.remove();
+
+    } else {
+        // --- ESTADO: CERRADO (BLOQUEO DE VITRINA) ---
+        if (puntoHeader) {
+            puntoHeader.className = "w-2 h-2 rounded-full bg-red-500";
+        }
+        if (textoHeader) {
+            textoHeader.className = "text-red-400 uppercase tracking-widest";
+            textoHeader.textContent = "Cerrado";
+        }
+
+        if (badgePuntoVitrina) {
+            badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+        }
+        if (tituloVitrina) {
+            tituloVitrina.textContent = "ESTADO DEL LOCAL: CERRADOS";
+        }
+        if (descVitrina) {
+            descVitrina.textContent = "Lo sentimos, nuestro horario de atención ha finalizado. No se reciben pedidos en este momento.";
+        }
+        if (iconoWrapper) {
+            iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400";
+        }
+
+        // Bloquear interacciones en la vitrina principal
+        if (vistaVitrina) {
+            vistaVitrina.style.pointerEvents = "none"; // Evita clics en los productos
+            vistaVitrina.style.opacity = "0.5";        // Apariencia visual de bloqueo
+        }
+
+        // Asegurarnos de que el banner superior de estado y el header sí se puedan ver/tocar para avisar
+        const bannerEstado = document.getElementById('banner-estado-tienda');
+        if (bannerEstado) {
+            bannerEstado.style.pointerEvents = "auto";
+            bannerEstado.style.opacity = "1";
+        }
+    }
+}
 
         async function cargarTarifaDeliveryDesdeSupabase() {
             const { data, error } = await supabaseClient
