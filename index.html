@@ -367,27 +367,27 @@
 
         // --- VERIFICAR ESTADO ABIERTO / CERRADO (CORREGIDO A 'estado_tienda') ---
         async function verificarEstadoTienda() {
-            let estaAbierto = true; // Por defecto abierto si no hay configuración
-            try {
-                const { data, error } = await supabaseClient
-                    .from('ajustes_sistema')
-                    .select('valor')
-                    .eq('id', 'estado_tienda')
-                    .single();
+    let estaAbierto = true; // Por defecto abierto si no hay configuración
+    try {
+        const { data, error } = await supabaseClient
+            .from('ajustes_sistema')
+            .select('valor')
+            .eq('id', 'estado_negocio') // <-- CAMBIADO DE 'estado_tienda' A 'estado_negocio'
+            .single();
 
-                if (!error && data && data.valor !== undefined) {
-                    const val = String(data.valor).toLowerCase();
-                    if (val === 'cerrado' || val === 'false' || val === '0') {
-                        estaAbierto = false;
-                    }
-                }
-            } catch (err) {
-                console.log("Usando estado predeterminado por horario o conexión");
+        if (!error && data && data.valor !== undefined) {
+            const val = String(data.valor).toLowerCase();
+            // Como en tu tabla dice 'cerrado', esto lo detectará de inmediato
+            if (val === 'cerrado' || val === 'false' || val === '0') {
+                estaAbierto = false;
             }
-
-            actualizarInterfazEstadoTienda(estaAbierto);
         }
+    } catch (err) {
+        console.log("Usando estado predeterminado por horario o conexión");
+    }
 
+    actualizarInterfazEstadoTienda(estaAbierto);
+}
         function actualizarInterfazEstadoTienda(abierto) {
             const puntoHeader = document.getElementById('punto-estado-header');
             const textoHeader = document.getElementById('texto-estado-header');
