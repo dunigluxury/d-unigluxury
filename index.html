@@ -371,27 +371,43 @@
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
-        // Diccionario de información dinámica de pagos
-        const datosDePago = {
-            'zelle': `
-                <p><strong>Correo:</strong> pagos@casadelaspapas.com</p>
-                <p><strong>Titular:</strong> Casa de las Papas C.A.</p>
-                <p class="text-[10px] text-stone-400 mt-1">Por favor envíe el capture al WhatsApp.</p>
-            `,
-            'nequi': `
-                <p><strong>Celular / Nequi:</strong> 300 123 4567</p>
-                <p><strong>Titular:</strong> Casa de las Papas</p>
-            `,
-            'pago_movil': `
-                <p><strong>Banco:</strong> 0102 - Banco de Venezuela</p>
-                <p><strong>Teléfono:</strong> 0412 123 4567</p>
-                <p><strong>Cédula / RIF:</strong> J-12345678-9</p>
-            `,
-            'efectivo': `
-                <p class="text-amber-400">💵 Pago en efectivo alianzas o delivery.</p>
-                <p class="text-[10px] text-stone-400">Por favor tenga en cuenta el monto exacto.</p>
-            `
-        };
+        // Diccionario dinámico que se llenará con los datos de Supabase (tabla cuentas_pago)
+        let datosDePago = {};
+
+        async function cargarCuentasPagoSupabase() {
+            try {
+                const { data, error } = await supabaseClient.from('cuentas_pago').select('*');
+                if (!error && data) {
+                    data.forEach(cuenta => {
+                        let htmlDetalle = '';
+                        if (cuenta.plataforma === 'efectivo') {
+                            htmlDetalle = `
+                                <p class="text-amber-400">💵 Pago en efectivo alianzas o delivery.</p>
+                                <p class="text-[10px] text-stone-400">Por favor tenga en cuenta el monto exacto.</p>
+                            `;
+                        } else {
+                            if (cuenta.banco) htmlDetalle += `<p><strong>Banco:</strong> ${cuenta.banco}</p>`;
+                            if (cuenta.telefono) htmlDetalle += `<p><strong>Teléfono:</strong> ${cuenta.telefono}</p>`;
+                            if (cuenta.ci) htmlDetalle += `<p><strong>Cédula / RIF:</strong> ${cuenta.ci}</p>`;
+                            if (cuenta.email) htmlDetalle += `<p><strong>Correo:</strong> ${cuenta.email}</p>`;
+                            if (cuenta.titular) htmlDetalle += `<p><strong>Titular:</strong> ${cuenta.titular}</p>`;
+                            if (cuenta.detalles) htmlDetalle += `<p><strong>Notas:</strong> ${cuenta.detalles}</p>`;
+                        }
+                        datosDePago[cuenta.plataforma] = htmlDetalle;
+                    });
+                }
+            } catch (err) {
+                console.error("Error al cargar cuentas de pago desde Supabase:", err);
+            }
+
+            // Fallback por defecto para efectivo si no viene en la tabla
+            if (!datosDePago['efectivo']) {
+                datosDePago['efectivo'] = `
+                    <p class="text-amber-400">💵 Pago en efectivo alianzas o delivery.</p>
+                    <p class="text-[10px] text-stone-400">Por favor tenga en cuenta el monto exacto.</p>
+                `;
+            }
+        }
 
         async function verificarEstadoTienda() {
             let estaAbierto = true; 
@@ -1055,7 +1071,7 @@
             }
         }
 
-        // --- GESTIÓN DINÁMICA DE CAMPOS Y DATOS DE PAGO ---
+        // --- GESTIÓN DINÁMICA DE CAMPOS Y DATOS DE PAGO DESDE SUPABASE ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
@@ -1099,6 +1115,7 @@
                 if(contenedorRef) contenedorRef.classList.remove('hidden');
             }
 
+            await cargarCuentasPagoSupabase();
             await verificarEstadoTienda();
             descargarCatalogoDeSupabase();
             descargarAdicionalesDeSupabase();
