@@ -91,6 +91,15 @@
             </div>
         </div>
 
+        <!-- CAPA DE BLOQUEO DE VITRINA SI ESTÁ CERRADO -->
+        <div id="aviso-bloqueo-cerrado" class="hidden w-full bg-red-950/40 border border-red-500/50 p-6 rounded-3xl text-center space-y-3 shadow-2xl">
+            <div class="inline-flex p-3 bg-red-500/20 text-red-400 rounded-2xl border border-red-500/30">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-black font-futurista text-white uppercase tracking-wider">LOCAL CERRADO TEMPORALMENTE</h2>
+            <p class="text-xs text-stone-300 max-w-lg mx-auto">En este momento el establecimiento se encuentra cerrado. Puedes explorar el menú de manera informativa, pero la recepción de nuevos pedidos y el simulador 3D se encuentran bloqueados hasta la hora de apertura.</p>
+        </div>
+
         <div class="glass-panel rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl relative">
             <div class="w-full h-64 md:h-80 relative overflow-hidden bg-black">
                 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
@@ -107,7 +116,7 @@
                     <img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3d3dlYnBqbDUwenB4eHZoeGw4NW01dGxra2Nxczl1cWEyOXQ1cG53NSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VEc68ccEaKVB31P9K5/giphy.gif" alt="Logo BCV" class="w-10 h-10 object-contain filter drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]">
                     <span class="text-xs text-stone-400 font-mono">Tasas oficiales y transacciones seguras al BCV</span>
                 </div>
-                <button onclick="cambiarPantalla('simulador3d')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black px-8 py-4 rounded-2xl text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl cursor-pointer shrink-0">
+                <button id="btn-crear-hamburguesa-main" onclick="cambiarPantalla('simulador3d')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black px-8 py-4 rounded-2xl text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl cursor-pointer shrink-0">
                     <i data-lucide="sparkles" class="w-5 h-5"></i> CREAR MI HAMBURGUESA
                 </button>
             </div>
@@ -179,7 +188,7 @@
                         <span class="text-xs text-green-400 font-bold flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Certificada</span>
                     </div>
                 </div>
-                <button onclick="agregarDetalleAlCarritoYVolver()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
+                <button id="btn-agregar-carrito-detalle" onclick="agregarDetalleAlCarritoYVolver()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 px-6 rounded-xl text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all duration-300">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i> AÑADIR A LA BOLSA VIP
                 </button>
             </div>
@@ -319,7 +328,7 @@
                     <div id="display-codigo-referido" class="font-bold text-amber-400 font-mono mt-0.5">NINGUNO</div>
                 </div>
 
-                <button onclick="finalizarOrdenWhatsApp()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
+                <button id="btn-enviar-whatsapp" onclick="finalizarOrdenWhatsApp()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-4 h-4"></i> Enviar Orden por WhatsApp
                 </button>
             </div>
@@ -350,6 +359,7 @@
         let baseProductos = [];
         let productoSeleccionado = null;
         let fotoSeleccionadaParaLightbox = "";
+        let tiendaAbiertaGlobal = true; // Control de estado global
         const precioBasePan = 1.00;
 
         let scene, camera, renderer, hamburguesaGrupo;
@@ -365,9 +375,9 @@
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
-        // --- VERIFICAR ESTADO ABIERTO / CERRADO ---
+        // --- VERIFICAR ESTADO ABIERTO / CERRADO (CORREGIDO) ---
         async function verificarEstadoTienda() {
-            let estaAbierto = true; // Por defecto abierto si no hay configuración
+            let estaAbierto = true; // Por defecto abierto
             try {
                 const { data, error } = await supabaseClient
                     .from('ajustes_sistema')
@@ -376,15 +386,17 @@
                     .single();
 
                 if (!error && data && data.valor !== undefined) {
-                    const val = String(data.valor).toLowerCase();
-                    if (val === 'cerrado' || val === 'false' || val === '0') {
+                    const val = String(data.valor).toLowerCase().trim();
+                    // Si el valor es cerrado, false o 0, interpretamos que está cerrado
+                    if (val === 'cerrado' || val === 'false' || val === '0' || val === 'off') {
                         estaAbierto = false;
                     }
                 }
             } catch (err) {
-                console.log("Usando estado predeterminado por horario o conexión");
+                console.log("Usando estado predeterminado por conexión", err);
             }
 
+            tiendaAbiertaGlobal = estaAbierto;
             actualizarInterfazEstadoTienda(estaAbierto);
         }
 
@@ -396,6 +408,10 @@
             const tituloVitrina = document.getElementById('titulo-estado-vitrina');
             const descVitrina = document.getElementById('descripcion-estado-vitrina');
             const iconoWrapper = document.getElementById('icono-estado-wrapper');
+            const avisoBloqueo = document.getElementById('aviso-bloqueo-cerrado');
+            const btnCrearMain = document.getElementById('btn-crear-hamburguesa-main');
+            const btnAgregarDetalle = document.getElementById('btn-agregar-carrito-detalle');
+            const btnEnviarWs = document.getElementById('btn-enviar-whatsapp');
 
             if (abierto) {
                 if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse"; }
@@ -406,6 +422,11 @@
                 if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: ABIERTOS"; tituloVitrina.className = "text-xs font-black font-futurista text-emerald-400 uppercase tracking-widest"; }
                 if(descVitrina) { descVitrina.innerText = "Recibiendo pedidos y despachando con normalidad."; }
                 if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"; }
+                
+                if(avisoBloqueo) avisoBloqueo.classList.add('hidden');
+                if(btnCrearMain) { btnCrearMain.disabled = false; btnCrearMain.style.opacity = "1"; btnCrearMain.style.pointerEvents = "auto"; }
+                if(btnAgregarDetalle) { btnAgregarDetalle.disabled = false; btnAgregarDetalle.style.opacity = "1"; btnAgregarDetalle.style.pointerEvents = "auto"; }
+                if(btnEnviarWs) { btnEnviarWs.disabled = false; btnEnviarWs.style.opacity = "1"; btnEnviarWs.style.pointerEvents = "auto"; }
             } else {
                 if(puntoHeader) { puntoHeader.className = "w-2 h-2 rounded-full bg-red-500"; }
                 if(textoHeader) { textoHeader.innerText = "Cerrado"; textoHeader.className = "text-red-400 uppercase tracking-widest"; }
@@ -413,8 +434,13 @@
                 if(bannerVitrina) { bannerVitrina.className = "w-full bg-stone-950 border border-red-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl"; }
                 if(puntoVitrina) { puntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500"; }
                 if(tituloVitrina) { tituloVitrina.innerText = "ESTADO DEL LOCAL: CERRADOS"; tituloVitrina.className = "text-xs font-black font-futurista text-red-400 uppercase tracking-widest"; }
-                if(descVitrina) { descVitrina.innerText = "En este momento estamos cerrados, pero puedes programar tus pedidos para el horario de apertura."; }
+                if(descVitrina) { descVitrina.innerText = "En este momento estamos cerrados. La recepción de pedidos está bloqueada temporalmente."; }
                 if(iconoWrapper) { iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400"; }
+                
+                if(avisoBloqueo) avisoBloqueo.classList.remove('hidden');
+                if(btnCrearMain) { btnCrearMain.disabled = true; btnCrearMain.style.opacity = "0.5"; btnCrearMain.style.pointerEvents = "none"; }
+                if(btnAgregarDetalle) { btnAgregarDetalle.disabled = true; btnAgregarDetalle.style.opacity = "0.5"; btnAgregarDetalle.style.pointerEvents = "none"; }
+                if(btnEnviarWs) { btnEnviarWs.disabled = true; btnEnviarWs.style.opacity = "0.5"; btnEnviarWs.style.pointerEvents = "none"; }
             }
         }
 
@@ -432,6 +458,14 @@
         }
 
         async function cambiarPantalla(nombre) {
+            await verificarEstadoTienda();
+
+            // Si intentan ir al simulador 3D y está cerrado, bloquear y avisar
+            if (nombre === 'simulador3d' && !tiendaAbiertaGlobal) {
+                alert("El local se encuentra cerrado. El Simulador 3D y la creación de pedidos están bloqueados temporalmente.");
+                return;
+            }
+
             ['vitrina', 'detalle', 'simulador3d', 'carrito'].forEach(v => {
                 const el = document.getElementById(`vista-${v}`);
                 if(el) el.classList.add('hidden');
@@ -439,9 +473,6 @@
             const target = document.getElementById(`vista-${nombre}`);
             if(target) target.classList.remove('hidden');
 
-            if (nombre === 'vitrina') {
-                await verificarEstadoTienda();
-            }
             if (nombre === 'simulador3d') {
                 setTimeout(async () => {
                     if (!scene) inicializarThreeJS();
@@ -626,6 +657,10 @@
         }
 
         function agregarDetalleAlCarritoYVolver() {
+            if (!tiendaAbiertaGlobal) {
+                alert("El local se encuentra cerrado. No se pueden agregar productos al carrito en este momento.");
+                return;
+            }
             if (!productoSeleccionado) return;
 
             const checkboxes = document.querySelectorAll('.check-adicional:checked');
@@ -869,6 +904,10 @@
         }
 
         function enviarCreacion3DAlCarrito() {
+            if (!tiendaAbiertaGlobal) {
+                alert("El local se encuentra cerrado. No se pueden procesar creaciones.");
+                return;
+            }
             if (capasActuales.length === 0) {
                 alert("Arma tu hamburguesa 3D agregando al menos un ingrediente.");
                 return;
@@ -1076,6 +1115,10 @@
         });
 
         async function finalizarOrdenWhatsApp() {
+            if (!tiendaAbiertaGlobal) {
+                alert("El local se encuentra cerrado. No se pueden procesar pedidos.");
+                return;
+            }
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
             if(gpsClienteLat === null || gpsClienteLng === null) {
