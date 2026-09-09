@@ -86,8 +86,9 @@
                     <p id="descripcion-estado-vitrina" class="text-[11px] text-stone-400 mt-0.5">Recibiendo pedidos y despachando con normalidad.</p>
                 </div>
             </div>
-            <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
-                Horario: <span class="text-amber-400 font-bold">11:00 AM - 10:00 PM</span>
+                <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
+    Horario: <span id="texto-horario-vitrina" class="text-amber-400 font-bold">Cargando...</span>
+</div>
             </div>
         </div>
 
@@ -367,23 +368,34 @@
 
         // --- VERIFICAR ESTADO ABIERTO / CERRADO (CORREGIDO A 'estado_tienda') ---
         async function verificarEstadoTienda() {
-    let estaAbierto = true; // Por defecto abierto si no hay configuración
+    let estaAbierto = true; 
     try {
+        // Consultamos ambos registros de la tabla ajustes_sistema a la vez
         const { data, error } = await supabaseClient
             .from('ajustes_sistema')
-            .select('valor')
-            .eq('id', 'estado_negocio') // <-- CAMBIADO DE 'estado_tienda' A 'estado_negocio'
-            .single();
+            .select('id, valor')
+            .in('id', ['estado_negocio', 'hora_vitrina']);
 
-        if (!error && data && data.valor !== undefined) {
-            const val = String(data.valor).toLowerCase();
-            // Como en tu tabla dice 'cerrado', esto lo detectará de inmediato
-            if (val === 'cerrado' || val === 'false' || val === '0') {
-                estaAbierto = false;
-            }
+        if (!error && data) {
+            data.forEach(item => {
+                // 1. Procesar Estado del Negocio
+                if (item.id === 'estado_negocio') {
+                    const val = String(item.valor).toLowerCase();
+                    if (val === 'cerrado' || val === 'false' || val === '0') {
+                        estaAbierto = false;
+                    }
+                }
+                // 2. Procesar Horario de la Vitrina
+                if (item.id === 'hora_vitrina') {
+                    const spanHorario = document.getElementById('texto-horario-vitrina');
+                    if (spanHorario) {
+                        spanHorario.textContent = item.valor;
+                    }
+                }
+            });
         }
     } catch (err) {
-        console.log("Usando estado predeterminado por horario o conexión");
+        console.log("Error al sincronizar con Supabase, usando valores por defecto", err);
     }
 
     actualizarInterfazEstadoTienda(estaAbierto);
