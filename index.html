@@ -36,7 +36,7 @@
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
 
-    <header class="bg-black/80 backdrop-blur-xl border-b border-stone-900 sticky top-0 z-50 px-4">
+    <header class="bg-black/85 backdrop-blur-xl border-b border-stone-900 sticky top-0 z-50 px-4">
         <div class="max-w-7xl mx-auto h-20 flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" onclick="cambiarPantalla('vitrina')">
                 <div class="border border-amber-500/30 p-2.5 rounded-2xl bg-stone-950 shadow-[0_0_20px_rgba(229,193,88,0.15)] glow-gold">
@@ -53,7 +53,6 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <!-- AVISO DE ESTADO DE TIENDA EN HEADER -->
                 <div id="badge-estado-header" class="hidden sm:flex items-center gap-2 bg-stone-950 border border-stone-800 px-3 py-1.5 rounded-xl text-[10px] font-futurista font-bold shadow-inner">
                     <span id="punto-estado-header" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="texto-estado-header" class="text-emerald-400 uppercase tracking-widest">Abierto</span>
@@ -72,7 +71,6 @@
 
     <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
         
-        <!-- AVISO DE ABIERTO / CERRADO DESTACADO EN LA VITRINA -->
         <div id="banner-estado-tienda" class="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
             <div class="flex items-center gap-3">
                 <div id="icono-estado-wrapper" class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -86,9 +84,8 @@
                     <p id="descripcion-estado-vitrina" class="text-[11px] text-stone-400 mt-0.5">Recibiendo pedidos y despachando con normalidad.</p>
                 </div>
             </div>
-                <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
-    Horario: <span id="texto-horario-vitrina" class="text-amber-400 font-bold">Cargando...</span>
-</div>
+            <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
+                Horario: <span id="texto-horario-vitrina" class="text-amber-400 font-bold">Cargando...</span>
             </div>
         </div>
 
@@ -114,7 +111,6 @@
             </div>
         </div>
 
-        <!-- BARRA DE BÚSQUEDA EN TIEMPO REAL -->
         <div class="w-full max-w-3xl mx-auto px-2">
             <div class="relative flex items-center bg-stone-950 border border-stone-800 rounded-2xl p-2 shadow-xl focus-within:border-amber-500/50 transition-colors">
                 <div class="pl-3 pr-2 text-amber-500">
@@ -309,6 +305,15 @@
                     </select>
                 </div>
 
+                <!-- CONTENEDOR DINÁMICO DE DATOS DE PAGO -->
+                <div id="info-metodo-pago" class="hidden p-3 bg-stone-900 border border-amber-500/30 rounded-xl space-y-1 text-xs font-mono">
+                    <div class="flex items-center justify-between text-amber-400 font-bold border-b border-stone-800 pb-1.5 mb-1">
+                        <span id="titulo-metodo-pago">Datos de Pago</span>
+                        <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                    </div>
+                    <div id="detalle-datos-pago" class="text-stone-300 space-y-1"></div>
+                </div>
+
                 <!-- CASILLA DE REFERENCIA -->
                 <div id="contenedorReferenciaCart" class="space-y-1.5 hidden">
                     <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
@@ -366,122 +371,105 @@
         const LOCAL_LNG = -71.1418;
         let TARIFA_POR_KM = 0.80; 
 
-        // --- VERIFICAR ESTADO ABIERTO / CERRADO (CORREGIDO A 'estado_tienda') ---
+        // Diccionario de información dinámica de pagos
+        const datosDePago = {
+            'zelle': `
+                <p><strong>Correo:</strong> pagos@casadelaspapas.com</p>
+                <p><strong>Titular:</strong> Casa de las Papas C.A.</p>
+                <p class="text-[10px] text-stone-400 mt-1">Por favor envíe el capture al WhatsApp.</p>
+            `,
+            'nequi': `
+                <p><strong>Celular / Nequi:</strong> 300 123 4567</p>
+                <p><strong>Titular:</strong> Casa de las Papas</p>
+            `,
+            'pago_movil': `
+                <p><strong>Banco:</strong> 0102 - Banco de Venezuela</p>
+                <p><strong>Teléfono:</strong> 0412 123 4567</p>
+                <p><strong>Cédula / RIF:</strong> J-12345678-9</p>
+            `,
+            'efectivo': `
+                <p class="text-amber-400">💵 Pago en efectivo alianzas o delivery.</p>
+                <p class="text-[10px] text-stone-400">Por favor tenga en cuenta el monto exacto.</p>
+            `
+        };
+
         async function verificarEstadoTienda() {
-    let estaAbierto = true; 
-    try {
-        // Consultamos ambos registros de la tabla ajustes_sistema a la vez
-        const { data, error } = await supabaseClient
-            .from('ajustes_sistema')
-            .select('id, valor')
-            .in('id', ['estado_negocio', 'hora_vitrina']);
+            let estaAbierto = true; 
+            try {
+                const { data, error } = await supabaseClient
+                    .from('ajustes_sistema')
+                    .select('id, valor')
+                    .in('id', ['estado_negocio', 'hora_vitrina']);
 
-        if (!error && data) {
-            data.forEach(item => {
-                // 1. Procesar Estado del Negocio
-                if (item.id === 'estado_negocio') {
-                    const val = String(item.valor).toLowerCase();
-                    if (val === 'cerrado' || val === 'false' || val === '0') {
-                        estaAbierto = false;
-                    }
+                if (!error && data) {
+                    data.forEach(item => {
+                        if (item.id === 'estado_negocio') {
+                            const val = String(item.valor).toLowerCase();
+                            if (val === 'cerrado' || val === 'false' || val === '0') {
+                                estaAbierto = false;
+                            }
+                        }
+                        if (item.id === 'hora_vitrina') {
+                            const spanHorario = document.getElementById('texto-horario-vitrina');
+                            if (spanHorario) {
+                                spanHorario.textContent = item.valor;
+                            }
+                        }
+                    });
                 }
-                // 2. Procesar Horario de la Vitrina
-                if (item.id === 'hora_vitrina') {
-                    const spanHorario = document.getElementById('texto-horario-vitrina');
-                    if (spanHorario) {
-                        spanHorario.textContent = item.valor;
-                    }
-                }
-            });
+            } catch (err) {
+                console.log("Error al sincronizar con Supabase, usando valores por defecto", err);
+            }
+
+            actualizarInterfazEstadoTienda(estaAbierto);
         }
-    } catch (err) {
-        console.log("Error al sincronizar con Supabase, usando valores por defecto", err);
-    }
 
-    actualizarInterfazEstadoTienda(estaAbierto);
-}
         function actualizarInterfazEstadoTienda(estaAbierto) {
-    // 1. Elementos del Header
-    const puntoHeader = document.getElementById('punto-estado-header');
-    const textoHeader = document.getElementById('texto-estado-header');
+            const puntoHeader = document.getElementById('punto-estado-header');
+            const textoHeader = document.getElementById('texto-estado-header');
+            const badgePuntoVitrina = document.getElementById('badge-punto-vitrina');
+            const tituloVitrina = document.getElementById('titulo-estado-vitrina');
+            const descVitrina = document.getElementById('descripcion-estado-vitrina');
+            const iconoWrapper = document.getElementById('icono-estado-wrapper');
+            const vistaVitrina = document.getElementById('vista-vitrina');
 
-    // 2. Elementos del Banner de la Vitrina
-    const badgePuntoVitrina = document.getElementById('badge-punto-vitrina');
-    const tituloVitrina = document.getElementById('titulo-estado-vitrina');
-    const descVitrina = document.getElementById('descripcion-estado-vitrina');
-    const iconoWrapper = document.getElementById('icono-estado-wrapper');
-    const vistaVitrina = document.getElementById('vista-vitrina');
-
-    if (estaAbierto) {
-        // --- ESTADO: ABIERTO ---
-        if (puntoHeader) {
-            puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+            if (estaAbierto) {
+                if (puntoHeader) puntoHeader.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                if (textoHeader) {
+                    textoHeader.className = "text-emerald-400 uppercase tracking-widest";
+                    textoHeader.textContent = "Abierto";
+                }
+                if (badgePuntoVitrina) badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
+                if (tituloVitrina) tituloVitrina.textContent = "ESTADO DEL LOCAL: ABIERTOS";
+                if (descVitrina) descVitrina.textContent = "Recibiendo pedidos y despachando con normalidad.";
+                if (iconoWrapper) iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400";
+                if (vistaVitrina) {
+                    vistaVitrina.style.pointerEvents = "auto";
+                    vistaVitrina.style.opacity = "1";
+                }
+                const avisoCerrado = document.getElementById('overlay-tienda-cerrada');
+                if (avisoCerrado) avisoCerrado.remove();
+            } else {
+                if (puntoHeader) puntoHeader.className = "w-2 h-2 rounded-full bg-red-500";
+                if (textoHeader) {
+                    textoHeader.className = "text-red-400 uppercase tracking-widest";
+                    textoHeader.textContent = "Cerrado";
+                }
+                if (badgePuntoVitrina) badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+                if (tituloVitrina) tituloVitrina.textContent = "ESTADO DEL LOCAL: CERRADOS";
+                if (descVitrina) descVitrina.textContent = "Lo sentimos, nuestro horario de atención ha finalizado.";
+                if (iconoWrapper) iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400";
+                if (vistaVitrina) {
+                    vistaVitrina.style.pointerEvents = "none";
+                    vistaVitrina.style.opacity = "0.5";
+                }
+                const bannerEstado = document.getElementById('banner-estado-tienda');
+                if (bannerEstado) {
+                    bannerEstado.style.pointerEvents = "auto";
+                    bannerEstado.style.opacity = "1";
+                }
+            }
         }
-        if (textoHeader) {
-            textoHeader.className = "text-emerald-400 uppercase tracking-widest";
-            textoHeader.textContent = "Abierto";
-        }
-
-        if (badgePuntoVitrina) {
-            badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
-        }
-        if (tituloVitrina) {
-            tituloVitrina.textContent = "ESTADO DEL LOCAL: ABIERTOS";
-        }
-        if (descVitrina) {
-            descVitrina.textContent = "Recibiendo pedidos y despachando con normalidad.";
-        }
-        if (iconoWrapper) {
-            iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400";
-        }
-
-        // Habilitar la vitrina (quitar opacidad y permitir clics)
-        if (vistaVitrina) {
-            vistaVitrina.style.pointerEvents = "auto";
-            vistaVitrina.style.opacity = "1";
-        }
-
-        // Remover cartel de cerrado si existiera
-        const avisoCerrado = document.getElementById('overlay-tienda-cerrada');
-        if (avisoCerrado) avisoCerrado.remove();
-
-    } else {
-        // --- ESTADO: CERRADO (BLOQUEO DE VITRINA) ---
-        if (puntoHeader) {
-            puntoHeader.className = "w-2 h-2 rounded-full bg-red-500";
-        }
-        if (textoHeader) {
-            textoHeader.className = "text-red-400 uppercase tracking-widest";
-            textoHeader.textContent = "Cerrado";
-        }
-
-        if (badgePuntoVitrina) {
-            badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-red-500";
-        }
-        if (tituloVitrina) {
-            tituloVitrina.textContent = "ESTADO DEL LOCAL: CERRADOS";
-        }
-        if (descVitrina) {
-            descVitrina.textContent = "Lo sentimos, nuestro horario de atención ha finalizado. No se reciben pedidos en este momento.";
-        }
-        if (iconoWrapper) {
-            iconoWrapper.className = "w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400";
-        }
-
-        // Bloquear interacciones en la vitrina principal
-        if (vistaVitrina) {
-            vistaVitrina.style.pointerEvents = "none"; // Evita clics en los productos
-            vistaVitrina.style.opacity = "0.5";        // Apariencia visual de bloqueo
-        }
-
-        // Asegurarnos de que el banner superior de estado y el header sí se puedan ver/tocar para avisar
-        const bannerEstado = document.getElementById('banner-estado-tienda');
-        if (bannerEstado) {
-            bannerEstado.style.pointerEvents = "auto";
-            bannerEstado.style.opacity = "1";
-        }
-    }
-}
 
         async function cargarTarifaDeliveryDesdeSupabase() {
             const { data, error } = await supabaseClient
@@ -504,9 +492,7 @@
             const target = document.getElementById(`vista-${nombre}`);
             if(target) target.classList.remove('hidden');
 
-            if (nombre === 'vitrina') {
-                await verificarEstadoTienda();
-            }
+            if (nombre === 'vitrina') await verificarEstadoTienda();
             if (nombre === 'simulador3d') {
                 setTimeout(async () => {
                     if (!scene) inicializarThreeJS();
@@ -526,11 +512,8 @@
                 await cargarTarifaDeliveryDesdeSupabase();
                 renderizarCarrito();
                 setTimeout(() => {
-                    if (!mapaDelivery) {
-                        inicializarMapaDelivery();
-                    } else {
-                        mapaDelivery.invalidateSize();
-                    }
+                    if (!mapaDelivery) inicializarMapaDelivery();
+                    else mapaDelivery.invalidateSize();
                 }, 200);
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -580,14 +563,9 @@
         function filtrarProductosVitrina() {
             const textoBusqueda = document.getElementById('input-buscador-vitrina').value.toLowerCase();
             const tarjetasProductos = document.querySelectorAll('#grid-productos-vitrina > div'); 
-
             tarjetasProductos.forEach(tarjeta => {
                 const textoTarjeta = tarjeta.innerText.toLowerCase();
-                if (textoTarjeta.includes(textoBusqueda)) {
-                    tarjeta.style.display = 'flex'; 
-                } else {
-                    tarjeta.style.display = 'none';
-                }
+                tarjeta.style.display = textoTarjeta.includes(textoBusqueda) ? 'flex' : 'none';
             });
         }
 
@@ -614,14 +592,12 @@
 
             let fotosSlider = [];
             try { if(productoSeleccionado.imagenes_slider) fotosSlider = JSON.parse(productoSeleccionado.imagenes_slider) || []; } catch(e){}
-            if (fotosSlider.length === 0 && imgInicial) { fotosSlider.push(imgInicial); }
+            if (fotosSlider.length === 0 && imgInicial) fotosSlider.push(imgInicial);
 
             const containerMiniaturas = document.getElementById('detalle-contenedor-miniaturas'); 
             containerMiniaturas.innerHTML = "";
             fotosSlider.forEach((img) => {
-                if(img) {
-                    containerMiniaturas.innerHTML += `<div onclick="actualizarVisorFoto('${img}')" class="aspect-square rounded-xl bg-stone-950 border border-stone-800 overflow-hidden cursor-pointer hover:border-amber-500/40 transition-all"><img src="${img}" class="w-full h-full object-cover"></div>`;
-                }
+                if(img) containerMiniaturas.innerHTML += `<div onclick="actualizarVisorFoto('${img}')" class="aspect-square rounded-xl bg-stone-950 border border-stone-800 overflow-hidden cursor-pointer hover:border-amber-500/40 transition-all"><img src="${img}" class="w-full h-full object-cover"></div>`;
             });
 
             renderizarAdicionales();
@@ -646,8 +622,7 @@
         function amplificarFotoActual() {
             if(!fotoSeleccionadaParaLightbox) return;
             const lightbox = document.getElementById('modal-lightbox');
-            const imgCompleta = document.getElementById('lightbox-imagen-completa');
-            imgCompleta.src = fotoSeleccionadaParaLightbox;
+            document.getElementById('lightbox-imagen-completa').src = fotoSeleccionadaParaLightbox;
             lightbox.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
@@ -659,9 +634,7 @@
 
         async function descargarAdicionalesDeSupabase() {
             const { data, error } = await supabaseClient.from('adicionales').select('*');
-            if (!error && data) {
-                window.listaAdicionales = data;
-            }
+            if (!error && data) window.listaAdicionales = data;
         }
 
         function renderizarAdicionales() {
@@ -775,9 +748,7 @@
 
         function animarThreeJS() {
             requestAnimationFrame(animarThreeJS);
-            if(renderer && scene && camera) {
-                renderer.render(scene, camera);
-            }
+            if(renderer && scene && camera) renderer.render(scene, camera);
         }
 
         function renderizarBandejaIngredientes() {
@@ -851,7 +822,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="font-mono text-amber-400">+$${capa.precio.toFixed(2)}</span>
-                            <button onclick="eliminarCapaPorUuid('${capa.uuid}')" class="w-5 h-5 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-md flex items-center justify-center transition-colors font-bold text-[10px] cursor-pointer">✕</button>
+                            <button onclick="eliminarCapaPorUuid('${capa.uuid}')" class="w-5 h-5 bg-red-500/25 hover:bg-red-500 text-red-400 hover:text-white rounded-md flex items-center justify-center transition-colors font-bold text-[10px] cursor-pointer">✕</button>
                         </div>
                     </div>`;
             });
@@ -890,7 +861,7 @@
 
         function actualizarEscena3D() {
             if(!hamburguesaGrupo) return;
-            while(hamburguesaGrupo.children.length > 0){ hamburguesaGrupo.remove(hamburguesaGrupo.children[0]); }
+            while(hamburguesaGrupo.children.length > 0) hamburguesaGrupo.remove(hamburguesaGrupo.children[0]);
 
             let alturaActualY = -2.2;
             const panBaseMesh = crearPanBeigeOscuroConPuntitos(false);
@@ -957,14 +928,9 @@
             const contenedorMapa = document.getElementById('mapa-delivery');
             if (!contenedorMapa || mapaDelivery) return;
 
-            mapaDelivery = L.map('mapa-delivery', {
-                attributionControl: false
-            }).setView([LOCAL_LAT, LOCAL_LNG], 14);
+            mapaDelivery = L.map('mapa-delivery', { attributionControl: false }).setView([LOCAL_LAT, LOCAL_LNG], 14);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: ''
-            }).addTo(mapaDelivery);
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(mapaDelivery);
 
             const iconoLocal = L.divIcon({
                 className: 'custom-local-icon',
@@ -1000,7 +966,6 @@
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
-                    
                     if (marcadorCliente && mapaDelivery) {
                         marcadorCliente.setLatLng([lat, lng]);
                         mapaDelivery.setView([lat, lng], 15);
@@ -1019,7 +984,6 @@
         function actualizarCoordenadasYTrazarRuta(lat, lng) {
             gpsClienteLat = lat;
             gpsClienteLng = lng;
-            
             distanciaCalculadaKm = calcularDistanciaEnKm(LOCAL_LAT, LOCAL_LNG, lat, lng);
             
             let costoCalculado = distanciaCalculadaKm * TARIFA_POR_KM;
@@ -1031,16 +995,9 @@
             document.getElementById('display-km').innerText = `${distanciaCalculadaKm.toFixed(2)} km`;
             document.getElementById('display-costo-km').innerText = `$${costoDeliveryKm.toFixed(2)}`;
 
-            if (lineaRutaDelivery) {
-                mapaDelivery.removeLayer(lineaRutaDelivery);
-            }
+            if (lineaRutaDelivery) mapaDelivery.removeLayer(lineaRutaDelivery);
             
-            const puntosRuta = [
-                [LOCAL_LAT, LOCAL_LNG],
-                [lat, lng]
-            ];
-            
-            lineaRutaDelivery = L.polyline(puntosRuta, {
+            lineaRutaDelivery = L.polyline([[LOCAL_LAT, LOCAL_LNG], [lat, lng]], {
                 color: '#e5c158',
                 weight: 4,
                 opacity: 0.8,
@@ -1054,11 +1011,8 @@
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c; 
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))); 
         }
 
         function renderizarCarrito() {
@@ -1101,10 +1055,23 @@
             }
         }
 
+        // --- GESTIÓN DINÁMICA DE CAMPOS Y DATOS DE PAGO ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
             const inputRef = document.getElementById('input-ref-pago');
+            const contenedorInfoPago = document.getElementById('info-metodo-pago');
+            const detalleDatosPago = document.getElementById('detalle-datos-pago');
+            const tituloMetodoPago = document.getElementById('titulo-metodo-pago');
+
+            if (datosDePago[metodo]) {
+                detalleDatosPago.innerHTML = datosDePago[metodo];
+                tituloMetodoPago.textContent = `Datos para: ${document.getElementById('tipoMetodoPago').selectedOptions[0].text}`;
+                contenedorInfoPago.classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } else {
+                contenedorInfoPago.classList.add('hidden');
+            }
 
             if (metodo === 'efectivo') {
                 contenedorRef.classList.add('hidden');
@@ -1122,9 +1089,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const codigoReferido = urlParams.get('ref');
 
-            if (codigoReferido) {
-                localStorage.setItem('dunig_ref_code', codigoReferido);
-            }
+            if (codigoReferido) localStorage.setItem('dunig_ref_code', codigoReferido);
 
             const refGuardado = localStorage.getItem('dunig_ref_code');
             if (refGuardado) {
@@ -1191,6 +1156,7 @@
             document.getElementById('tipoMetodoPago').value = "";
             document.getElementById('input-ref-pago').value = "";
             document.getElementById('contenedorReferenciaCart').classList.add('hidden');
+            document.getElementById('info-metodo-pago').classList.add('hidden');
             localStorage.removeItem('dunig_ref_code');
             cambiarPantalla('vitrina');
             window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
