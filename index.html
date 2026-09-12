@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CASA DE LAS PAPAS- Ecosistema Studio 3D & VIP</title>
+    <title>Casa de las PAPAS- Ecosistema Studio 3D & VIP</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Google Maps API con librerías de geometría para rutas y cálculos -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLoIMl0UZfglMOIXFxIjOkh5BhRy6sXFw&libraries=geometry&callback=initMap" async defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 50% 0%, #1c1917 0%, #0c0a09 100%); background-color: #000000; overflow-x: hidden; }
@@ -29,7 +31,9 @@
             transform: scale(1.08);
             box-shadow: 0 6px 25px rgba(223, 179, 71, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8);
         }
-        .leaflet-control-attribution { display: none !important; }
+        .gmnoprint, .gm-style-cc, .gm-fullscreen-control, .gm-streetview { display: none !important; }
+        a[href^="https://maps.google.com/maps"] { display: none !important; }
+        .gm-bundled-control { display: none !important; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
     </style>
@@ -44,7 +48,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-black tracking-widest text-white font-futurista">
-                       CASA DE LAS <span class="text-amber-400">PAPAS</span>
+                       CASA de las <span class="text-amber-400">PAPAS</span>
                     </h1>
                     <p class="text-[8px] text-amber-500/70 uppercase tracking-[0.25em] font-bold font-futurista">
                         MERIDA VENEZUELA
@@ -59,7 +63,7 @@
                 </div>
 
                 <button onclick="cambiarPantalla('simulador3d')" class="hidden sm:flex bg-stone-900 border border-amber-500/30 hover:border-amber-500/60 px-4 py-2 rounded-xl items-center gap-2 text-xs font-futurista uppercase font-bold text-amber-400 cursor-pointer transition-all">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i> Simulador 3D
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Studio 3D
                 </button>
                 <button onclick="cambiarPantalla('carrito')" class="bg-stone-900 border border-amber-500/30 p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:border-amber-500/60">
                     <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
@@ -70,7 +74,6 @@
     </header>
 
     <main id="vista-vitrina" class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow space-y-8 relative z-10">
-        
         <div id="banner-estado-tienda" class="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
             <div class="flex items-center gap-3">
                 <div id="icono-estado-wrapper" class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -81,7 +84,7 @@
                         <span id="badge-punto-vitrina" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
                         <h3 id="titulo-estado-vitrina" class="text-xs font-black font-futurista text-white uppercase tracking-widest">ESTADO DEL LOCAL: ABIERTOS</h3>
                     </div>
-                    <p id="descripcion-estado-vitrina" class="text-[11px] text-stone-400 mt-0.5">Recibiendo pedidos y despachando con normalidad.</p>
+                    <p id="descripcion-estado-vitrina" class="text-[11px] text-stone-400 mt-0.5">Recibiendo pedidos y despachando con normalidad.</p> 
                 </div>
             </div>
             <div class="text-[10px] font-mono text-stone-500 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800">
@@ -91,18 +94,17 @@
 
         <div class="glass-panel rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl relative">
             <div class="w-full h-64 md:h-80 relative overflow-hidden bg-black">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado Casa de las Papas" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGJrNnV3cnVzdWF2ZjZwOXI3b2U1cjk5ejM2cTh0YnpvZWlvbXplcyZlcD12MV9naWZzX3JlbGF0ZWQmY3Q9Zw/3o7TKMYewttqjcp21y/giphy.gif" alt="Banner Animado" class="w-full h-full object-cover opacity-85 transform hover:scale-105 transition-transform duration-700">
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8 space-y-2">
                     <span class="text-[10px] text-amber-400 font-futurista font-bold uppercase tracking-widest bg-amber-500/20 px-3 py-1 rounded-full border border-amber-500/30 w-max backdrop-blur-md">TU MEJOR OPCION VIP</span>
                     <h2 class="text-2xl md:text-4xl font-black text-white font-futurista tracking-wider uppercase drop-shadow-lg">
-                        REALIZA TU PEDIDO<span class="text-amber-400">"YA"</span>
+                        REALIZA TU PEDIDO <span class="text-amber-400">"YA"</span>
                     </h2>
                     <p class="text-xs text-stone-300 max-w-xl">Arrastra ingredientes en tiempo real o explora nuestras especialidades certificadas.</p>
                 </div>
             </div>
             <div class="p-6 bg-black/90 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-stone-900">
                 <div class="flex items-center gap-3">
-                    <img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3d3dlYnBqbDUwenB4eHZoeGw4NW01dGxra2Nxczl1cWEyOXQ1cG53NSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VEc68ccEaKVB31P9K5/giphy.gif" alt="Logo BCV" class="w-10 h-10 object-contain filter drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]">
                     <span class="text-xs text-stone-400 font-mono">Tasas oficiales y transacciones seguras al BCV</span>
                 </div>
                 <button onclick="cambiarPantalla('simulador3d')" class="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black px-8 py-4 rounded-2xl text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl cursor-pointer shrink-0">
@@ -255,14 +257,45 @@
             <div class="space-y-3 pt-6 border-t border-stone-900">
                 <div class="flex justify-between items-center">
                     <label class="text-[10px] uppercase text-amber-400 font-bold tracking-widest block font-futurista flex items-center gap-2">
-                        <i data-lucide="map-pin" class="w-4 h-4"></i> Ubicación de Entrega GPS (Obligatorio)
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> Ubicación de Entrega en el Mapa (Google Maps)
                     </label>
                 </div>
-                <p class="text-xs text-stone-400">Presiona el botón inferior para capturar tu GPS actual, bloquear el mapa y trazar la ruta exacta de entrega.</p>
+                <p class="text-xs text-stone-400">Mueve el mapa para colocar el centro exactamente en el lugar de entrega.</p>
                 
-                <div id="mapa-delivery" class="w-full h-64 rounded-2xl border border-stone-800 relative z-10 bg-stone-950"></div>
-                
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center text-xs font-mono bg-stone-900 p-4 rounded-xl border border-stone-800">
+                <div class="flex flex-col h-[500px] bg-neutral-900 text-white rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl relative">
+                    <div id="google-map-container" class="relative w-full h-1/2 md:h-2/3 bg-neutral-800 flex items-center justify-center z-10">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 1000; pointer-events: none; font-size: 35px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">📍</div>
+                        
+                        <button type="button" onclick="centrarEnMiGPS()" class="absolute top-4 right-4 z-[1000] bg-neutral-800/90 hover:bg-neutral-700 p-3 rounded-full shadow-lg border border-neutral-700 cursor-pointer">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="w-full h-1/2 md:h-1/3 bg-neutral-900 rounded-t-3xl p-5 overflow-y-auto shadow-2xl border-t border-neutral-800 z-20">
+                        <div class="w-12 h-1.5 bg-neutral-700 rounded-full mx-auto mb-4"></div>
+                        <h3 class="text-neutral-400 text-sm font-medium mb-3">Lugares cercanos o Guardados</h3>
+                        
+                        <div class="space-y-3">
+                            <div onclick="activarBotonUbicacion(this, 'gps')" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
+                                <div class="bg-neutral-800 p-3 rounded-full text-emerald-400">📍</div>
+                                <div>
+                                    <h4 class="font-semibold text-sm">Enviar tu ubicación actual</h4>
+                                    <p class="text-xs text-neutral-400">Centrar mapa en tu posición GPS</p>
+                                </div>
+                            </div>
+
+                            <div onclick="activarBotonUbicacion(this, 'vendaval')" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
+                                <div class="bg-neutral-800 p-3 rounded-full text-neutral-300">🏢</div>
+                                <div>
+                                    <h4 class="font-semibold text-sm">Vendaval House (Local Principal)</h4>
+                                    <p class="text-xs text-neutral-400">Mérida, Venezuela</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center text-xs font-mono bg-stone-900 p-4 rounded-xl border border-stone-800 mt-4">
                     <div>
                         <span class="text-stone-400 block text-[9px] uppercase font-futurista">Distancia calculada:</span>
                         <span id="display-km" class="text-white font-bold text-sm">0.00 km</span>
@@ -272,11 +305,12 @@
                         <span id="display-costo-km" class="text-amber-400 font-black text-base">$0.00</span>
                     </div>
                     <div class="text-right">
-                        <button type="button" onclick="obtenerUbicacionGPSActual()" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-futurista font-black px-4 py-2.5 rounded-xl text-[10px] tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer">
-                            <i data-lucide="locate-fixed" class="w-3.5 h-3.5"></i> 📍 Usar mi GPS actual
+                        <button type="button" id="btn-usar-ubicacion" onclick="fijarUbicacionActualMapa()" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-futurista font-black px-4 py-2.5 rounded-xl text-[10px] tracking-wider uppercase flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i> Confirmar Ubicación 📍
                         </button>
                     </div>
                 </div>
+                <p id="coordenadas-seleccionadas" style="font-size: 11px; color: #10b981; text-align: center;" class="font-mono"></p>
             </div>
         </section>
 
@@ -293,7 +327,6 @@
             </div>
             
             <div class="space-y-3 pt-2 border-t border-stone-900">
-                <!-- SELECCIÓN DEL MÉTODO DE PAGO -->
                 <div class="space-y-1.5">
                     <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">1. Selecciona Método de Pago</label>
                     <select id="tipoMetodoPago" onchange="gestionarCamposPagoCart()" class="w-full bg-stone-900 border border-stone-800 text-xs text-stone-300 p-3.5 rounded-xl focus:outline-none focus:border-amber-500/40 font-medium">
@@ -305,7 +338,6 @@
                     </select>
                 </div>
 
-                <!-- CONTENEDOR DINÁMICO DE DATOS DE PAGO -->
                 <div id="info-metodo-pago" class="hidden p-3 bg-stone-900 border border-amber-500/30 rounded-xl space-y-1 text-xs font-mono">
                     <div class="flex items-center justify-between text-amber-400 font-bold border-b border-stone-800 pb-1.5 mb-1">
                         <span id="titulo-metodo-pago">Datos de Pago</span>
@@ -314,15 +346,13 @@
                     <div id="detalle-datos-pago" class="text-stone-300 space-y-1"></div>
                 </div>
 
-                <!-- CASILLA DE NÚMERO DE MESA OBLIGATORIO (SOLO PARA EFECTIVO) -->
                 <div id="contenedorNumeroMesaCart" class="space-y-1.5 hidden">
                     <label class="text-[9px] uppercase text-amber-400 font-bold tracking-widest block font-futurista">2. Número de Mesa (Obligatorio)</label>
                     <input type="text" id="input-num-mesa" placeholder="Ej. Mesa 04" class="w-full bg-stone-900 border border-amber-500/40 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider focus:outline-none focus:border-amber-400">
                 </div>
 
-                <!-- CASILLA DE REFERENCIA -->
                 <div id="contenedorReferenciaCart" class="space-y-1.5 hidden">
-                    <label class="text-[9px] uppercase text-stone-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
+                    <label class="text-[9px] uppercase text-amber-400 font-bold tracking-widest block font-futurista">2. Número de Referencia</label>
                     <input type="text" id="input-ref-pago" placeholder="Ingresa datos o código de referencia" class="w-full bg-stone-900 border border-stone-800 text-xs text-white p-3.5 rounded-xl font-mono tracking-wider">
                 </div>
 
@@ -331,7 +361,7 @@
                     <div id="display-codigo-referido" class="font-bold text-amber-400 font-mono mt-0.5">NINGUNO</div>
                 </div>
 
-                <button onclick="finalizarOrdenWhatsApp()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
+                <button onclick="enviarPedidoWhatsApp()" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-futurista font-black py-4 rounded-xl text-xs uppercase tracking-wider cursor-pointer shadow-xl flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-4 h-4"></i> Enviar Orden por WhatsApp
                 </button>
             </div>
@@ -349,11 +379,11 @@
         <img id="lightbox-imagen-completa" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl transition-transform duration-300">
     </div>
 
-    <footer class="border-t border-stone-950 bg-black/80 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 Casa de las papas & D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <footer class="border-t border-stone-950 bg-black/80 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 Vendaval House & D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
-        const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
+        const SUPABASE_URL = "https://rqxtbdegckeaufnlfqfs.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxeHRiZGVnY2tlYXVmbmxmcWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3ODc3NjgsImV4cCI6MjEwNDM2Mzc2OH0.62QheHDSsV-N9S1n_18_uP2_evxwiNS9kZQX2vLGMC8"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let carrito = [];
@@ -366,19 +396,52 @@
 
         let scene, camera, renderer, hamburguesaGrupo;
 
-        let mapaDelivery = null;
-        let marcadorCliente = null;
-        let lineaRutaDelivery = null;
-        let costoDeliveryKm = 0;
-        let distanciaCalculadaKm = 0;
-        let gpsClienteLat = null;
-        let gpsClienteLng = null;
-        const LOCAL_LAT = 8.5897;  
-        const LOCAL_LNG = -71.1418;
+        let map;
+        let gpsClienteLat = 8.59941369535553;  
+        let gpsClienteLng = -71.14089323410698;
+        const LOCAL_LAT = 8.59941369535553;  
+        const LOCAL_LNG = -71.14089323410698;
         let TARIFA_POR_KM = 0.80; 
+        let distanciaCalculadaKm = 0;
+        let costoDeliveryKm = 0;
 
-        // Diccionario dinámico que se llenará con los datos de Supabase (tabla cuentas_pago)
         let datosDePago = {};
+
+        async function guardarOrdenEnCentral(nuevaOrden) {
+          const SUPABASE_CENTRAL_URL = "https://cmaishgahyzlhszwaozg.supabase.co/rest/v1/ordenes_central";
+          const SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtYWlzaGdhaHl6bGhzendhb3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MjMxMzEsImV4cCI6MjEwMDQ5OTEzMX0.8JVrpQKocnyZa3qLxsX9ZxjygYy4QY3kp_VSvrL1qNQ";
+
+          try {
+            const response = await fetch(SUPABASE_CENTRAL_URL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY,
+                "Authorization": `Bearer ${SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY}`,
+                "Prefer": "return=representation"
+              },
+              body: JSON.stringify({
+                comercio: nuevaOrden.nombre || "Vitrina Digital",
+                productos: nuevaOrden.detalles || "Pedido desde vitrina",
+                costo_delivery: nuevaOrden.costo_delivery !== undefined ? nuevaOrden.costo_delivery : (window.costoDeliveryKm || costoDeliveryKm || 0.00),
+                coordenadas_gps: nuevaOrden.coordenadas || `${gpsClienteLat}, ${gpsClienteLng}`,
+                estado: "Pendiente"
+              })
+            });
+
+            if (!response.ok) {
+              const errorDetalle = await response.text();
+              throw new Error(`Error ${response.status}: ${errorDetalle}`);
+            }
+
+            const data = await response.json();
+            console.log("Orden guardada exitosamente en la central:", data);
+            return data;
+
+          } catch (error) {
+            console.error("Fallo la sincronización central:", error);
+          }
+        }
 
         async function cargarCuentasPagoSupabase() {
             try {
@@ -406,7 +469,6 @@
                 console.error("Error al cargar cuentas de pago desde Supabase:", err);
             }
 
-            // Fallback por defecto para efectivo si no viene en la tabla
             if (!datosDePago['efectivo']) {
                 datosDePago['efectivo'] = `
                     <p class="text-amber-400">💵 Pago en efectivo en mesa o local.</p>
@@ -469,8 +531,6 @@
                     vistaVitrina.style.pointerEvents = "auto";
                     vistaVitrina.style.opacity = "1";
                 }
-                const avisoCerrado = document.getElementById('overlay-tienda-cerrada');
-                if (avisoCerrado) avisoCerrado.remove();
             } else {
                 if (puntoHeader) puntoHeader.className = "w-2 h-2 rounded-full bg-red-500";
                 if (textoHeader) {
@@ -484,11 +544,6 @@
                 if (vistaVitrina) {
                     vistaVitrina.style.pointerEvents = "none";
                     vistaVitrina.style.opacity = "0.5";
-                }
-                const bannerEstado = document.getElementById('banner-estado-tienda');
-                if (bannerEstado) {
-                    bannerEstado.style.pointerEvents = "auto";
-                    bannerEstado.style.opacity = "1";
                 }
             }
         }
@@ -534,8 +589,7 @@
                 await cargarTarifaDeliveryDesdeSupabase();
                 renderizarCarrito();
                 setTimeout(() => {
-                    if (!mapaDelivery) inicializarMapaDelivery();
-                    else mapaDelivery.invalidateSize();
+                    if (map) google.maps.event.trigger(map, "resize");
                 }, 200);
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -946,87 +1000,123 @@
             cambiarPantalla('vitrina');
         }
 
-        function inicializarMapaDelivery() {
-            const contenedorMapa = document.getElementById('mapa-delivery');
-            if (!contenedorMapa || mapaDelivery) return;
+        const estilosMapaOscuroNaranja = [
+            { elementType: "geometry", stylers: [{ color: "#1d1d1d" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a1a" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
+            { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#ff9f0a" }] },
+            { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+            { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#151515" }] },
+            { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#ca8a04" }] },
+            { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#f97316" }] },
+            { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#c2410c" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f0f0f" }] },
+            { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515151" }] }
+        ];
 
-            mapaDelivery = L.map('mapa-delivery', { attributionControl: false }).setView([LOCAL_LAT, LOCAL_LNG], 14);
+        function initMap() {
+            const containerMap = document.getElementById("google-map-container");
+            if(containerMap) {
+                map = new google.maps.Map(containerMap, {
+                    center: { lat: LOCAL_LAT, lng: LOCAL_LNG },
+                    zoom: 15,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    styles: estilosMapaOscuroNaranja 
+                });
 
-            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '' }).addTo(mapaDelivery);
-
-            const iconoLocal = L.divIcon({
-                className: 'custom-local-icon',
-                html: '<div style="background:#f59e0b; width:16px; height:16px; border-radius:50%; border:2px solid #000; box-shadow: 0 0 10px #f59e0b;" title="Casa de las Papas"></div>',
-                iconSize: [16, 16]
-            });
-            L.marker([LOCAL_LAT, LOCAL_LNG], { icon: iconoLocal }).addTo(mapaDelivery).bindPopup("<b>CASA DE LAS PAPAS</b><br>Punto de Salida");
-
-            marcadorCliente = L.marker([LOCAL_LAT, LOCAL_LNG], { draggable: true }).addTo(mapaDelivery);
-
-            bloquearInteraccionMapa();
-            obtenerUbicacionGPSActual();
+                map.addListener("idle", () => {
+                    const centro = map.getCenter();
+                    gpsClienteLat = centro.lat();
+                    gpsClienteLng = centro.lng();
+                });
+            }
         }
 
-        function bloquearInteraccionMapa() {
-            if (!mapaDelivery) return;
-            mapaDelivery.dragging.disable();
-            mapaDelivery.touchZoom.disable();
-            mapaDelivery.doubleClickZoom.disable();
-            mapaDelivery.scrollWheelZoom.disable();
-            mapaDelivery.boxZoom.disable();
-            mapaDelivery.keyboard.disable();
-            if (mapaDelivery.tap) mapaDelivery.tap.disable();
+        function activarBotonUbicacion(elemento, tipo) {
+            elemento.classList.remove('border-neutral-800', 'bg-neutral-900', 'hover:bg-neutral-800');
+            elemento.classList.add('bg-amber-500/20', 'border-amber-500', 'text-amber-300', 'shadow-[0_0_15px_rgba(245,158,11,0.3)]');
+            
+            setTimeout(() => {
+                elemento.classList.remove('bg-amber-500/20', 'border-amber-500', 'text-amber-300', 'shadow-[0_0_15px_rgba(245,158,11,0.3)]');
+                elemento.classList.add('border-neutral-800', 'bg-neutral-900', 'hover:bg-neutral-800');
+            }, 800);
+
+            if (tipo === 'gps') {
+                centrarEnMiGPS();
+            } else if (tipo === 'vendaval') {
+                irAVendavalHouse();
+            }
         }
 
-        function obtenerUbicacionGPSActual() {
-            if (!navigator.geolocation) {
-                alert("Tu navegador no soporta geolocalización.");
-                return;
+        function fijarUbicacionActualMapa() {
+            const btn = document.getElementById('btn-usar-ubicacion');
+            if(btn) {
+                btn.classList.remove('bg-amber-500', 'hover:bg-amber-400');
+                btn.classList.add('bg-emerald-500', 'text-black');
+                btn.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5"></i> ¡Ubicación Confirmada! ✓`;
+                setTimeout(() => {
+                    btn.classList.remove('bg-emerald-500');
+                    btn.classList.add('bg-amber-500');
+                    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Confirmar Ubicación 📍`;
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }, 1500);
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
 
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    if (marcadorCliente && mapaDelivery) {
-                        marcadorCliente.setLatLng([lat, lng]);
-                        mapaDelivery.setView([lat, lng], 15);
-                        actualizarCoordenadasYTrazarRuta(lat, lng);
-                        bloquearInteraccionMapa();
-                    }
-                },
-                (error) => {
-                    console.warn("No se pudo obtener la ubicación GPS automática:", error.message);
-                    actualizarCoordenadasYTrazarRuta(LOCAL_LAT, LOCAL_LNG);
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        gpsClienteLat = position.coords.latitude;
+                        gpsClienteLng = position.coords.longitude;
+                        if(map) {
+                            map.setCenter({ lat: gpsClienteLat, lng: gpsClienteLng });
+                            map.setZoom(17);
+                        }
+                        procesarCalculoDistanciaYCostos();
+                    },
+                    () => {
+                        procesarCalculoDistanciaYCostos();
+                    },
+                    { enableHighAccuracy: true, timeout: 5000 }
+                );
+            } else {
+                procesarCalculoDistanciaYCostos();
+            }
         }
 
-        function actualizarCoordenadasYTrazarRuta(lat, lng) {
-            gpsClienteLat = lat;
-            gpsClienteLng = lng;
-            distanciaCalculadaKm = calcularDistanciaEnKm(LOCAL_LAT, LOCAL_LNG, lat, lng);
-            
-            let costoCalculado = distanciaCalculadaKm * TARIFA_POR_KM;
-            if (costoCalculado < 1.00 && distanciaCalculadaKm > 0.1) costoCalculado = 1.00; 
-            if (distanciaCalculadaKm <= 0.1) costoCalculado = 0.00;
+        function procesarCalculoDistanciaYCostos() {
+            if(gpsClienteLat !== null && gpsClienteLng !== null) {
+                distanciaCalculadaKm = calcularDistanciaEnKm(LOCAL_LAT, LOCAL_LNG, gpsClienteLat, gpsClienteLng);
+                
+                let costoCalculado = distanciaCalculadaKm * TARIFA_POR_KM;
+                if (costoCalculado < 1.00 && distanciaCalculadaKm > 0.1) costoCalculado = 1.00; 
+                if (distanciaCalculadaKm <= 0.1) costoCalculado = 0.00;
 
-            costoDeliveryKm = parseFloat(costoCalculado.toFixed(2));
+                costoDeliveryKm = parseFloat(costoCalculado.toFixed(2));
 
-            document.getElementById('display-km').innerText = `${distanciaCalculadaKm.toFixed(2)} km`;
-            document.getElementById('display-costo-km').innerText = `$${costoDeliveryKm.toFixed(2)}`;
+                document.getElementById('display-km').innerText = `${distanciaCalculadaKm.toFixed(2)} km`;
+                document.getElementById('display-costo-km').innerText = `$${costoDeliveryKm.toFixed(2)}`;
+                document.getElementById('coordenadas-seleccionadas').innerText = `✓ GPS Directo fijado: Lat: ${gpsClienteLat.toFixed(5)}, Lng: ${gpsClienteLng.toFixed(5)}`;
+                
+                renderizarCarrito();
+            }
+        }
 
-            if (lineaRutaDelivery) mapaDelivery.removeLayer(lineaRutaDelivery);
-            
-            lineaRutaDelivery = L.polyline([[LOCAL_LAT, LOCAL_LNG], [lat, lng]], {
-                color: '#e5c158',
-                weight: 4,
-                opacity: 0.8,
-                dashArray: '6, 6'
-            }).addTo(mapaDelivery);
+        function irAVendavalHouse() {
+            if(map) {
+                map.setCenter({ lat: LOCAL_LAT, lng: LOCAL_LNG });
+                map.setZoom(17);
+                gpsClienteLat = LOCAL_LAT;
+                gpsClienteLng = LOCAL_LNG;
+                procesarCalculoDistanciaYCostos();
+            }
+        }
 
-            renderizarCarrito();
+        function centrarEnMiGPS() {
+            fijarUbicacionActualMapa();
         }
 
         function calcularDistanciaEnKm(lat1, lon1, lat2, lon2) {
@@ -1077,7 +1167,6 @@
             }
         }
 
-        // --- GESTIÓN DINÁMICA DE CAMPOS Y DATOS DE PAGO DESDE SUPABASE ---
         function gestionarCamposPagoCart() {
             const metodo = document.getElementById('tipoMetodoPago').value;
             const contenedorRef = document.getElementById('contenedorReferenciaCart');
@@ -1135,13 +1224,10 @@
             lucide.createIcons();
         });
 
-        async function finalizarOrdenWhatsApp() {
+        async function enviarPedidoWhatsApp() {
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
-            if(gpsClienteLat === null || gpsClienteLng === null) {
-                alert("Por favor permite o selecciona tu ubicación GPS en el mapa para continuar con la entrega.");
-                return;
-            }
+            fijarUbicacionActualMapa();
 
             const metodo = document.getElementById('tipoMetodoPago').value;
             if(!metodo) { alert("Por favor selecciona un método de pago."); return; }
@@ -1174,7 +1260,7 @@
             if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
 
             let mensajeMesaExtra = metodo === 'efectivo' ? `🪑 *NÚMERO DE MESA:* ${numeroMesa}\n` : '';
-            const mensaje = `🍔 *PEDIDO VIP - CASA DE LAS PAPAS* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación GPS:* ${linkGoogleMaps}\n🏦 *MÉTODO DE PAGO:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
+            const mensaje = `🍔 *PEDIDO VIP - Vendaval House* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación Google Maps:* ${linkGoogleMaps}\n🏦 *MÉTODO DE PAGO:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
 
             const datosOrdenPendiente = {
                 productos: carrito.map(i => i.titulo).join(', '),
@@ -1190,6 +1276,13 @@
 
             await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
 
+            await guardarOrdenEnCentral({
+                nombre: "Cliente VIP (Vitrina)",
+                telefono: "No especificado",
+                detalles: carrito.map(i => i.titulo).join(', '),
+                total: totalGeneral
+            });
+
             carrito = [];
             document.getElementById('contador-carrito-badge').innerText = "0";
             document.getElementById('tipoMetodoPago').value = "";
@@ -1203,5 +1296,5 @@
             window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
         }
     </script>
-</body>
+</body> 
 </html>
