@@ -1296,6 +1296,43 @@
     cambiarPantalla('vitrina');
     window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
 }
+
+// --- FUNCIÓN PARA ABRIR LA RUTA GPS DESDE SUPABASE ---
+async function verRutaGPS(ordenId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('ordenes_vip')
+            .select('coordenadas_gps')
+            .eq('id', ordenId)
+            .single();
+
+        if (error || !data || !data.coordenadas_gps) {
+            alert("Por favor, asigna una dirección o coordenadas válidas a esta orden.");
+            return;
+        }
+
+        const coords = data.coordenadas_gps.split(',');
+        if (coords.length !== 2) {
+            alert("Las coordenadas guardadas no tienen un formato válido.");
+            return;
+        }
+
+        const lat = coords[0].trim();
+        const lng = coords[1].trim();
+
+        if (!lat || !lng) {
+            alert("Las coordenadas de la orden están incompletas.");
+            return;
+        }
+
+        const urlGoogleMapsRuta = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+        window.open(urlGoogleMapsRuta, '_blank');
+
+    } catch (err) {
+        console.error("Error al abrir la ruta GPS:", err);
+        alert("Ocurrió un error al intentar calcular la ruta GPS.");
+    }
+}
     </script>
 </body> 
 </html>
