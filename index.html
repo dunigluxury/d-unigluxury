@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casa de las PAPAS- Ecosistema Studio 3D & VIP</title>
+    <title>Vendaval House - Ecosistema Studio 3D & VIP</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -48,7 +48,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-black tracking-widest text-white font-futurista">
-                       CASA de las <span class="text-amber-400">PAPAS</span>
+                       Vendaval<span class="text-amber-400">House</span>
                     </h1>
                     <p class="text-[8px] text-amber-500/70 uppercase tracking-[0.25em] font-bold font-futurista">
                         MERIDA VENEZUELA
@@ -276,7 +276,7 @@
                         <h3 class="text-neutral-400 text-sm font-medium mb-3">Lugares cercanos o Guardados</h3>
                         
                         <div class="space-y-3">
-                            <div onclick="activarBotonUbicacion(this, 'gps')" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
+                            <div onclick="centrarEnMiGPS()" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
                                 <div class="bg-neutral-800 p-3 rounded-full text-emerald-400">📍</div>
                                 <div>
                                     <h4 class="font-semibold text-sm">Enviar tu ubicación actual</h4>
@@ -284,7 +284,7 @@
                                 </div>
                             </div>
 
-                            <div onclick="activarBotonUbicacion(this, 'vendaval')" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
+                            <div onclick="irAVendavalHouse()" class="flex items-center space-x-4 p-3 hover:bg-neutral-800 rounded-xl transition cursor-pointer border border-neutral-800">
                                 <div class="bg-neutral-800 p-3 rounded-full text-neutral-300">🏢</div>
                                 <div>
                                     <h4 class="font-semibold text-sm">Vendaval House (Local Principal)</h4>
@@ -382,8 +382,8 @@
     <footer class="border-t border-stone-950 bg-black/80 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 Vendaval House & D'UNIG LUXURY ECOSISTEMA. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
-        const SUPABASE_URL = "https://vcymfspywjabnbddbruh.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeW1mc3B5d2phYm5iZGRicnVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2Njg1MjIsImV4cCI6MjEwMDI0NDUyMn0.bXamCrThn-oGgK_6Ol2w3cSoxUd0pJDHW0_UkPqGEuA"; 
+        const SUPABASE_URL = "https://rqxtbdegckeaufnlfqfs.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxeHRiZGVnY2tlYXVmbmxmcWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3ODc3NjgsImV4cCI6MjEwNDM2Mzc2OH0.62QheHDSsV-N9S1n_18_uP2_evxwiNS9kZQX2vLGMC8"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let carrito = [];
@@ -408,7 +408,7 @@
         let datosDePago = {};
 
         async function guardarOrdenEnCentral(nuevaOrden) {
-          const SUPABASE_CENTRAL_URL = "https://cmaishgahyzlhszwaozg.supabase.co";
+          const SUPABASE_CENTRAL_URL = "https://cmaishgahyzlhszwaozg.supabase.co/rest/v1/ordenes_central";
           const SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtYWlzaGdhaHl6bGhzendhb3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MjMxMzEsImV4cCI6MjEwMDQ5OTEzMX0.8JVrpQKocnyZa3qLxsX9ZxjygYy4QY3kp_VSvrL1qNQ";
 
           try {
@@ -423,11 +423,12 @@
               body: JSON.stringify({
                 comercio: nuevaOrden.nombre || "Vitrina Digital",
                 productos: nuevaOrden.detalles || "Pedido desde vitrina",
-                costo_delivery: nuevaOrden.costo_delivery !== undefined ? nuevaOrden.costo_delivery : (window.costoDeliveryKm || costoDeliveryKm || 0.00),
+                costo_delivery: nuevaOrden.costo_delivery !== undefined ? nuevaOrden.costo_delivery : (window.costoDeliveryKm || costoDeliveryKm || 0.00), // <-- Toma la variable global si no se pasa
                 coordenadas_gps: nuevaOrden.coordenadas || `${gpsClienteLat}, ${gpsClienteLng}`,
                 estado: "Pendiente"
               })
             });
+            // ... resto del código
 
             if (!response.ok) {
               const errorDetalle = await response.text();
@@ -1035,37 +1036,8 @@
             }
         }
 
-        function activarBotonUbicacion(elemento, tipo) {
-            elemento.classList.remove('border-neutral-800', 'bg-neutral-900', 'hover:bg-neutral-800');
-            elemento.classList.add('bg-amber-500/20', 'border-amber-500', 'text-amber-300', 'shadow-[0_0_15px_rgba(245,158,11,0.3)]');
-            
-            setTimeout(() => {
-                elemento.classList.remove('bg-amber-500/20', 'border-amber-500', 'text-amber-300', 'shadow-[0_0_15px_rgba(245,158,11,0.3)]');
-                elemento.classList.add('border-neutral-800', 'bg-neutral-900', 'hover:bg-neutral-800');
-            }, 800);
-
-            if (tipo === 'gps') {
-                centrarEnMiGPS();
-            } else if (tipo === 'vendaval') {
-                irAVendavalHouse();
-            }
-        }
-
         function fijarUbicacionActualMapa() {
-            const btn = document.getElementById('btn-usar-ubicacion');
-            if(btn) {
-                btn.classList.remove('bg-amber-500', 'hover:bg-amber-400');
-                btn.classList.add('bg-emerald-500', 'text-black');
-                btn.innerHTML = `<i data-lucide="check-check" class="w-3.5 h-3.5"></i> ¡Ubicación Confirmada! ✓`;
-                setTimeout(() => {
-                    btn.classList.remove('bg-emerald-500');
-                    btn.classList.add('bg-amber-500');
-                    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Confirmar Ubicación 📍`;
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
-                }, 1500);
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            }
-
+            // GPS Directo automático al confirmar o interactuar
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -1078,6 +1050,7 @@
                         procesarCalculoDistanciaYCostos();
                     },
                     () => {
+                        // Respaldo manual si falla el GPS directo del navegador
                         procesarCalculoDistanciaYCostos();
                     },
                     { enableHighAccuracy: true, timeout: 5000 }
@@ -1111,7 +1084,7 @@
                 map.setZoom(17);
                 gpsClienteLat = LOCAL_LAT;
                 gpsClienteLng = LOCAL_LNG;
-                procesarCalculoDistanciaYCostos();
+                fijarUbicacionActualMapa();
             }
         }
 
@@ -1227,6 +1200,7 @@
         async function enviarPedidoWhatsApp() {
             if(carrito.length === 0) { alert("Agrega productos primero."); return; }
             
+            // Forzar captura de GPS directo antes de validar o enviar
             fijarUbicacionActualMapa();
 
             const metodo = document.getElementById('tipoMetodoPago').value;
