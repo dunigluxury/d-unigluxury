@@ -408,40 +408,46 @@
         let datosDePago = {};
 
         async function guardarOrdenEnCentral(nuevaOrden) {
-          const SUPABASE_CENTRAL_URL = "https://cmaishgahyzlhszwaozg.supabase.co/rest/v1/ordenes_central";
-          const SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtYWlzaGdhaHl6bGhzendhb3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MjMxMzEsImV4cCI6MjEwMDQ5OTEzMX0.8JVrpQKocnyZa3qLxsX9ZxjygYy4QY3kp_VSvrL1qNQ";
+    const SUPABASE_CENTRAL_URL = "https://cmaishgahyzlhszwaozg.supabase.co/rest/v1/ordenes_central";
+    const SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtYWlzaGdhaHl6bGhzendhb3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MjMxMzEsImV4cCI6MjEwMDQ5OTEzMX0.8JVrpQKocnyZa3qLxsX9ZxjygYy4QY3kp_VSvrL1qNQ";
 
-          try {
-            const response = await fetch(SUPABASE_CENTRAL_URL, {
-              method: "POST",
-              headers: {
+    // Definimos los valores por defecto del comercio (puedes ajustarlos o pasarlos en 'nuevaOrden')
+    const nombreComercio = nuevaOrden.nombre || "Casa de las Papas";
+    const direccionComercio = nuevaOrden.direccion || "HVX5+RH6, Mérida";
+
+    try {
+        const response = await fetch(SUPABASE_CENTRAL_URL, {
+            method: "POST",
+            headers: {
                 "Content-Type": "application/json",
                 "apikey": SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY,
                 "Authorization": `Bearer ${SUPABASE_CENTRAL_ANON_OR_SERVICE_KEY}`,
                 "Prefer": "return=representation"
-              },
-              body: JSON.stringify({
-                comercio: nuevaOrden.nombre || "Vitrina Digital (HVX5+RH6, Mérida)",
+            },
+            body: JSON.stringify({
+                comercio: nombreComercio,
+                comercio_nombre: nombreComercio,
+                comercio_direccion: direccionComercio,
                 productos: nuevaOrden.detalles || "Pedido desde vitrina",
                 costo_delivery: nuevaOrden.costo_delivery !== undefined ? nuevaOrden.costo_delivery : (window.costoDeliveryKm || costoDeliveryKm || 0.00),
                 coordenadas_gps: nuevaOrden.coordenadas || `${gpsClienteLat}, ${gpsClienteLng}`,
                 estado: "Pendiente"
-              })
-            });
+            })
+        });
 
-            if (!response.ok) {
-              const errorDetalle = await response.text();
-              throw new Error(`Error ${response.status}: ${errorDetalle}`);
-            }
-
-            const data = await response.json();
-            console.log("Orden guardada exitosamente en la central:", data);
-            return data;
-
-          } catch (error) {
-            console.error("Fallo la sincronización central:", error);
-          }
+        if (!response.ok) {
+            const errorDetalle = await response.text();
+            throw new Error(`Error ${response.status}: ${errorDetalle}`);
         }
+
+        const data = await response.json();
+        console.log("Orden guardada exitosamente en la central:", data);
+        return data;
+
+    } catch (error) {
+        console.error("Fallo la sincronización central:", error);
+    }
+}
 
         async function cargarCuentasPagoSupabase() {
             try {
