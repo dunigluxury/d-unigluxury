@@ -1225,76 +1225,77 @@
         });
 
         async function enviarPedidoWhatsApp() {
-            if(carrito.length === 0) { alert("Agrega productos primero."); return; }
-            
-            fijarUbicacionActualMapa();
+    if(carrito.length === 0) { alert("Agrega productos primero."); return; }
+    
+    fijarUbicacionActualMapa();
 
-            const metodo = document.getElementById('tipoMetodoPago').value;
-            if(!metodo) { alert("Por favor selecciona un método de pago."); return; }
+    const metodo = document.getElementById('tipoMetodoPago').value;
+    if(!metodo) { alert("Por favor selecciona un método de pago."); return; }
 
-            let ref = "";
-            let numeroMesa = "";
+    let ref = "";
+    let numeroMesa = "";
 
-            if (metodo === 'efectivo') {
-                numeroMesa = document.getElementById('input-num-mesa').value.trim();
-                if(!numeroMesa) {
-                    alert("Por favor ingresa el número de mesa obligatorio para pagos en efectivo.");
-                    document.getElementById('input-num-mesa').focus();
-                    return;
-                }
-                ref = `Efectivo (Mesa: ${numeroMesa})`;
-            } else {
-                ref = document.getElementById('input-ref-pago').value.trim();
-                if(!ref) { alert("Por favor ingresa el número o código de referencia."); return; }
-            }
-
-            const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
-            
-            let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
-            let totalGeneral = subtotalProductos + costoDeliveryKm;
-            let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
-            const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
-
-            let wsNum = "584120000000";
-            const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
-            if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
-
-            let mensajeMesaExtra = metodo === 'efectivo' ? `🪑 *NÚMERO DE MESA:* ${numeroMesa}\n` : '';
-            const mensaje = `🍔 *PEDIDO VIP - Casa de las Papas (HVX5+RH6, Mérida)* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación Google Maps:* ${linkGoogleMaps}\n🏦 *MÉTODO DE PAGO:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
-
-            const datosOrdenPendiente = {
-                productos: carrito.map(i => i.titulo).join(', '),
-                total: totalGeneral,
-                monto_total: totalGeneral,
-                referencia: ref,
-                referencia_bancaria: ref,
-                estado: "Pendiente",
-                codigo_referido: codigoReferidoCliente,
-                coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`,
-                costo_delivery: costoDeliveryKm
-            };
-
-            await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
-
-            await guardarOrdenEnCentral({
-                nombre: "Casa de las Papas (HVX5+RH6, Mérida)",
-                telefono: "No especificado",
-                detalles: carrito.map(i => i.titulo).join(', '),
-                total: totalGeneral
-            });
-
-            carrito = [];
-            document.getElementById('contador-carrito-badge').innerText = "0";
-            document.getElementById('tipoMetodoPago').value = "";
-            document.getElementById('input-ref-pago').value = "";
-            document.getElementById('input-num-mesa').value = "";
-            document.getElementById('contenedorReferenciaCart').classList.add('hidden');
-            document.getElementById('contenedorNumeroMesaCart').classList.add('hidden');
-            document.getElementById('info-metodo-pago').classList.add('hidden');
-            localStorage.removeItem('dunig_ref_code');
-            cambiarPantalla('vitrina');
-            window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
+    if (metodo === 'efectivo') {
+        numeroMesa = document.getElementById('input-num-mesa').value.trim();
+        if(!numeroMesa) {
+            alert("Por favor ingresa el número de mesa obligatorio para pagos en efectivo.");
+            document.getElementById('input-num-mesa').focus();
+            return;
         }
+        ref = `Efectivo (Mesa: ${numeroMesa})`;
+    } else {
+        ref = document.getElementById('input-ref-pago').value.trim();
+        if(!ref) { alert("Por favor ingresa el número o código de referencia."); return; }
+    }
+
+    const codigoReferidoCliente = localStorage.getItem('dunig_ref_code') || 'NINGUNO';
+    
+    let subtotalProductos = carrito.reduce((a, b) => a + b.precio, 0);
+    let totalGeneral = subtotalProductos + costoDeliveryKm;
+    let lista = carrito.map(i => `• ${i.titulo} ($${i.precio.toFixed(2)})`).join('\n');
+    const linkGoogleMaps = `https://maps.google.com/?q=${gpsClienteLat},${gpsClienteLng}`;
+
+    let wsNum = "584120000000";
+    const { data } = await supabaseClient.from('ajustes_sistema').select('valor').eq('id', 'whatsapp_notificaciones').single();
+    if(data && data.valor) wsNum = data.valor.replace(/[^0-9]/g, "");
+
+    let mensajeMesaExtra = metodo === 'efectivo' ? `🪑 *NÚMERO DE MESA:* ${numeroMesa}\n` : '';
+    const mensaje = `🍔 *PEDIDO VIP - Casa de las Papas (HVX5+RH6, Mérida)* 🍔\n\n${lista}\n\n📦 *Subtotal:* $${subtotalProductos.toFixed(2)}\n🛵 *Delivery (${distanciaCalculadaKm.toFixed(2)} km):* $${costoDeliveryKm.toFixed(2)}\n💵 *TOTAL A PAGAR:* $${totalGeneral.toFixed(2)}\n📍 *Ubicación Google Maps:* ${linkGoogleMaps}\n🏦 *MÉTODO DE PAGO:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}`;
+
+    const datosOrdenPendiente = {
+        productos: carrito.map(i => i.titulo).join(', '),
+        total: totalGeneral,
+        monto_total: totalGeneral,
+        referencia: ref,
+        referencia_bancaria: ref,
+        estado: "Pendiente",
+        codigo_referido: codigoReferidoCliente,
+        coordenadas_gps: `${gpsClienteLat},${gpsClienteLng}`,
+        costo_delivery: costoDeliveryKm
+    };
+
+    await supabaseClient.from('ordenes_vip').insert([datosOrdenPendiente]); 
+
+    // Guardar la orden centralizada utilizando la estructura personalizada
+    await guardarOrdenEnCentral({
+        nombre: 'Casa de las Papas',
+        detalles: carrito.map(i => i.titulo).join(', '),
+        costo_delivery: costoDeliveryKm,
+        coordenadas: `${gpsClienteLat}, ${gpsClienteLng}`
+    });
+
+    carrito = [];
+    document.getElementById('contador-carrito-badge').innerText = "0";
+    document.getElementById('tipoMetodoPago').value = "";
+    document.getElementById('input-ref-pago').value = "";
+    document.getElementById('input-num-mesa').value = "";
+    document.getElementById('contenedorReferenciaCart').classList.add('hidden');
+    document.getElementById('contenedorNumeroMesaCart').classList.add('hidden');
+    document.getElementById('info-metodo-pago').classList.add('hidden');
+    localStorage.removeItem('dunig_ref_code');
+    cambiarPantalla('vitrina');
+    window.open(`https://api.whatsapp.com/send?phone=${wsNum}&text=${encodeURIComponent(mensaje)}`, '_blank');
+}
     </script>
 </body> 
 </html>
