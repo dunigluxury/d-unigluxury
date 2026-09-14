@@ -1233,6 +1233,23 @@
         async function enviarPedidoWhatsApp() {
     if(carrito.length === 0) { alert("Agrega productos primero."); return; }
     
+    // --- PASO 1: VERIFICAR Y SOLICITAR PERMISOS NATIVOS / WEB DE UBICACIÓN ---
+    try {
+        if (typeof Geolocation !== 'undefined') {
+            const permisos = await Geolocation.checkPermissions();
+            if (permisos.location !== 'granted') {
+                const solicitud = await Geolocation.requestPermissions();
+                if (solicitud.location !== 'granted') {
+                    alert("Se requiere permiso de ubicación para calcular el delivery y enviar la orden.");
+                    return;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Nota sobre permisos (entorno web o no nativo):", e);
+    }
+
+    // --- PASO 2: FIJAR Y CAPTURAR LA UBICACIÓN ACTUAL ---
     fijarUbicacionActualMapa();
 
     const metodo = document.getElementById('tipoMetodoPago').value;
