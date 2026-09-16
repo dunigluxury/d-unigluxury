@@ -17,6 +17,16 @@
         .grid-bg { background-image: linear-gradient(rgba(229, 193, 88, 0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 193, 88, 0.01) 1px, transparent 1px); background-size: 32px 32px; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e5c158; border-radius: 10px; }
+
+        /* SOLUCIÓN: Permite que el texto de las órdenes se vea completo y baje de línea */
+        .nombre-del-plato {
+            white-space: normal;    /* Permite saltos de línea automáticos */
+            overflow: visible;      /* Muestra todo el contenido */
+            text-overflow: clip;    /* Quita los puntos suspensivos */
+            display: block;         /* Asegura que ocupe el ancho disponible */
+            line-height: 1.2;       /* Ajusta un poco el interlineado para estética */
+            padding: 5px 0;         /* Agrega un pequeño espacio vertical entre ítems largos */
+        }
     </style>
 </head>
 <body class="text-stone-200 antialiased min-h-screen flex flex-col justify-between grid-bg relative">
@@ -910,7 +920,7 @@
                     tbody.innerHTML += `<tr class="border-b border-stone-900/40 hover:bg-stone-900/10 transition-colors">
                         <td class="p-3 font-mono text-amber-400 font-bold">#${o.id}</td>
                         <td class="p-3 text-stone-400">${fechaFormateada}</td>
-                        <td class="p-3 text-white truncate max-w-xs">${o.productos}</td>
+                        <td class="p-3 text-white nombre-del-plato">${o.productos}</td>
                         <td class="p-3 font-mono font-bold text-stone-200">$${parseFloat(o.total || 0).toFixed(2)}</td>
                         <td class="p-3 font-mono text-stone-500">${o.referencia || 'N/A'}</td>
                         <td class="p-3 text-right">
