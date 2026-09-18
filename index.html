@@ -413,7 +413,7 @@
 
     // Definimos los valores por defecto del comercio (puedes ajustarlos o pasarlos en 'nuevaOrden')
     const nombreComercio = nuevaOrden.nombre || "Casa de las Papas";
-    const direccionComercio = nuevaOrden.direccion || "HVX5+RH6, Mérida";
+    const direccionComercio = nuevaOrden.direccion || "HVX5+G5H, Mérida";
 
     try {
         const response = await fetch(SUPABASE_CENTRAL_URL, {
@@ -457,7 +457,7 @@
                         let htmlDetalle = '';
                         if (cuenta.plataforma === 'efectivo') {
                             htmlDetalle = `
-                                <p class="text-amber-400">💵 Pago en efectivo en mesa o local (HVX5+RH6, Mérida).</p>
+                                <p class="text-amber-400">💵 Pago en efectivo en mesa o local (HVX5+G5H, Mérida).</p>
                                 <p class="text-[10px] text-stone-400">Por favor indique su número de mesa correspondiente.</p>
                             `;
                         } else {
@@ -530,7 +530,7 @@
                     textoHeader.textContent = "Abierto";
                 }
                 if (badgePuntoVitrina) badgePuntoVitrina.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping";
-                if (tituloVitrina) tituloVitrina.textContent = "ESTADO DEL LOCAL: ABIERTOS (HVX5+RH6, Mérida)";
+                if (tituloVitrina) tituloVitrina.textContent = "ESTADO DEL LOCAL: ABIERTOS (HVX5+G5H, Mérida)";
                 if (descVitrina) descVitrina.textContent = "Recibiendo pedidos y despachando con normalidad.";
                 if (iconoWrapper) iconoWrapper.className = "w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400";
                 if (vistaVitrina) {
